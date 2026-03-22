@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 Le Coffre-Fort — Module 16</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --primary:#1E40AF; --accent:#F97316; --bg:#0B0E17; --card:#141825; --text:#E8ECF4; --muted:#6B7A99; --border:rgba(255,255,255,0.06); --success:#34D399; --error:#EF4444; }
+  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .header { background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 80%, #000), var(--primary)); padding:1.2rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; }
+  .header h1 { font-size:1.3rem; font-weight:800; }
+  .header .sub { font-size:0.8rem; opacity:0.7; }
+  .score-bar { display:flex; gap:1rem; }
+  .score-box { background:rgba(255,255,255,0.1); padding:0.3rem 0.8rem; border-radius:8px; text-align:center; }
+  .score-box .lbl { font-size:0.65rem; opacity:0.6; text-transform:uppercase; }
+  .score-box .val { font-size:1.2rem; font-weight:800; font-family:'JetBrains Mono',monospace; }
+  .container { max-width:900px; margin:0 auto; padding:1.5rem; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-bottom:1rem; }
+  .btn { padding:0.7rem 1.8rem; border:none; border-radius:10px; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .btn-go { background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#fff)); color:#fff; box-shadow:0 4px 15px rgba(0,0,0,0.3); }
+  .btn-go:hover { transform:translateY(-2px); }
+  .quiz-option { display:block; width:100%; text-align:left; padding:0.8rem 1.2rem; margin:0.5rem 0; background:var(--card); border:2px solid var(--border); border-radius:10px; color:var(--text); font-family:inherit; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
+  .quiz-option:hover { border-color:var(--primary); background:rgba(255,255,255,0.03); }
+  .quiz-option.correct { border-color:var(--success); background:rgba(52,211,153,0.1); }
+  .quiz-option.wrong { border-color:var(--error); background:rgba(239,68,68,0.1); }
+  .quiz-option.disabled { pointer-events:none; opacity:0.7; }
+  .progress-bar { height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; margin:1rem 0; }
+  .progress-fill { height:100%; background:var(--primary); border-radius:3px; transition:width 0.4s; }
+  .tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.7rem; font-weight:600; margin-right:0.3rem; }
+  .tag-green { background:rgba(52,211,153,0.15); color:#34D399; }
+  .tag-blue { background:rgba(96,165,250,0.15); color:#60A5FA; }
+  .tag-yellow { background:rgba(251,191,36,0.15); color:#FBBF24; }
+  .tag-purple { background:rgba(192,132,252,0.15); color:#C084FC; }
+  .drag-zone { min-height:80px; border:2px dashed var(--border); border-radius:10px; padding:0.8rem; margin:0.5rem 0; transition:all 0.2s; }
+  .drag-zone.over { border-color:var(--primary); background:rgba(255,255,255,0.02); }
+  .drag-item { display:inline-block; padding:0.4rem 0.8rem; margin:0.3rem; background:var(--primary); color:#fff; border-radius:8px; cursor:grab; font-size:0.85rem; font-weight:600; user-select:none; }
+  .drag-item:active { cursor:grabbing; opacity:0.8; }
+  .hidden { display:none; }
+  .fade-in { animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
+  .result-dot { width:10px; height:10px; border-radius:50%; }
+  .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div><h1>🔐 Le Coffre-Fort</h1><div class="sub">Module 16 — Sécurité — GRANT, REVOKE, RGPD</div></div>
+  <div class="score-bar">
+    <div class="score-box"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+    <div class="score-box"><div class="lbl">Question</div><div class="val"><span id="qNum">0</span>/<span id="qTotal">0</span></div></div>
+  </div>
+</div>
+<div class="container">
+
+  <div id="intro" class="card fade-in" style="text-align:center;">
+    <div style="font-size:3rem;margin-bottom:0.5rem;">🔐</div>
+    <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">Le Coffre-Fort</h2>
+    <p style="color:var(--muted);margin-bottom:1.5rem;">Sécurité — GRANT, REVOKE, RGPD<br>8 questions — Testez vos connaissances !</p>
+    <button class="btn btn-go" onclick="startQuiz()">🚀 Commencer</button>
+  </div>
+  <div id="quiz" class="hidden"></div>
+  <div id="result" class="hidden"></div>
+  <script>
+  const questions = [{"q":"La commande pour donner le droit SELECT sur la table artiste à l'utilisateur 'comptable' :","opts":["GRANT SELECT ON swisssound.artiste TO 'comptable';","ALLOW SELECT ON artiste FOR comptable;","PERMIT comptable SELECT artiste;","SET RIGHTS comptable = SELECT;"],"correct":0,"expl":"GRANT privilege ON database.table TO 'user';"},{"q":"Le principe du 'moindre privilège' signifie :","opts":["Donner GRANT ALL à tout le monde","Donner uniquement les droits strictement nécessaires","Ne donner aucun droit","Donner les droits au cas par cas chaque jour"],"correct":1,"expl":"Moindre privilège : chaque utilisateur n'a que les droits dont il a besoin, rien de plus."},{"q":"REVOKE supprime :","opts":["Un utilisateur","Un ou plusieurs droits d'un utilisateur","Une table","Une base de données"],"correct":1,"expl":"REVOKE retire des privilèges précédemment accordés avec GRANT."},{"q":"Le RGPD donne aux individus le droit de :","opts":["Accéder à leurs données et demander leur suppression","Modifier les BDD de l'entreprise","Supprimer n'importe quelle donnée","Installer leurs propres logiciels"],"correct":0,"expl":"RGPD : droit d'accès, droit de rectification, droit à l'effacement ('droit à l'oubli')."},{"q":"Pour chiffrer un email en MySQL :","opts":["MD5(email)","AES_ENCRYPT(email, 'clé_secrète')","HASH(email)","ENCODE(email)"],"correct":1,"expl":"AES_ENCRYPT/DECRYPT pour le chiffrement réversible. MD5/SHA sont des hash (non réversibles)."},{"q":"Quel utilisateur SwissSound ne devrait PAS avoir le droit DELETE sur la table facture ?","opts":["admin_studio","comptable","ingenieur_son","Tous devraient l'avoir"],"correct":2,"expl":"L'ingénieur son gère les sessions, pas les factures. Moindre privilège !"},{"q":"CREATE USER 'nouveau'@'localhost' IDENTIFIED BY 'motdepasse'; — que fait cette commande ?","opts":["Crée une table","Crée un utilisateur MySQL avec mot de passe","Crée une base de données","Modifie un utilisateur existant"],"correct":1,"expl":"CREATE USER crée un compte MySQL. @'localhost' = connexion locale uniquement."},{"q":"Pour l'évaluation D2, il faut :","opts":["Juste lister les utilisateurs","Évaluer l'efficacité de la solution et suggérer des améliorations","Créer 10 utilisateurs","Supprimer toutes les données"],"correct":1,"expl":"D2 = évaluation critique : forces, faiblesses, améliorations concrètes de la solution BDD."}];
+  let current = 0, score = 0, answers = [];
+  document.getElementById('qTotal').textContent = questions.length;
+
+  function startQuiz() {
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('quiz').classList.remove('hidden');
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = questions[current];
+    document.getElementById('qNum').textContent = current + 1;
+    document.getElementById('quiz').innerHTML = `
+      <div class="card fade-in">
+        <div class="progress-bar"><div class="progress-fill" style="width:${((current)/questions.length)*100}%"></div></div>
+        <h3 style="margin:1rem 0;font-size:1.1rem;">${q.q}</h3>
+        <div id="opts">
+          ${q.opts.map((o,i) => `<button class="quiz-option" onclick="answer(${i})">${o}</button>`).join('')}
+        </div>
+        <div id="feedback" class="hidden" style="margin-top:1rem;padding:1rem;border-radius:10px;"></div>
+        <div id="nextArea" class="hidden" style="text-align:center;margin-top:1rem;">
+          <button class="btn btn-go" onclick="nextQ()">${current < questions.length - 1 ? 'Suivante →' : '🏆 Résultat'}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function answer(idx) {
+    const q = questions[current];
+    const correct = idx === q.correct;
+    if (correct) score += 10;
+    answers.push({ q: q.q, picked: idx, correct: q.correct, ok: correct });
+
+    const opts = document.querySelectorAll('.quiz-option');
+    opts.forEach((o, i) => {
+      o.classList.add('disabled');
+      if (i === q.correct) o.classList.add('correct');
+      if (i === idx && !correct) o.classList.add('wrong');
+    });
+
+    const fb = document.getElementById('feedback');
+    fb.classList.remove('hidden');
+    fb.style.background = correct ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)';
+    fb.style.border = correct ? '1px solid rgba(52,211,153,0.3)' : '1px solid rgba(239,68,68,0.3)';
+    fb.innerHTML = `<strong>${correct ? '✅ Correct !' : '❌ Incorrect'}</strong><br><span style="color:var(--muted);font-size:0.9rem;">${q.expl}</span>`;
+    
+    document.getElementById('nextArea').classList.remove('hidden');
+    document.getElementById('score').textContent = score;
+  }
+
+  function nextQ() {
+    current++;
+    if (current < questions.length) showQuestion();
+    else showResult();
+  }
+
+  function showResult() {
+    document.getElementById('quiz').classList.add('hidden');
+    const pct = Math.round((score / (questions.length * 10)) * 100);
+    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+    const msg = pct >= 90 ? 'Excellent !' : pct >= 70 ? 'Bon travail !' : pct >= 50 ? 'Passable.' : 'À revoir !';
+    document.getElementById('result').classList.remove('hidden');
+    document.getElementById('result').innerHTML = `
+      <div class="card fade-in" style="text-align:center;">
+        <div class="final-score">${score}/${questions.length * 10}</div>
+        <div style="font-size:2rem;margin:0.5rem 0;">${stars}</div>
+        <p style="color:var(--muted);font-size:1.1rem;margin-bottom:1.5rem;">${msg} — ${pct}% de réussite</p>
+        <div style="text-align:left;margin:1rem 0;">
+          ${answers.map((a,i) => `
+            <div class="result-bar">
+              <div class="result-dot" style="background:${a.ok ? 'var(--success)' : 'var(--error)'}"></div>
+              <span style="font-size:0.85rem;">${i+1}. ${a.ok ? '✅' : '❌'} ${questions[i].q.substring(0,60)}...</span>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-go" onclick="location.reload()">🔄 Rejouer</button>
+        <a href="../../index.html" style="display:inline-block;margin-left:1rem;color:var(--muted);text-decoration:none;font-weight:600;">← Retour au hub</a>
+      </div>
+    `;
+  }
+  </script>
+</div>
+</body>
+</html>

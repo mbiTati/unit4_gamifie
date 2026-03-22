@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏭 L'Usine à Besoins — Module 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --primary:#0369A1; --accent:#F97316; --bg:#0B0E17; --card:#141825; --text:#E8ECF4; --muted:#6B7A99; --border:rgba(255,255,255,0.06); --success:#34D399; --error:#EF4444; }
+  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  .header { background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 80%, #000), var(--primary)); padding:1.2rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; }
+  .header h1 { font-size:1.3rem; font-weight:800; }
+  .header .sub { font-size:0.8rem; opacity:0.7; }
+  .score-bar { display:flex; gap:1rem; }
+  .score-box { background:rgba(255,255,255,0.1); padding:0.3rem 0.8rem; border-radius:8px; text-align:center; }
+  .score-box .lbl { font-size:0.65rem; opacity:0.6; text-transform:uppercase; }
+  .score-box .val { font-size:1.2rem; font-weight:800; font-family:'JetBrains Mono',monospace; }
+  .container { max-width:900px; margin:0 auto; padding:1.5rem; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-bottom:1rem; }
+  .btn { padding:0.7rem 1.8rem; border:none; border-radius:10px; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .btn-go { background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#fff)); color:#fff; box-shadow:0 4px 15px rgba(0,0,0,0.3); }
+  .btn-go:hover { transform:translateY(-2px); }
+  .quiz-option { display:block; width:100%; text-align:left; padding:0.8rem 1.2rem; margin:0.5rem 0; background:var(--card); border:2px solid var(--border); border-radius:10px; color:var(--text); font-family:inherit; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
+  .quiz-option:hover { border-color:var(--primary); background:rgba(255,255,255,0.03); }
+  .quiz-option.correct { border-color:var(--success); background:rgba(52,211,153,0.1); }
+  .quiz-option.wrong { border-color:var(--error); background:rgba(239,68,68,0.1); }
+  .quiz-option.disabled { pointer-events:none; opacity:0.7; }
+  .progress-bar { height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; margin:1rem 0; }
+  .progress-fill { height:100%; background:var(--primary); border-radius:3px; transition:width 0.4s; }
+  .tag { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-size:0.7rem; font-weight:600; margin-right:0.3rem; }
+  .tag-green { background:rgba(52,211,153,0.15); color:#34D399; }
+  .tag-blue { background:rgba(96,165,250,0.15); color:#60A5FA; }
+  .tag-yellow { background:rgba(251,191,36,0.15); color:#FBBF24; }
+  .tag-purple { background:rgba(192,132,252,0.15); color:#C084FC; }
+  .drag-zone { min-height:80px; border:2px dashed var(--border); border-radius:10px; padding:0.8rem; margin:0.5rem 0; transition:all 0.2s; }
+  .drag-zone.over { border-color:var(--primary); background:rgba(255,255,255,0.02); }
+  .drag-item { display:inline-block; padding:0.4rem 0.8rem; margin:0.3rem; background:var(--primary); color:#fff; border-radius:8px; cursor:grab; font-size:0.85rem; font-weight:600; user-select:none; }
+  .drag-item:active { cursor:grabbing; opacity:0.8; }
+  .hidden { display:none; }
+  .fade-in { animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
+  .result-dot { width:10px; height:10px; border-radius:50%; }
+  .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div><h1>🏭 L'Usine à Besoins</h1><div class="sub">Module 2 — Recueil des besoins</div></div>
+  <div class="score-bar">
+    <div class="score-box"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+    <div class="score-box"><div class="lbl">Question</div><div class="val"><span id="qNum">0</span>/<span id="qTotal">0</span></div></div>
+  </div>
+</div>
+<div class="container">
+
+  <div id="intro" class="card fade-in" style="text-align:center;">
+    <div style="font-size:3rem;margin-bottom:0.5rem;">🏭</div>
+    <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">L'Usine à Besoins</h2>
+    <p style="color:var(--muted);margin-bottom:0.5rem;">Recueil des besoins</p>
+    <p style="color:var(--muted);margin-bottom:1.5rem;font-size:0.9rem;">Triez chaque demande : besoin utilisateur ou besoin système ?</p>
+    <button class="btn btn-go" onclick="startGame()">🚀 Commencer</button>
+  </div>
+  <div id="game" class="hidden"></div>
+  <div id="result" class="hidden"></div>
+  <script>
+  const items = [{"text":"L'artiste doit pouvoir voir ses sessions","zone":"user"},{"text":"Temps de réponse < 2 secondes","zone":"system"},{"text":"Sauvegardes automatiques chaque nuit","zone":"system"},{"text":"Le comptable génère les factures en PDF","zone":"user"},{"text":"Base de données MySQL 8.x","zone":"system"},{"text":"L'ingénieur réserve une salle","zone":"user"},{"text":"Chiffrement des mots de passe","zone":"system"},{"text":"Rechercher un artiste par nom","zone":"user"},{"text":"Compatible avec Windows et Mac","zone":"system"},{"text":"Afficher le planning de la semaine","zone":"user"},{"text":"Supporter 50 utilisateurs simultanés","zone":"system"},{"text":"Modifier les coordonnées d'un artiste","zone":"user"}];
+  const zones = [{"id":"user","label":"👤 Besoin UTILISATEUR"},{"id":"system","label":"⚙️ Besoin SYSTÈME"}];
+  let placed = {};
+  let score = 0;
+  document.getElementById('qTotal').textContent = items.length;
+
+  function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+  function startGame() {
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('game').classList.remove('hidden');
+    zones.forEach(z => placed[z.id] = []);
+    render();
+  }
+
+  function render() {
+    const shuffled = shuffle([...items.filter(i => !Object.values(placed).flat().includes(i.text))]);
+    document.getElementById('game').innerHTML = `
+      <div class="card fade-in">
+        <h3 style="margin-bottom:1rem;">Glissez chaque élément dans la bonne zone :</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1.5rem;min-height:50px;" id="source">
+          ${shuffled.map(i => `<div class="drag-item" draggable="true" data-text="${i.text}" data-zone="${i.zone}" 
+            ondragstart="event.dataTransfer.setData('text',JSON.stringify({text:'${i.text}',zone:'${i.zone}'}))">${i.text}</div>`).join('')}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(${Math.min(zones.length, 3)},1fr);gap:1rem;">
+          ${zones.map(z => `
+            <div>
+              <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.3rem;color:var(--primary);">${z.label}</div>
+              <div class="drag-zone" id="zone-${z.id}"
+                ondragover="event.preventDefault();this.classList.add('over')"
+                ondragleave="this.classList.remove('over')"
+                ondrop="dropItem(event,'${z.id}')">
+                ${placed[z.id].map(t => `<div class="drag-item" style="cursor:default">${t}</div>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="text-align:center;margin-top:1.5rem;">
+          <button class="btn btn-go" onclick="checkAll()" id="checkBtn" ${Object.values(placed).flat().length < items.length ? 'disabled style="opacity:0.4"' : ''}>✅ Vérifier</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function dropItem(event, zoneId) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('over');
+    const data = JSON.parse(event.dataTransfer.getData('text'));
+    placed[zoneId].push(data.text);
+    document.getElementById('qNum').textContent = Object.values(placed).flat().length;
+    render();
+  }
+
+  function checkAll() {
+    let correct = 0;
+    items.forEach(item => {
+      if (placed[item.zone] && placed[item.zone].includes(item.text)) correct++;
+    });
+    score = Math.round((correct / items.length) * 100);
+    document.getElementById('score').textContent = score;
+    document.getElementById('game').classList.add('hidden');
+    document.getElementById('result').classList.remove('hidden');
+    const pct = score;
+    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+    document.getElementById('result').innerHTML = `
+      <div class="card fade-in" style="text-align:center;">
+        <div class="final-score">${correct}/${items.length}</div>
+        <div style="font-size:2rem;margin:0.5rem 0;">${stars}</div>
+        <p style="color:var(--muted);margin-bottom:1rem;">${pct}% correct</p>
+        <div style="text-align:left;margin:1rem 0;">
+          ${items.map(i => `
+            <div class="result-bar">
+              <div class="result-dot" style="background:${placed[i.zone]?.includes(i.text) ? 'var(--success)' : 'var(--error)'}"></div>
+              <span style="font-size:0.85rem;"><strong>${i.text}</strong> → ${zones.find(z=>z.id===i.zone).label} ${placed[i.zone]?.includes(i.text) ? '✅' : '❌'}</span>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-go" onclick="location.reload()">🔄 Rejouer</button>
+        <a href="../../index.html" style="display:inline-block;margin-left:1rem;color:var(--muted);text-decoration:none;font-weight:600;">← Retour</a>
+      </div>
+    `;
+  }
+  </script>
+</div>
+</body>
+</html>
