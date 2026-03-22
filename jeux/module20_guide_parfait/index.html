@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 Le Guide Parfait — Module 20</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --primary: #6A1B9A;
+    --primary-light: #9C4DCC;
+    --primary-dark: #4A0072;
+    --accent: #FF6F00;
+    --accent-light: #FFA040;
+    --success: #2E7D32;
+    --error: #C62828;
+    --bg: #F5F0FF;
+    --card: #FFFFFF;
+    --text: #1A1A2E;
+    --text-muted: #6B7280;
+    --border: #E0D4F5;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header h1 { font-size: 1.5rem; font-weight: 800; }
+  .header .subtitle { font-size: 0.85rem; opacity: 0.8; }
+
+  .score-bar {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .score-item {
+    text-align: center;
+    background: rgba(255,255,255,0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+  }
+
+  .score-item .label { font-size: 0.7rem; opacity: 0.7; text-transform: uppercase; }
+  .score-item .value { font-size: 1.3rem; font-weight: 800; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* INTRO */
+  .intro-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(106,27,154,0.1);
+    text-align: center;
+  }
+
+  .intro-card h2 { font-size: 1.8rem; color: var(--primary); margin-bottom: 1rem; }
+  .intro-card p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .rule-card {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+  }
+
+  .rule-card .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+  .rule-card h4 { font-size: 0.9rem; color: var(--primary); margin-bottom: 0.3rem; }
+  .rule-card p { font-size: 0.8rem; color: var(--text-muted); }
+
+  .btn {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    color: white;
+    box-shadow: 0 4px 15px rgba(255,111,0,0.3);
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,111,0,0.4); }
+
+  .btn-secondary {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* CHALLENGE */
+  .challenge-header {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .challenge-header .task-num {
+    background: var(--primary);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .challenge-header .timer {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .task-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+  }
+
+  .task-card h3 {
+    font-size: 1.1rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .task-desc {
+    background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1.2rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .task-desc strong { color: var(--accent); }
+
+  .steps-area { margin-top: 1rem; }
+
+  .step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .step-num {
+    background: var(--primary-light);
+    color: white;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+  }
+
+  .step-input {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+    resize: none;
+    min-height: 42px;
+  }
+
+  .step-input:focus { outline: none; border-color: var(--primary-light); }
+
+  .step-input.correct { border-color: var(--success); background: #E8F5E9; }
+  .step-input.partial { border-color: var(--accent); background: #FFF3E0; }
+  .step-input.missing { border-color: var(--error); background: #FFEBEE; }
+
+  .add-step-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .add-step-btn:hover { border-color: var(--primary-light); color: var(--primary); }
+
+  .submit-area {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  /* RESULTS */
+  .result-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .result-score-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .comparison-col h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .expected-step, .student-step {
+    padding: 0.5rem 0.8rem;
+    margin-bottom: 0.4rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .expected-step { background: #E8F5E9; border-left: 3px solid var(--success); }
+  .student-step.matched { background: #E8F5E9; border-left: 3px solid var(--success); }
+  .student-step.partial { background: #FFF3E0; border-left: 3px solid var(--accent); }
+  .student-step.extra { background: #F3E5F5; border-left: 3px solid var(--primary-light); }
+  .student-step.missing { background: #FFEBEE; border-left: 3px solid var(--error); }
+
+  .legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+    font-size: 0.8rem;
+  }
+
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  /* FINAL SCREEN */
+  .final-card {
+    text-align: center;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 4px 20px rgba(106,27,154,0.1);
+  }
+
+  .final-card .big-score {
+    font-size: 4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stars { font-size: 2.5rem; margin: 1rem 0; }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .history-table th {
+    background: var(--primary);
+    color: white;
+    padding: 0.6rem;
+    text-align: left;
+  }
+
+  .history-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .history-table tr:nth-child(even) { background: var(--bg); }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  @media (max-width: 700px) {
+    .comparison-grid { grid-template-columns: 1fr; }
+    .header { flex-direction: column; text-align: center; }
+    .rules-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📖 Le Guide Parfait</h1>
+    <div class="subtitle">Module 20 — Documentation utilisateur | SwissSound Studios</div>
+  </div>
+  <div class="score-bar">
+    <div class="score-item">
+      <div class="label">Score</div>
+      <div class="value" id="totalScore">0</div>
+    </div>
+    <div class="score-item">
+      <div class="label">Tâche</div>
+      <div class="value"><span id="currentTask">0</span>/5</div>
+    </div>
+    <div class="score-item">
+      <div class="label">Combo</div>
+      <div class="value" id="combo">×1</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- INTRO SCREEN -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-card">
+      <h2>📖 Bienvenue dans Le Guide Parfait !</h2>
+      <p>Vous êtes rédacteur technique chez <strong>SwissSound Studios</strong>. Votre mission : écrire des guides utilisateur si clairs qu'un débutant peut suivre chaque étape sans aide.</p>
+      <p>Un collègue testera vos instructions à l'aveugle. Chaque étape manquante ou imprécise = points perdus !</p>
+      
+      <div class="rules-grid">
+        <div class="rule-card">
+          <div class="emoji">📝</div>
+          <h4>Écrivez les étapes</h4>
+          <p>Décrivez chaque action utilisateur dans l'ordre</p>
+        </div>
+        <div class="rule-card">
+          <div class="emoji">🎯</div>
+          <h4>Soyez précis</h4>
+          <p>Nommez les boutons, menus et champs exacts</p>
+        </div>
+        <div class="rule-card">
+          <div class="emoji">⏱️</div>
+          <h4>Timer actif</h4>
+          <p>3 minutes par tâche — la rapidité rapporte des bonus</p>
+        </div>
+        <div class="rule-card">
+          <div class="emoji">⭐</div>
+          <h4>Combos</h4>
+          <p>Guides parfaits consécutifs = multiplicateur de score</p>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="startGame()">🚀 Commencer</button>
+    </div>
+  </div>
+
+  <!-- CHALLENGE SCREEN -->
+  <div class="screen" id="screen-challenge">
+    <div class="challenge-header">
+      <span class="task-num" id="taskBadge">Tâche 1/5</span>
+      <h3 id="taskTitle" style="flex:1; text-align:center;"></h3>
+      <span class="timer" id="timer">3:00</span>
+    </div>
+
+    <div class="task-card">
+      <div class="task-desc" id="taskDesc"></div>
+      
+      <h3>📝 Vos instructions étape par étape :</h3>
+      <div class="steps-area" id="stepsArea"></div>
+      <button class="add-step-btn" id="addStepBtn" onclick="addStep()">
+        + Ajouter une étape
+      </button>
+    </div>
+
+    <div class="submit-area">
+      <button class="btn btn-primary" onclick="submitAnswer()">✅ Soumettre le guide</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="screen" id="screen-result">
+    <div id="resultContent"></div>
+    <div style="text-align:center; margin-top:1.5rem;">
+      <button class="btn btn-primary" id="nextBtn" onclick="nextTask()">Tâche suivante →</button>
+    </div>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div class="screen" id="screen-final">
+    <div class="final-card" id="finalContent"></div>
+  </div>
+
+</div>
+
+<script>
+// === TASKS DATA ===
+const tasks = [
+  {
+    title: "Ajouter un nouvel artiste",
+    context: "Un nouveau rappeur, <strong>MC Léman</strong>, vient signer chez SwissSound Studios. La réceptionniste doit l'enregistrer dans le système. Rédigez le guide pour cette opération.",
+    expectedSteps: [
+      { text: "Ouvrir HeidiSQL et se connecter au serveur MySQL (hôte: localhost, utilisateur: reception)", keywords: ["ouvrir", "heidisql", "connecter", "serveur"] },
+      { text: "Sélectionner la base de données 'swisssound' dans le panneau de gauche", keywords: ["sélectionner", "swisssound", "base"] },
+      { text: "Cliquer sur l'onglet 'Requête' ou appuyer sur Ctrl+T pour ouvrir un nouvel onglet SQL", keywords: ["onglet", "requête", "sql", "ctrl"] },
+      { text: "Saisir la requête INSERT INTO artiste (nom, prenom, email, telephone, date_inscription) VALUES ('Léman', 'MC', 'mc.leman@email.ch', '+41791234567', CURDATE());", keywords: ["insert", "artiste", "values", "nom", "prenom"] },
+      { text: "Cliquer sur le bouton 'Exécuter' (▶) ou appuyer sur F9 pour lancer la requête", keywords: ["exécuter", "f9", "lancer", "bouton"] },
+      { text: "Vérifier le message de confirmation '1 ligne(s) affectée(s)' dans la zone de résultats", keywords: ["vérifier", "confirmation", "ligne", "résultat"] },
+      { text: "Vérifier l'insertion en exécutant : SELECT * FROM artiste WHERE nom = 'Léman';", keywords: ["select", "vérifier", "artiste", "léman"] }
+    ]
+  },
+  {
+    title: "Réserver une session d'enregistrement",
+    context: "L'artiste <strong>Alpes Sound</strong> souhaite réserver la <strong>Salle A (Studio Pro)</strong> pour le <strong>15 avril 2025 de 14h à 18h</strong> avec l'ingénieur <strong>Marc Dupont</strong>. Rédigez le guide complet.",
+    expectedSteps: [
+      { text: "Se connecter à HeidiSQL avec le compte 'ingenieur_son'", keywords: ["connecter", "heidisql", "ingenieur"] },
+      { text: "Vérifier la disponibilité de la Salle A : SELECT * FROM session WHERE salle_id = 1 AND date = '2025-04-15';", keywords: ["vérifier", "disponibilité", "salle", "select", "session"] },
+      { text: "Vérifier que l'ingénieur Marc Dupont est disponible à cette date/heure", keywords: ["vérifier", "ingénieur", "disponible", "marc"] },
+      { text: "Récupérer l'id de l'artiste : SELECT id_artiste FROM artiste WHERE nom = 'Alpes Sound';", keywords: ["récupérer", "id", "artiste", "select"] },
+      { text: "Insérer la session : INSERT INTO session (date, heure_debut, heure_fin, statut, artiste_id, salle_id, ingenieur_id) VALUES ('2025-04-15', '14:00', '18:00', 'confirmee', [id], 1, [id_marc]);", keywords: ["insert", "session", "date", "heure", "values"] },
+      { text: "Exécuter la requête et vérifier le message de confirmation", keywords: ["exécuter", "vérifier", "confirmation"] },
+      { text: "Confirmer la réservation : SELECT s.*, a.nom, sa.nom AS salle FROM session s JOIN artiste a ON s.artiste_id = a.id_artiste JOIN salle sa ON s.salle_id = sa.id_salle WHERE s.date = '2025-04-15';", keywords: ["confirmer", "select", "join", "réservation"] }
+    ]
+  },
+  {
+    title: "Consulter les factures impayées",
+    context: "Le comptable de SwissSound doit sortir la <strong>liste de toutes les factures impayées</strong> avec le nom de l'artiste et le montant. Rédigez le guide.",
+    expectedSteps: [
+      { text: "Se connecter à HeidiSQL avec le compte 'comptable'", keywords: ["connecter", "heidisql", "comptable"] },
+      { text: "Sélectionner la base de données 'swisssound'", keywords: ["sélectionner", "swisssound", "base"] },
+      { text: "Ouvrir un nouvel onglet de requête (Ctrl+T)", keywords: ["onglet", "requête", "ctrl"] },
+      { text: "Saisir la requête : SELECT f.id_facture, f.date, a.nom, a.prenom, f.montant_total, f.statut_paiement FROM facture f JOIN artiste a ON f.artiste_id = a.id_artiste WHERE f.statut_paiement = 'impayee' ORDER BY f.date;", keywords: ["select", "facture", "join", "artiste", "impayee", "where", "order"] },
+      { text: "Exécuter la requête (F9)", keywords: ["exécuter", "f9"] },
+      { text: "Lire les résultats dans le tableau : vérifier le nombre de factures et le montant total", keywords: ["résultat", "tableau", "montant", "nombre"] },
+      { text: "Optionnel : exporter les résultats en CSV via Outils > Exporter la grille (pour envoi par email)", keywords: ["exporter", "csv", "grille"] }
+    ]
+  },
+  {
+    title: "Modifier le tarif horaire d'une salle",
+    context: "La direction décide d'augmenter le <strong>tarif horaire de la Salle B (Studio Podcast)</strong> de 80 CHF à <strong>95 CHF</strong>. Rédigez le guide pour l'administrateur.",
+    expectedSteps: [
+      { text: "Se connecter à HeidiSQL avec le compte 'admin_studio' (seul compte ayant les droits UPDATE sur la table salle)", keywords: ["connecter", "admin", "heidisql"] },
+      { text: "Sélectionner la base 'swisssound' et vérifier le tarif actuel : SELECT * FROM salle WHERE nom = 'Studio Podcast';", keywords: ["sélectionner", "swisssound", "select", "salle", "tarif", "vérifier"] },
+      { text: "Exécuter la mise à jour : UPDATE salle SET tarif_horaire = 95.00 WHERE nom = 'Studio Podcast';", keywords: ["update", "salle", "tarif", "95", "set", "where"] },
+      { text: "Vérifier le message '1 ligne(s) affectée(s)'", keywords: ["vérifier", "ligne", "affectée", "confirmation"] },
+      { text: "Confirmer la modification : SELECT nom, tarif_horaire FROM salle WHERE nom = 'Studio Podcast';", keywords: ["confirmer", "select", "tarif", "studio"] },
+      { text: "Vérifier que le nouveau tarif (95.00) est bien affiché", keywords: ["vérifier", "95", "nouveau", "affiché"] }
+    ]
+  },
+  {
+    title: "Supprimer un équipement défectueux",
+    context: "Le micro <strong>Shure SM7B</strong> (id: 12) de la Salle C est irréparable. L'admin doit le retirer du système. <strong>Attention : il faut vérifier qu'aucune session future ne l'utilise avant de supprimer.</strong>",
+    expectedSteps: [
+      { text: "Se connecter avec le compte 'admin_studio'", keywords: ["connecter", "admin"] },
+      { text: "Vérifier l'équipement : SELECT * FROM equipement WHERE id_equipement = 12;", keywords: ["vérifier", "select", "equipement", "12"] },
+      { text: "⚠️ Vérifier qu'aucune session future ne référence cet équipement (vérifier les contraintes FK)", keywords: ["vérifier", "session", "contrainte", "fk", "future"] },
+      { text: "Par sécurité, commencer une transaction : START TRANSACTION;", keywords: ["transaction", "start", "begin", "sécurité"] },
+      { text: "Supprimer l'équipement : DELETE FROM equipement WHERE id_equipement = 12;", keywords: ["delete", "equipement", "12", "where"] },
+      { text: "Vérifier la suppression : SELECT * FROM equipement WHERE id_equipement = 12; (doit retourner 0 ligne)", keywords: ["vérifier", "select", "0", "suppression"] },
+      { text: "Si tout est correct : COMMIT; — sinon : ROLLBACK;", keywords: ["commit", "rollback"] },
+      { text: "Documenter la suppression (date, raison, qui) dans un fichier de log ou commentaire", keywords: ["documenter", "log", "raison", "date"] }
+    ]
+  }
+];
+
+// === GAME STATE ===
+let state = {
+  currentTask: 0,
+  totalScore: 0,
+  combo: 1,
+  stepCount: 3,
+  timerInterval: null,
+  timeLeft: 180,
+  results: [],
+};
+
+// === HELPERS ===
+function $(id) { return document.getElementById(id); }
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(`screen-${name}`).classList.add('active');
+}
+
+function updateScoreBar() {
+  $('totalScore').textContent = state.totalScore;
+  $('currentTask').textContent = state.currentTask + 1;
+  $('combo').textContent = `×${state.combo}`;
+}
+
+function startTimer() {
+  state.timeLeft = 180;
+  updateTimerDisplay();
+  state.timerInterval = setInterval(() => {
+    state.timeLeft--;
+    updateTimerDisplay();
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timerInterval);
+      submitAnswer();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(state.timeLeft / 60);
+  const s = state.timeLeft % 60;
+  $('timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  if (state.timeLeft <= 30) $('timer').style.color = '#C62828';
+  else $('timer').style.color = '#FF6F00';
+}
+
+// === GAME FLOW ===
+function startGame() {
+  state.currentTask = 0;
+  state.totalScore = 0;
+  state.combo = 1;
+  state.results = [];
+  updateScoreBar();
+  loadTask();
+}
+
+function loadTask() {
+  const task = tasks[state.currentTask];
+  state.stepCount = 3;
+
+  $('taskBadge').textContent = `Tâche ${state.currentTask + 1}/5`;
+  $('taskTitle').textContent = task.title;
+  $('taskDesc').innerHTML = task.context;
+
+  // Reset steps
+  const area = $('stepsArea');
+  area.innerHTML = '';
+  for (let i = 0; i < 3; i++) addStepElement(area, i + 1);
+
+  showScreen('challenge');
+  updateScoreBar();
+  startTimer();
+}
+
+function addStepElement(container, num) {
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.innerHTML = `
+    <div class="step-num">${num}</div>
+    <textarea class="step-input" placeholder="Étape ${num} : décrivez l'action..." rows="1" 
+      oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"></textarea>
+  `;
+  container.appendChild(row);
+}
+
+function addStep() {
+  state.stepCount++;
+  addStepElement($('stepsArea'), state.stepCount);
+}
+
+function submitAnswer() {
+  clearInterval(state.timerInterval);
+  const task = tasks[state.currentTask];
+  const inputs = document.querySelectorAll('#stepsArea .step-input');
+  const studentSteps = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
+
+  // Score calculation
+  const expected = task.expectedSteps;
+  let matchedExpected = new Set();
+  let studentResults = [];
+
+  // For each student step, find best matching expected step
+  for (const step of studentSteps) {
+    const lower = step.toLowerCase();
+    let bestMatch = -1;
+    let bestScore = 0;
+
+    for (let i = 0; i < expected.length; i++) {
+      if (matchedExpected.has(i)) continue;
+      const kw = expected[i].keywords;
+      const matched = kw.filter(k => lower.includes(k.toLowerCase()));
+      const score = matched.length / kw.length;
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = i;
+      }
+    }
+
+    if (bestScore >= 0.6) {
+      matchedExpected.add(bestMatch);
+      studentResults.push({ text: step, status: 'matched', matchedIdx: bestMatch, score: bestScore });
+    } else if (bestScore >= 0.3) {
+      studentResults.push({ text: step, status: 'partial', score: bestScore });
+    } else {
+      studentResults.push({ text: step, status: 'extra', score: 0 });
+    }
+  }
+
+  // Calculate score
+  const totalExpected = expected.length;
+  const fullMatches = studentResults.filter(r => r.status === 'matched').length;
+  const partialMatches = studentResults.filter(r => r.status === 'partial').length;
+  const rawScore = Math.round(((fullMatches + partialMatches * 0.4) / totalExpected) * 100);
+  
+  // Time bonus
+  const timeBonus = state.timeLeft > 120 ? 15 : state.timeLeft > 60 ? 10 : state.timeLeft > 0 ? 5 : 0;
+  
+  // Combo
+  const taskScore = Math.round((rawScore + timeBonus) * state.combo);
+  
+  if (rawScore >= 80) state.combo = Math.min(state.combo + 1, 5);
+  else state.combo = 1;
+  
+  state.totalScore += taskScore;
+
+  const result = {
+    task: task.title,
+    studentResults,
+    matchedExpected,
+    expected,
+    rawScore,
+    timeBonus,
+    taskScore,
+    fullMatches,
+    totalExpected,
+    timeLeft: state.timeLeft,
+  };
+  state.results.push(result);
+
+  showResult(result);
+  updateScoreBar();
+}
+
+function showResult(result) {
+  const { expected, studentResults, matchedExpected, rawScore, timeBonus, taskScore, fullMatches, totalExpected } = result;
+  
+  const grade = rawScore >= 90 ? '🌟 Excellent !' : rawScore >= 70 ? '👍 Bon travail !' : rawScore >= 50 ? '📝 Passable' : '⚠️ À améliorer';
+  const circleColor = rawScore >= 70 ? '#2E7D32' : rawScore >= 50 ? '#FF6F00' : '#C62828';
+
+  let html = `
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-score-circle" style="background:${circleColor}">${rawScore}%</div>
+        <div>
+          <h3>${grade}</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem;">
+            ${fullMatches}/${totalExpected} étapes couvertes | 
+            Bonus temps : +${timeBonus} | 
+            Score tâche : <strong>${taskScore}</strong> pts (×${state.combo > 1 ? state.combo - 1 : state.combo} combo)
+          </p>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><div class="legend-dot" style="background:#2E7D32"></div> Étape correcte</span>
+        <span><div class="legend-dot" style="background:#FF6F00"></div> Partielle</span>
+        <span><div class="legend-dot" style="background:#6A1B9A"></div> Étape supplémentaire</span>
+        <span><div class="legend-dot" style="background:#C62828"></div> Étape manquante</span>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="comparison-col">
+          <h4>📋 Étapes attendues (corrigé)</h4>
+          ${expected.map((e, i) => `
+            <div class="expected-step" style="${matchedExpected.has(i) ? '' : 'background:#FFEBEE; border-color:#C62828;'}">
+              <strong>${i+1}.</strong> ${e.text} ${matchedExpected.has(i) ? '✅' : '❌ manquante'}
+            </div>
+          `).join('')}
+        </div>
+        <div class="comparison-col">
+          <h4>✍️ Vos instructions</h4>
+          ${studentResults.length === 0 ? '<p style="color:var(--text-muted);">Aucune étape soumise</p>' :
+            studentResults.map((s, i) => `
+              <div class="student-step ${s.status}">
+                <strong>${i+1}.</strong> ${s.text} 
+                ${s.status === 'matched' ? '✅' : s.status === 'partial' ? '⚠️' : '➕'}
+              </div>
+            `).join('')}
+          ${Array.from({length: totalExpected - fullMatches}, (_, i) => 
+            `<div class="student-step missing">❌ Étape manquante</div>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  $('resultContent').innerHTML = html;
+  $('nextBtn').textContent = state.currentTask < tasks.length - 1 ? 'Tâche suivante →' : '🏆 Voir le résultat final';
+  showScreen('result');
+}
+
+function nextTask() {
+  state.currentTask++;
+  if (state.currentTask < tasks.length) {
+    loadTask();
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal() {
+  const maxPossible = tasks.length * 115 * 5; // rough max
+  const pct = Math.min(100, Math.round((state.totalScore / (tasks.length * 100)) * 100));
+  const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+  const message = pct >= 90 ? 'Rédacteur technique expert !' : pct >= 70 ? 'Bon rédacteur, quelques détails à peaufiner.' : pct >= 50 ? 'Les bases sont là, mais il manque de la précision.' : 'La documentation mérite plus de détails et de rigueur.';
+
+  let html = `
+    <h2>🏆 Résultat final</h2>
+    <div class="big-score">${state.totalScore} pts</div>
+    <div class="stars">${stars}</div>
+    <p style="color:var(--text-muted); font-size:1.1rem; margin-bottom:2rem;">${message}</p>
+
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Tâche</th>
+          <th>Score</th>
+          <th>Étapes couvertes</th>
+          <th>Temps restant</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${state.results.map(r => `
+          <tr>
+            <td>${r.task}</td>
+            <td>
+              <div class="progress-bar" style="width:80px; display:inline-block; vertical-align:middle;">
+                <div class="progress-fill" style="width:${r.rawScore}%; background:${r.rawScore >= 70 ? '#2E7D32' : r.rawScore >= 50 ? '#FF6F00' : '#C62828'}"></div>
+              </div>
+              ${r.rawScore}%
+            </td>
+            <td>${r.fullMatches}/${r.totalExpected}</td>
+            <td>${Math.floor(r.timeLeft/60)}:${(r.timeLeft%60).toString().padStart(2,'0')}</td>
+            <td><strong>${r.taskScore}</strong></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div style="margin-top:2rem;">
+      <button class="btn btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    </div>
+  `;
+
+  $('finalContent').innerHTML = html;
+  showScreen('final');
+  updateScoreBar();
+}
+</script>
+</body>
+</html>
