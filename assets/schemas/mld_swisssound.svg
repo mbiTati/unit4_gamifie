@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+<style>text{font-family:monospace;font-size:10px;fill:#333}.title{font-size:12px;font-weight:bold;fill:#1565C0}.pk{fill:#C62828;font-weight:bold}.fk{fill:#2E7D32;font-style:italic}rect{rx:5;ry:5}</style>
+<rect x="10" y="10" width="250" height="90" fill="#E3F2FD" stroke="#1565C0"/>
+<text class="title" x="20" y="30">ARTISTE</text>
+<text class="pk" x="20" y="48">#id_artiste INT PK AUTO_INCREMENT</text>
+<text x="20" y="62">nom VARCHAR(100) NOT NULL</text>
+<text x="20" y="76">email VARCHAR(150) UNIQUE</text>
+<text x="20" y="90">actif BOOLEAN DEFAULT TRUE</text>
+
+<rect x="300" y="10" width="230" height="80" fill="#E8F5E9" stroke="#2E7D32"/>
+<text class="title" x="310" y="30">ALBUM</text>
+<text class="pk" x="310" y="48">#id_album INT PK</text>
+<text x="310" y="62">titre VARCHAR(200) NOT NULL</text>
+<text class="fk" x="310" y="76">→id_artiste FK → ARTISTE</text>
+
+<rect x="560" y="10" width="220" height="60" fill="#FFF3E0" stroke="#E65100"/>
+<text class="title" x="570" y="30">GENRE</text>
+<text class="pk" x="570" y="48">#id_genre INT PK</text>
+<text x="570" y="62">nom VARCHAR(50) UNIQUE</text>
+
+<rect x="560" y="90" width="220" height="50" fill="#F3E5F5" stroke="#6A1B9A"/>
+<text class="title" x="570" y="110">GENRE_ARTISTE (N:M)</text>
+<text class="fk" x="570" y="128">→#id_genre FK, →#id_artiste FK</text>
+
+<rect x="10" y="140" width="250" height="80" fill="#E3F2FD" stroke="#1565C0"/>
+<text class="title" x="20" y="160">SALLE</text>
+<text class="pk" x="20" y="178">#id_salle INT PK</text>
+<text x="20" y="192">nom VARCHAR(100) UNIQUE</text>
+<text x="20" y="206">tarif_horaire DECIMAL(8,2)</text>
+
+<rect x="300" y="140" width="230" height="60" fill="#E3F2FD" stroke="#1565C0"/>
+<text class="title" x="310" y="160">INGÉNIEUR</text>
+<text class="pk" x="310" y="178">#id_ingenieur INT PK</text>
+<text x="310" y="192">specialite VARCHAR(100)</text>
+
+<rect x="10" y="260" width="520" height="100" fill="#BBDEFB" stroke="#0D47A1"/>
+<text class="title" x="20" y="280">SESSION_ENREGISTREMENT</text>
+<text class="pk" x="20" y="298">#id_session INT PK</text>
+<text x="20" y="312">date_session DATE, heure_debut TIME, heure_fin TIME</text>
+<text x="20" y="326">statut ENUM('planifiee','confirmee','terminee','annulee')</text>
+<text class="fk" x="20" y="345">→id_artiste FK, →id_salle FK, →id_ingenieur FK</text>
+
+<rect x="10" y="400" width="350" height="80" fill="#FFF3E0" stroke="#E65100"/>
+<text class="title" x="20" y="420">FACTURE</text>
+<text class="pk" x="20" y="438">#id_facture INT PK</text>
+<text x="20" y="452">montant_total DECIMAL(10,2), statut_paiement ENUM</text>
+<text class="fk" x="20" y="466">→id_artiste FK, →id_session FK</text>
+
+<rect x="560" y="200" width="220" height="80" fill="#E8F5E9" stroke="#2E7D32"/>
+<text class="title" x="570" y="220">ÉQUIPEMENT</text>
+<text class="pk" x="570" y="238">#id_equipement INT PK</text>
+<text x="570" y="252">categorie ENUM, etat ENUM</text>
+<text class="fk" x="570" y="266">→id_salle FK (SET NULL)</text>
+
+<line x1="245" y1="50" x2="300" y2="50" stroke="#C62828" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="272" y="45" style="font-size:8px;fill:#C62828">1:N</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C62828"/></marker></defs>
+</svg>

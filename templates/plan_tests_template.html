@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Template Plan de Tests — SwissSound</title>
+<style>body{font-family:Arial;margin:2rem;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #ccc;padding:8px;font-size:12px;}th{background:#1565C0;color:#fff;text-align:left;}tr:nth-child(even){background:#f5f5f5;}.status-ok{background:#E8F5E9;}.status-ko{background:#FFEBEE;}</style></head>
+<body><h1>🧪 Plan de Tests — SwissSound Studios</h1><p>Module 17-18 | LO3 | Critères P4, M4</p>
+<table><thead><tr><th>ID</th><th>Description</th><th>Type</th><th>Entrée / Action</th><th>Résultat attendu</th><th>Résultat obtenu</th><th>Statut</th></tr></thead><tbody>
+<tr><td>T01</td><td>INSERT artiste valide</td><td>Normal</td><td>INSERT INTO artiste (nom,email) VALUES ('Test','test@mail.ch')</td><td>1 ligne insérée</td><td></td><td></td></tr>
+<tr><td>T02</td><td>INSERT artiste sans nom (NOT NULL)</td><td>Erroné</td><td>INSERT INTO artiste (nom) VALUES (NULL)</td><td>Erreur 1048</td><td></td><td></td></tr>
+<tr><td>T03</td><td>INSERT email doublon (UNIQUE)</td><td>Erroné</td><td>INSERT avec email existant</td><td>Erreur 1062</td><td></td><td></td></tr>
+<tr><td>T04</td><td>INSERT album FK invalide</td><td>Erroné</td><td>INSERT album avec id_artiste=999</td><td>Erreur 1452</td><td></td><td></td></tr>
+<tr><td>T05</td><td>INSERT album prix négatif (CHECK)</td><td>Limite</td><td>INSERT album avec prix=-1</td><td>Erreur 3819</td><td></td><td></td></tr>
+<tr><td>T06</td><td>INSERT album prix=0 (CHECK limite)</td><td>Limite</td><td>INSERT album avec prix=0</td><td>Succès (0 ≥ 0)</td><td></td><td></td></tr>
+<tr><td>T07</td><td>DELETE artiste avec albums (RESTRICT)</td><td>Erroné</td><td>DELETE FROM artiste WHERE id=1</td><td>Erreur 1451</td><td></td><td></td></tr>
+<tr><td>T08</td><td>DELETE genre CASCADE</td><td>Normal</td><td>DELETE FROM genre WHERE id=1</td><td>Genre + associations supprimés</td><td></td><td></td></tr>
+<tr><td>T09</td><td>SELECT artistes actifs</td><td>Normal</td><td>SELECT * FROM artiste WHERE actif=1</td><td>19 lignes</td><td></td><td></td></tr>
+<tr><td>T10</td><td>SELECT LIKE pattern</td><td>Normal</td><td>SELECT * FROM artiste WHERE nom LIKE 'M%'</td><td>3 artistes (MC Helvetik, Müller, Martin)</td><td></td><td></td></tr>
+<tr><td>T11</td><td>JOIN artiste-album</td><td>Normal</td><td>SELECT a.nom, al.titre FROM artiste a JOIN album al ON ...</td><td>30 lignes (tous les albums avec artiste)</td><td></td><td></td></tr>
+<tr><td>T12</td><td>LEFT JOIN artistes sans album</td><td>Normal</td><td>LEFT JOIN ... WHERE al.id IS NULL</td><td>Artistes sans album listés</td><td></td><td></td></tr>
+<tr><td>T13</td><td>GROUP BY + HAVING</td><td>Normal</td><td>COUNT albums GROUP BY artiste HAVING COUNT>1</td><td>Artistes avec 2+ albums</td><td></td><td></td></tr>
+<tr><td>T14</td><td>Vue v_artistes_actifs</td><td>Normal</td><td>SELECT * FROM v_artistes_actifs</td><td>Artistes actifs avec genres</td><td></td><td></td></tr>
+<tr><td>T15</td><td>Procédure sp_ajouter_session (valide)</td><td>Normal</td><td>CALL sp_ajouter_session(...)</td><td>Session créée</td><td></td><td></td></tr>
+<tr><td>T16</td><td>Procédure sp_ajouter_session (conflit)</td><td>Erroné</td><td>CALL avec salle déjà occupée</td><td>Erreur 'Salle occupée'</td><td></td><td></td></tr>
+<tr><td>T17</td><td>Fonction fn_ca_artiste</td><td>Normal</td><td>SELECT fn_ca_artiste(1)</td><td>CA artiste 1 (numérique)</td><td></td><td></td></tr>
+<tr><td>T18</td><td>GRANT test ingénieur DELETE</td><td>Erroné</td><td>Connexion ingenieur_son → DELETE artiste</td><td>Erreur 1142 (denied)</td><td></td><td></td></tr>
+<tr><td>T19</td><td>VARCHAR limite (100 caractères)</td><td>Limite</td><td>INSERT nom de 100 caractères exactement</td><td>Succès</td><td></td><td></td></tr>
+<tr><td>T20</td><td>VARCHAR dépassement (101 car)</td><td>Limite</td><td>INSERT nom de 101 caractères</td><td>Troncature ou erreur (strict mode)</td><td></td><td></td></tr>
+</tbody></table>
+<h2>Matrice de traçabilité</h2>
+<table><thead><tr><th>Besoin</th><th>Tests associés</th></tr></thead><tbody>
+<tr><td>Ajouter un artiste</td><td>T01, T02, T03</td></tr>
+<tr><td>Ajouter un album</td><td>T04, T05, T06</td></tr>
+<tr><td>Intégrité référentielle</td><td>T04, T07, T08</td></tr>
+<tr><td>Requêtes SELECT</td><td>T09, T10</td></tr>
+<tr><td>Requêtes JOIN</td><td>T11, T12, T13</td></tr>
+<tr><td>Vues et procédures</td><td>T14, T15, T16, T17</td></tr>
+<tr><td>Sécurité</td><td>T18</td></tr>
+<tr><td>Limites</td><td>T05, T06, T19, T20</td></tr>
+</tbody></table></body></html>
