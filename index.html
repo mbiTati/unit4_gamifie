@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 SwissSound Academy — Unit 4 Database Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #0B0E17;
+    --bg-card: #141825;
+    --bg-card-hover: #1A2035;
+    --bg-surface: #0F1320;
+    --border: rgba(255,255,255,0.06);
+    --text: #E8ECF4;
+    --text-muted: #6B7A99;
+    --text-dim: #3D4A66;
+
+    --lo1: #34D399;
+    --lo1-bg: rgba(52,211,153,0.08);
+    --lo1-glow: rgba(52,211,153,0.25);
+
+    --lo2: #60A5FA;
+    --lo2-bg: rgba(96,165,250,0.08);
+    --lo2-glow: rgba(96,165,250,0.25);
+
+    --lo3: #FBBF24;
+    --lo3-bg: rgba(251,191,36,0.08);
+    --lo3-glow: rgba(251,191,36,0.25);
+
+    --lo4: #C084FC;
+    --lo4-bg: rgba(192,132,252,0.08);
+    --lo4-glow: rgba(192,132,252,0.25);
+
+    --accent: #F97316;
+    --accent-glow: rgba(249,115,22,0.3);
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === AMBIENT BG === */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(52,211,153,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(96,165,250,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(192,132,252,0.03) 0%, transparent 60%);
+    animation: ambientDrift 30s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes ambientDrift {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-3%, -2%) rotate(2deg); }
+  }
+
+  /* === HEADER === */
+  .site-header {
+    position: relative;
+    z-index: 10;
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(11,14,23,0.85);
+    backdrop-filter: blur(20px);
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--lo1), var(--lo2));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 20px rgba(52,211,153,0.2);
+  }
+
+  .logo-text h1 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text), var(--lo1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo-text p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .stat-pill {
+    padding: 0.4rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .stat-pill .num { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+  /* === MAIN === */
+  .main {
+    position: relative;
+    z-index: 5;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* === PROGRESS OVERVIEW === */
+  .progress-overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .lo-progress-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lo-progress-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .lo-progress-card[data-lo="1"]::before { background: var(--lo1); }
+  .lo-progress-card[data-lo="2"]::before { background: var(--lo2); }
+  .lo-progress-card[data-lo="3"]::before { background: var(--lo3); }
+  .lo-progress-card[data-lo="4"]::before { background: var(--lo4); }
+
+  .lo-progress-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
+
+  .lo-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  .lo-progress-card[data-lo="1"] .lo-label { color: var(--lo1); }
+  .lo-progress-card[data-lo="2"] .lo-label { color: var(--lo2); }
+  .lo-progress-card[data-lo="3"] .lo-label { color: var(--lo3); }
+  .lo-progress-card[data-lo="4"] .lo-label { color: var(--lo4); }
+
+  .lo-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .lo-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+  }
+
+  .lo-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  .lo-progress-card[data-lo="1"] .lo-bar-fill { background: var(--lo1); }
+  .lo-progress-card[data-lo="2"] .lo-bar-fill { background: var(--lo2); }
+  .lo-progress-card[data-lo="3"] .lo-bar-fill { background: var(--lo3); }
+  .lo-progress-card[data-lo="4"] .lo-bar-fill { background: var(--lo4); }
+
+  .lo-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* === LO SECTIONS === */
+  .lo-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .lo-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lo-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  .lo-badge.lo1 { background: var(--lo1-bg); color: var(--lo1); border: 1px solid rgba(52,211,153,0.2); }
+  .lo-badge.lo2 { background: var(--lo2-bg); color: var(--lo2); border: 1px solid rgba(96,165,250,0.2); }
+  .lo-badge.lo3 { background: var(--lo3-bg); color: var(--lo3); border: 1px solid rgba(251,191,36,0.2); }
+  .lo-badge.lo4 { background: var(--lo4-bg); color: var(--lo4); border: 1px solid rgba(192,132,252,0.2); }
+
+  .lo-section-title { font-size: 1.2rem; font-weight: 700; }
+  .lo-section-meta { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
+
+  /* === MODULE GRID === */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .module-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.3rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .module-card:hover {
+    background: var(--bg-card-hover);
+    border-color: rgba(255,255,255,0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .module-card.locked {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .module-card.locked:hover {
+    transform: none;
+    box-shadow: none;
+    background: var(--bg-card);
+  }
+
+  .module-num {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .module-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.7rem;
+    display: block;
+  }
+
+  .module-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    line-height: 1.3;
+    padding-right: 2.5rem;
+  }
+
+  .module-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 0.8rem;
+  }
+
+  .module-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .module-phases {
+    display: flex;
+    gap: 3px;
+  }
+
+  .phase-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.08);
+    transition: all 0.2s;
+  }
+
+  .phase-dot.done { background: var(--lo1); }
+  .phase-dot.active { background: var(--accent); animation: pulseDot 1.5s infinite; }
+
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .module-btec {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+
+  .play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    background: linear-gradient(135deg, var(--accent), #FB923C);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    box-shadow: 0 2px 10px var(--accent-glow);
+  }
+
+  .play-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px var(--accent-glow); }
+
+  .lock-icon {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+  }
+
+  /* === PIPELINE SECTION === */
+  .pipeline-banner {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    overflow-x: auto;
+  }
+
+  .pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .pipeline-step .pip-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    background: var(--lo1-bg);
+    color: var(--lo1);
+    border: 1px solid rgba(52,211,153,0.15);
+  }
+
+  .pipeline-arrow {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  /* === FOOTER === */
+  .site-footer {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  .site-footer a {
+    color: var(--lo2);
+    text-decoration: none;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 900px) {
+    .progress-overview { grid-template-columns: repeat(2, 1fr); }
+    .modules-grid { grid-template-columns: 1fr; }
+    .pipeline-banner { display: none; }
+  }
+
+  @media (max-width: 550px) {
+    .progress-overview { grid-template-columns: 1fr; }
+    .header-stats { display: none; }
+  }
+
+  /* === ANIMATIONS === */
+  .module-card { animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🎵</div>
+      <div class="logo-text">
+        <h1>SwissSound Academy</h1>
+        <p>Unit 4 — Database Design & Development</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill">📦 <span class="num" id="statModules">0</span>/20 modules</div>
+      <div class="stat-pill">⭐ <span class="num" id="statScore">0</span> XP</div>
+      <div class="stat-pill">🔥 <span class="num" id="statStreak">0</span> série</div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- PROGRESS OVERVIEW -->
+  <div class="progress-overview" id="progressOverview"></div>
+
+  <!-- PIPELINE BANNER -->
+  <div class="pipeline-banner">
+    <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-right:0.5rem;">Pipeline :</span>
+    <div class="pipeline-step"><span class="pip-label">DD</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label">Matrice DF</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label">Graphe</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo1-bg);color:var(--lo1);">MCD + CIF</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo1-bg);color:var(--lo1);">MLD</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo1-bg);color:var(--lo1);">3NF</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo1-bg);color:var(--lo1);">MPD</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo2-bg);color:var(--lo2);">SQL</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo3-bg);color:var(--lo3);">Tests</span></div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step"><span class="pip-label" style="background:var(--lo4-bg);color:var(--lo4);">Doc</span></div>
+  </div>
+
+  <!-- MODULES BY LO -->
+  <div id="moduleSections"></div>
+
+</main>
+
+<footer class="site-footer">
+  <p>SwissSound Academy — BTEC Higher Nationals in Computing 2025-2026 — <a href="https://github.com/mbiTati/unit4_gamifie" target="_blank">GitHub</a></p>
+</footer>
+
+<script>
+// === MODULE DATA ===
+const modules = [
+  // LO1
+  { id: 1, lo: 1, title: "Introduction aux BDD", icon: "🗄️", desc: "Relationnelle vs non-relationnelle, vocabulaire, SGBD", jeu: "Serpent de données", jeuUrl: "jeux/module01_serpent_donnees/index.html", btec: "P1", periodes: 4 },
+  { id: 2, lo: 1, title: "Recueil des besoins", icon: "📋", desc: "Besoins utilisateur/système, interview, cahier des charges", jeu: "Usine à besoins", jeuUrl: null, btec: "P1", periodes: 4 },
+  { id: 3, lo: 1, title: "Dictionnaire des données", icon: "📖", desc: "Recenser toutes les données, formats, synonymes", jeu: "Collectionneur de données", jeuUrl: null, btec: "P1 M1", periodes: 4 },
+  { id: 4, lo: 1, title: "Dépendances fonctionnelles", icon: "🔗", desc: "Matrice des DF, graphe SAT/SRE, sources", jeu: "Détective des dépendances", jeuUrl: null, btec: "P1 M1", periodes: 6 },
+  { id: 5, lo: 1, title: "MCD : entités, CIF, cardinalités", icon: "🫧", desc: "Associations, Merise vs UML, CIF", jeu: "Constructeur de MCD", jeuUrl: null, btec: "P1 M1", periodes: 6 },
+  { id: 6, lo: 1, title: "MLD : MCD → schéma relationnel", icon: "🔑", desc: "Règles de passage, PK, FK, tables associatives", jeu: "Le transformateur", jeuUrl: null, btec: "P1 M1", periodes: 6 },
+  { id: 7, lo: 1, title: "Normalisation (1NF→3NF)", icon: "🧹", desc: "Anomalies, formes normales, dénormalisation", jeu: "Nettoyeur de tables", jeuUrl: null, btec: "M1 D1", periodes: 4 },
+  { id: 8, lo: 1, title: "MPD + Interfaces + BDD OO", icon: "🛡️", desc: "Types MySQL, contraintes, maquettes, sécurité", jeu: "Bouclier de validation", jeuUrl: null, btec: "M1 D1", periodes: 4 },
+  // LO2
+  { id: 9, lo: 2, title: "CREATE DATABASE / TABLE", icon: "🏗️", desc: "DDL, types de données, ordre de création FK", jeu: "Architecte SQL", jeuUrl: null, btec: "P2", periodes: 4 },
+  { id: 10, lo: 2, title: "Contraintes & intégrité", icon: "⛓️", desc: "NOT NULL, UNIQUE, CHECK, FK CASCADE", jeu: "Chaîne de contraintes", jeuUrl: null, btec: "P2 M2", periodes: 4 },
+  { id: 11, lo: 2, title: "DML : INSERT, UPDATE, DELETE", icon: "💣", desc: "Transactions ACID, COMMIT, ROLLBACK", jeu: "Démineur SQL", jeuUrl: null, btec: "P2", periodes: 4 },
+  { id: 12, lo: 2, title: "SELECT : filtrage et tri", icon: "🔍", desc: "WHERE, LIKE, ORDER BY, LIMIT, alias", jeu: "Détective de données", jeuUrl: null, btec: "P2 P3", periodes: 6 },
+  { id: 13, lo: 2, title: "Agrégation + GROUP BY", icon: "📊", desc: "COUNT, SUM, AVG, HAVING, fonctions MySQL", jeu: "Comptable fou", jeuUrl: null, btec: "P3 M3", periodes: 6 },
+  { id: 14, lo: 2, title: "JOIN multi-tables", icon: "🧩", desc: "INNER, LEFT, RIGHT, CROSS, réflexive", jeu: "Puzzle de tables", jeuUrl: null, btec: "P2 P3 M3", periodes: 6 },
+  { id: 15, lo: 2, title: "Vues, procédures, fonctions", icon: "🎭", desc: "CREATE VIEW, PROCEDURE, FUNCTION, triggers", jeu: "Masque de la vue", jeuUrl: null, btec: "P3 M2", periodes: 4 },
+  { id: 16, lo: 2, title: "Sécurité, RGPD, chiffrement", icon: "🔐", desc: "GRANT, REVOKE, moindre privilège, AES", jeu: "Coffre-fort", jeuUrl: null, btec: "M2 D2", periodes: 4 },
+  // LO3
+  { id: 17, lo: 3, title: "Plan de tests", icon: "🎯", desc: "White/black box, données de test, traçabilité", jeu: "Testeur fou", jeuUrl: null, btec: "P4 M4", periodes: 4 },
+  { id: 18, lo: 3, title: "Exécution & évaluation tests", icon: "🐛", desc: "Exécuter, corriger, évaluer efficacité", jeu: "Chasse aux bugs", jeuUrl: null, btec: "P4 M4", periodes: 4 },
+  // LO4
+  { id: 19, lo: 4, title: "Documentation technique", icon: "🗺️", desc: "DFD niveaux 0-2, flowcharts, dictionnaire", jeu: "Le cartographe", jeuUrl: null, btec: "P5 M5", periodes: 6 },
+  { id: 20, lo: 4, title: "Documentation utilisateur + D3", icon: "📖", desc: "Guide utilisateur, FAQ, évaluation finale", jeu: "Le Guide Parfait", jeuUrl: "jeux/module20_guide_parfait/index.html", btec: "P5 M5 D3", periodes: 4 },
+];
+
+const loInfo = [
+  { num: 1, label: "LO1", title: "Conception", color: "lo1", modules: 8, periodes: 34 },
+  { num: 2, label: "LO2", title: "Développement MySQL", color: "lo2", modules: 8, periodes: 38 },
+  { num: 3, label: "LO3", title: "Tests", color: "lo3", modules: 2, periodes: 8 },
+  { num: 4, label: "LO4", title: "Documentation", color: "lo4", modules: 2, periodes: 10 },
+];
+
+// === RENDER ===
+function render() {
+  // Progress cards
+  const overview = document.getElementById('progressOverview');
+  overview.innerHTML = loInfo.map(lo => {
+    const loModules = modules.filter(m => m.lo === lo.num);
+    const done = loModules.filter(m => m.jeuUrl).length; // placeholder: modules with a game URL count as "available"
+    const pct = Math.round((done / lo.modules) * 100);
+    return `
+      <div class="lo-progress-card" data-lo="${lo.num}" onclick="scrollToLO(${lo.num})">
+        <div class="lo-label">${lo.label}</div>
+        <div class="lo-title">${lo.title}</div>
+        <div class="lo-bar"><div class="lo-bar-fill" style="width:${pct}%"></div></div>
+        <div class="lo-meta">
+          <span>${done}/${lo.modules} modules</span>
+          <span>${lo.periodes} périodes</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Module sections
+  const sections = document.getElementById('moduleSections');
+  sections.innerHTML = loInfo.map(lo => {
+    const loModules = modules.filter(m => m.lo === lo.num);
+    return `
+      <div class="lo-section" id="lo${lo.num}">
+        <div class="lo-section-header">
+          <span class="lo-badge ${lo.color}">${lo.label}</span>
+          <span class="lo-section-title">${lo.title}</span>
+          <span class="lo-section-meta">${lo.modules} modules · ${lo.periodes} périodes</span>
+        </div>
+        <div class="modules-grid">
+          ${loModules.map((m, i) => {
+            const hasGame = !!m.jeuUrl;
+            const locked = !hasGame;
+            return `
+              <div class="module-card ${locked ? 'locked' : ''}" style="animation-delay: ${i * 0.06}s" ${hasGame ? `onclick="window.open('${m.jeuUrl}', '_blank')"` : ''}>
+                <span class="module-num">#${String(m.id).padStart(2, '0')}</span>
+                <span class="module-icon">${m.icon}</span>
+                <div class="module-title">${m.title}</div>
+                <div class="module-desc">${m.desc}</div>
+                <div class="module-footer">
+                  <div class="module-phases">
+                    ${[1,2,3,4,5,6].map(p => `<div class="phase-dot ${hasGame && p <= 2 ? 'done' : ''}"></div>`).join('')}
+                  </div>
+                  ${hasGame 
+                    ? `<a class="play-btn" href="${m.jeuUrl}" target="_blank" onclick="event.stopPropagation()">▶ ${m.jeu}</a>`
+                    : `<span class="lock-icon">🔒</span>`
+                  }
+                </div>
+                <div class="module-btec">${m.btec} · ${m.periodes} pér.</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Stats
+  const available = modules.filter(m => m.jeuUrl).length;
+  document.getElementById('statModules').textContent = available;
+}
+
+function scrollToLO(num) {
+  document.getElementById('lo' + num).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+render();
+</script>
+</body>
+</html>
