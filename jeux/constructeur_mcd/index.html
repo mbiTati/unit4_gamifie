@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constructeur MCD — SwissSound</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06);--lo1:#10b981;--accent:#f97316;--success:#10b981;--error:#ef4444}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text)}
+.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem}
+.header h1{font-size:1.1rem;font-weight:800}.header .sub{font-size:.72rem;color:var(--muted)}
+.sb{background:rgba(255,255,255,.06);padding:.2rem .6rem;border-radius:5px;font-size:.85rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.3rem;margin-bottom:1rem}
+.info{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:8px;padding:.8rem 1rem;font-size:.8rem;color:var(--lo1);line-height:1.6;margin-bottom:1rem}
+h2{font-size:1.2rem;font-weight:800;margin-bottom:.8rem}
+h3{font-size:.95rem;font-weight:700;margin:1rem 0 .5rem;color:var(--lo1)}
+
+/* EXERCISE SECTIONS */
+.exercise{margin-bottom:1.5rem}
+.q{font-size:.88rem;margin-bottom:.6rem;line-height:1.5}
+.q strong{color:var(--lo1)}
+.options{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.3rem}
+.opt{padding:.35rem .7rem;border:2px solid var(--border);border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;transition:.15s;background:var(--surface)}
+.opt:hover{border-color:var(--lo1);background:rgba(16,185,129,.05)}
+.opt.selected{border-color:var(--lo1);background:rgba(16,185,129,.12);color:var(--lo1)}
+.opt.correct{border-color:var(--success);background:rgba(16,185,129,.15);color:var(--success)}
+.opt.wrong{border-color:var(--error);background:rgba(239,68,68,.1);color:var(--error)}
+
+/* ASSOCIATION BUILDER */
+.assoc-row{display:flex;align-items:center;gap:.5rem;margin:.5rem 0;flex-wrap:wrap}
+.assoc-ent{background:var(--surface);border:1px solid var(--border);padding:.3rem .6rem;border-radius:6px;font-size:.82rem;font-weight:700;min-width:80px;text-align:center}
+.assoc-card{display:flex;gap:.3rem;align-items:center}
+.card-sel{padding:.2rem .5rem;border:1px solid var(--border);border-radius:4px;font-size:.72rem;cursor:pointer;transition:.15s;background:var(--card)}
+.card-sel:hover{border-color:var(--lo1)}.card-sel.selected{border-color:var(--lo1);background:rgba(16,185,129,.1);color:var(--lo1)}
+.card-sel.correct{border-color:var(--success);background:rgba(16,185,129,.15)}.card-sel.wrong{border-color:var(--error);background:rgba(239,68,68,.1)}
+.assoc-verb{font-size:.8rem;font-style:italic;color:var(--muted);padding:0 .3rem}
+
+.btn{padding:.55rem 1.3rem;border:none;border-radius:7px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-go{background:linear-gradient(135deg,var(--accent),#fb923c);color:#fff;box-shadow:0 2px 10px rgba(249,115,22,.2)}
+.btn-go:hover{transform:translateY(-1px)}
+.btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.actions{display:flex;gap:.6rem;justify-content:center;margin-top:1.2rem}
+.result{padding:1rem;border-radius:10px;text-align:center;margin-top:1rem}
+.result.pass{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15)}
+.result.fail{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.1)}
+.back{display:inline-block;margin-top:1rem;color:var(--muted);font-size:.78rem;font-weight:600}
+.fb{font-size:.78rem;padding:.4rem .6rem;border-radius:6px;margin-top:.3rem;display:none}
+.fb.show{display:block}
+.fb.ok{background:rgba(16,185,129,.08);color:var(--success)}.fb.ko{background:rgba(239,68,68,.06);color:var(--error)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><h1>Constructeur MCD</h1><div class="sub">Ch.5 — Entites, Associations, Cardinalites</div></div>
+  <div class="sb" id="score">— / 30</div>
+</div>
+
+<div class="main">
+
+<div class="card">
+  <div class="info">
+    <strong>Exercice :</strong> Construisez le MCD de SwissSound Studios etape par etape.<br>
+    Pour chaque association, choisissez les bonnes cardinalites Merise et identifiez les CIF.
+  </div>
+
+  <!-- PART 1: Identify entities -->
+  <h2>Partie 1 — Identifier les entites (6 pts)</h2>
+  <div class="exercise" id="ex1">
+    <div class="q">Parmi ces elements, lesquels sont des <strong>ENTITES</strong> (pas des attributs) ?</div>
+    <div class="options" id="entOpts"></div>
+    <div class="fb" id="fb1"></div>
+  </div>
+
+  <!-- PART 2: Cardinalities -->
+  <h2>Partie 2 — Cardinalites Merise (16 pts)</h2>
+  <div id="assocExercises"></div>
+
+  <!-- PART 3: CIF -->
+  <h2>Partie 3 — Identifier les CIF (8 pts)</h2>
+  <div class="exercise" id="ex3">
+    <div class="q">Pour chaque association 1:N, de quel cote migrera la <strong>cle etrangere</strong> lors du passage MCD→MLD ?<br>La CIF est le cote (0,1) ou (1,1).</div>
+    <div id="cifExercises"></div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-go" onclick="checkAll()">Verifier tout</button>
+    <button class="btn btn-sec" onclick="location.reload()">Recommencer</button>
+  </div>
+
+  <div id="resultArea"></div>
+</div>
+
+<a class="back" href="../../index.html">&larr; Retour au hub</a>
+</div>
+
+<script>
+// DATA
+const allItems = [
+  {name:"Artiste",isEntity:true},{name:"Album",isEntity:true},{name:"Genre",isEntity:true},
+  {name:"Salle",isEntity:true},{name:"Ingenieur",isEntity:true},{name:"Session",isEntity:true},
+  {name:"Facture",isEntity:true},{name:"Equipement",isEntity:true},
+  {name:"nom",isEntity:false},{name:"email",isEntity:false},{name:"tarif_horaire",isEntity:false},
+  {name:"date_sortie",isEntity:false},{name:"capacite",isEntity:false},{name:"statut",isEntity:false},
+];
+
+const associations = [
+  {e1:"Artiste",e2:"Album",verb:"enregistre",c1:"1,N",c2:"1,1",cif:"Album",
+   expl:"Un artiste enregistre 1 ou N albums. Un album est enregistre par 1 et 1 seul artiste."},
+  {e1:"Genre",e2:"Artiste",verb:"classe",c1:"0,N",c2:"0,N",cif:"table_assoc",
+   expl:"Un genre peut classer 0 ou N artistes. Un artiste peut avoir 0 ou N genres. → Table associative GENRE_ARTISTE."},
+  {e1:"Session",e2:"Artiste",verb:"implique",c1:"1,1",c2:"0,N",cif:"Session",
+   expl:"Une session implique 1 et 1 seul artiste. Un artiste peut avoir 0 ou N sessions."},
+  {e1:"Session",e2:"Salle",verb:"utilise",c1:"1,1",c2:"0,N",cif:"Session",
+   expl:"Une session utilise 1 et 1 seule salle. Une salle peut accueillir 0 ou N sessions."},
+  {e1:"Session",e2:"Ingenieur",verb:"assigne",c1:"1,1",c2:"0,N",cif:"Session",
+   expl:"Une session est assignee a 1 et 1 seul ingenieur. Un ingenieur peut avoir 0 ou N sessions."},
+  {e1:"Facture",e2:"Artiste",verb:"concerne",c1:"1,1",c2:"0,N",cif:"Facture",
+   expl:"Une facture concerne 1 et 1 seul artiste. Un artiste peut avoir 0 ou N factures."},
+  {e1:"Equipement",e2:"Salle",verb:"se_trouve",c1:"0,1",c2:"0,N",cif:"Equipement",
+   expl:"Un equipement se trouve dans 0 ou 1 salle. Une salle contient 0 ou N equipements."},
+  {e1:"Facture",e2:"Session",verb:"liee_a",c1:"0,1",c2:"0,1",cif:"Facture",
+   expl:"Une facture est liee a 0 ou 1 session. Une session a 0 ou 1 facture."},
+];
+
+const cardOptions = ["0,1","1,1","0,N","1,N"];
+let entSelections = {};
+let cardSelections = {};
+let cifSelections = {};
+
+// PART 1: Entity identification
+function renderEntities() {
+  const container = document.getElementById('entOpts');
+  const shuffled = [...allItems].sort(() => Math.random() - 0.5);
+  container.innerHTML = shuffled.map(item =>
+    `<div class="opt" data-name="${item.name}" onclick="toggleEnt(this)">${item.name}</div>`
+  ).join('');
+}
+
+function toggleEnt(el) {
+  el.classList.toggle('selected');
+  entSelections[el.dataset.name] = el.classList.contains('selected');
+}
+
+// PART 2: Cardinalities
+function renderAssociations() {
+  const container = document.getElementById('assocExercises');
+  container.innerHTML = associations.map((a, i) => `
+    <div class="exercise" id="assoc${i}">
+      <div class="assoc-row">
+        <div class="assoc-ent">${a.e1}</div>
+        <div class="assoc-card" id="card1_${i}">
+          ${cardOptions.map(c => `<div class="card-sel" data-i="${i}" data-side="1" data-val="${c}" onclick="selCard(this)">${c}</div>`).join('')}
+        </div>
+        <div class="assoc-verb">— ${a.verb} —</div>
+        <div class="assoc-card" id="card2_${i}">
+          ${cardOptions.map(c => `<div class="card-sel" data-i="${i}" data-side="2" data-val="${c}" onclick="selCard(this)">${c}</div>`).join('')}
+        </div>
+        <div class="assoc-ent">${a.e2}</div>
+      </div>
+      <div class="fb" id="fbAssoc${i}"></div>
+    </div>
+  `).join('');
+}
+
+function selCard(el) {
+  const i = el.dataset.i, side = el.dataset.side;
+  document.querySelectorAll(`#card${side}_${i} .card-sel`).forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  if (!cardSelections[i]) cardSelections[i] = {};
+  cardSelections[i][side] = el.dataset.val;
+}
+
+// PART 3: CIF
+function renderCIF() {
+  const container = document.getElementById('cifExercises');
+  const cifAssocs = associations.filter(a => a.cif !== 'table_assoc');
+  container.innerHTML = cifAssocs.map((a, i) => `
+    <div class="assoc-row" style="margin:.6rem 0">
+      <span style="font-size:.82rem;min-width:200px">${a.e1} — ${a.verb} — ${a.e2}</span>
+      <span style="font-size:.75rem;color:var(--muted)">FK dans :</span>
+      <div class="opt" data-ci="${i}" data-val="${a.e1}" onclick="selCIF(this)">${a.e1}</div>
+      <div class="opt" data-ci="${i}" data-val="${a.e2}" onclick="selCIF(this)">${a.e2}</div>
+      ${a.cif==='table_assoc'?'<div class="opt" data-ci="'+i+'" data-val="table_assoc" onclick="selCIF(this)">Table associative</div>':''}
+    </div>
+  `).join('');
+}
+
+function selCIF(el) {
+  const ci = el.dataset.ci;
+  document.querySelectorAll(`[data-ci="${ci}"]`).forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  cifSelections[ci] = el.dataset.val;
+}
+
+// CHECK ALL
+function checkAll() {
+  let score = 0;
+
+  // Part 1: Entities (6 pts)
+  let entCorrect = 0;
+  document.querySelectorAll('#entOpts .opt').forEach(el => {
+    const name = el.dataset.name;
+    const isEnt = allItems.find(i => i.name === name).isEntity;
+    const selected = el.classList.contains('selected');
+    el.classList.remove('selected');
+    if (isEnt && selected) { el.classList.add('correct'); entCorrect++; }
+    else if (!isEnt && selected) { el.classList.add('wrong'); }
+    else if (isEnt && !selected) { el.classList.add('wrong'); }
+    else { el.style.opacity = '.4'; }
+    el.onclick = null;
+  });
+  score += Math.round((entCorrect / allItems.filter(i => i.isEntity).length) * 6);
+  const fb1 = document.getElementById('fb1');
+  fb1.classList.add('show', entCorrect >= 6 ? 'ok' : 'ko');
+  fb1.textContent = `${entCorrect}/8 entites correctement identifiees.`;
+
+  // Part 2: Cardinalities (16 pts)
+  associations.forEach((a, i) => {
+    const sel = cardSelections[i] || {};
+    const c1ok = sel['1'] === a.c1;
+    const c2ok = sel['2'] === a.c2;
+
+    document.querySelectorAll(`#card1_${i} .card-sel`).forEach(el => {
+      el.classList.remove('selected');
+      if (el.dataset.val === a.c1) el.classList.add('correct');
+      else if (el.dataset.val === sel['1'] && !c1ok) el.classList.add('wrong');
+      el.onclick = null;
+    });
+    document.querySelectorAll(`#card2_${i} .card-sel`).forEach(el => {
+      el.classList.remove('selected');
+      if (el.dataset.val === a.c2) el.classList.add('correct');
+      else if (el.dataset.val === sel['2'] && !c2ok) el.classList.add('wrong');
+      el.onclick = null;
+    });
+
+    if (c1ok) score += 1;
+    if (c2ok) score += 1;
+
+    const fb = document.getElementById(`fbAssoc${i}`);
+    fb.classList.add('show', (c1ok && c2ok) ? 'ok' : 'ko');
+    fb.textContent = (c1ok && c2ok) ? `Correct ! ${a.expl}` : `Attendu : ${a.e1}(${a.c1}) — ${a.e2}(${a.c2}). ${a.expl}`;
+  });
+
+  // Part 3: CIF (8 pts)
+  const cifAssocs = associations.filter(a => a.cif !== 'table_assoc');
+  let cifCorrect = 0;
+  cifAssocs.forEach((a, i) => {
+    const sel = cifSelections[i];
+    document.querySelectorAll(`[data-ci="${i}"]`).forEach(el => {
+      el.classList.remove('selected');
+      if (el.dataset.val === a.cif) el.classList.add('correct');
+      else if (el.dataset.val === sel && sel !== a.cif) el.classList.add('wrong');
+      el.onclick = null;
+    });
+    if (sel === a.cif) { cifCorrect++; score += 1; }
+  });
+
+  const fb3 = document.getElementById('fb3');
+  fb3.classList.add('show', cifCorrect >= 5 ? 'ok' : 'ko');
+  fb3.textContent = `${cifCorrect}/${cifAssocs.length} CIF correctes. La FK migre toujours du cote (1,1) ou (0,1).`;
+
+  document.getElementById('score').textContent = `${score} / 30`;
+
+  const pct = Math.round((score / 30) * 100);
+  const res = document.getElementById('resultArea');
+  res.innerHTML = `<div class="result ${pct >= 60 ? 'pass' : 'fail'}"><h3>${pct}%</h3><p>Entites: ${entCorrect}/8 | Cardinalites: ${score - entCorrect - cifCorrect}/16 | CIF: ${cifCorrect}/${cifAssocs.length}</p></div>`;
+}
+
+// INIT
+renderEntities();
+renderAssociations();
+renderCIF();
+</script>
+</body>
+</html>
