@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Exercices Entreprise — Unit 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8fafc;--surface:#ffffff;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--lo1:#059669;--lo2:#2563eb;--accent:#ea580c;--code-bg:#1e293b}
+[data-theme="dark"]{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06);--code-bg:#0d1117}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:background .3s,color .3s}
+.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.header h1{font-size:1.1rem;font-weight:800}
+.header .sub{font-size:.72rem;color:var(--muted)}
+.toggle{width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:.3s}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:var(--accent);border-radius:50%;transition:.3s}
+[data-theme="dark"] .toggle::after{left:20px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.intro{text-align:center;margin-bottom:2rem}
+.intro h2{font-size:1.5rem;font-weight:800;margin-bottom:.3rem}
+.intro p{color:var(--muted);font-size:.88rem}
+.cas{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;transition:.2s}
+.cas:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.cas-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem}
+.cas h3{font-size:1.05rem;font-weight:700;color:var(--lo2)}
+.cas-badge{font-size:.65rem;font-weight:700;padding:.2rem .5rem;border-radius:4px;background:rgba(37,99,235,.1);color:var(--lo2)}
+.cas-desc{font-size:.85rem;color:var(--muted);margin-bottom:.8rem;line-height:1.6}
+.cas-tables{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:var(--code-bg);color:#93c5fd;padding:.8rem;border-radius:8px;margin-bottom:.8rem;line-height:1.8}
+.cas-tasks{font-size:.82rem;line-height:1.7}
+.cas-tasks li{margin-bottom:.3rem}
+.cas-tasks strong{color:var(--accent)}
+.tag{display:inline-block;padding:.12rem .4rem;border-radius:3px;font-size:.65rem;font-weight:600;margin-right:.3rem}
+.tag-p{background:rgba(5,150,105,.1);color:var(--lo1)}.tag-m{background:rgba(37,99,235,.1);color:var(--lo2)}.tag-d{background:rgba(147,51,234,.1);color:#9333ea}
+.back{display:inline-block;margin-top:1rem;color:var(--muted);font-size:.78rem;font-weight:600;text-decoration:none}
+</style></head><body>
+<div class="header">
+  <div><h1>Exercices Entreprise</h1><div class="sub">4 cas professionnels — max 6 tables</div></div>
+  <div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div>
+</div>
+<div class="main">
+<div class="intro">
+  <h2>4 cas concrets, contexte professionnel</h2>
+  <p>Chaque cas couvre DD → MCD → MLD → SQL. Inspirés de vrais besoins d'entreprise.</p>
+</div>
+
+<!-- CAS 1: Gestion de vélos (GESCOM simplifié) -->
+<div class="cas">
+  <div class="cas-header">
+    <h3>Cas 1 — VeloShop : Gestion commerciale de velos</h3>
+    <span class="cas-badge">5 tables</span>
+  </div>
+  <div class="cas-desc">
+    VeloShop est un magasin de velos a Lausanne. Il vend des articles (velos, accessoires) fournis par differents fournisseurs. Les clients passent des commandes contenant plusieurs articles avec des quantites. Chaque article appartient a une famille (VTT, Route, Urbain, Accessoire).
+  </div>
+  <div class="cas-tables">
+    FAMILLE(#nofam, libfam)<br>
+    FOURNISSEUR(#nofour, nomfour, villefour)<br>
+    ARTICLE(#noart, desart, prix, qtesto, →nofam, →nofour)<br>
+    CLIENT(#nocli, nomcli, prenomcli, villecli, cacli)<br>
+    COMMANDE(#nocde, datecde, →nocli)<br>
+    LIGNECDE(→#nocde, →#noart, qtecde)
+  </div>
+  <div class="cas-tasks">
+    <span class="tag tag-p">P1</span> <strong>Conception</strong>
+    <ol>
+      <li>Identifier les entites et attributs a partir du contexte</li>
+      <li>Dessiner le MCD avec cardinalites Merise</li>
+      <li>Identifier les CIF et transformer en MLD</li>
+    </ol>
+    <span class="tag tag-p">P2</span><span class="tag tag-m">M2</span> <strong>Developpement</strong>
+    <ol start="4">
+      <li>Ecrire le script CREATE TABLE (ordre FK correct)</li>
+      <li>Inserer 10 articles, 5 clients, 8 commandes avec lignes</li>
+      <li>Requetes : articles en rupture (qtesto = 0), CA par client, commandes du mois</li>
+      <li>JOIN : commandes avec nom client + detail articles</li>
+    </ol>
+    <span class="tag tag-m">M3</span><span class="tag tag-d">D2</span> <strong>Analyse</strong>
+    <ol start="8">
+      <li>Dashboard : top 5 articles vendus, CA total, nb commandes par mois</li>
+      <li>Evaluer : quelles ameliorations pour VeloShop ? (stock auto, fidelite client...)</li>
+    </ol>
+  </div>
+</div>
+
+<!-- CAS 2: Gestion d'interventions -->
+<div class="cas">
+  <div class="cas-header">
+    <h3>Cas 2 — TechRepair : Gestion d'interventions</h3>
+    <span class="cas-badge">5 tables</span>
+  </div>
+  <div class="cas-desc">
+    TechRepair est une societe de maintenance informatique a Geneve. Des techniciens interviennent chez des clients pour reparer du materiel. Chaque intervention est liee a un client, un technicien et un type de panne. On enregistre la duree et le statut (en cours, terminee, facturee).
+  </div>
+  <div class="cas-tables">
+    TECHNICIEN(#id_tech, nom, prenom, specialite, tarif_h)<br>
+    CLIENT(#id_client, raison_sociale, adresse, telephone, email)<br>
+    TYPE_PANNE(#id_panne, libelle, priorite)<br>
+    INTERVENTION(#id_interv, date_interv, duree_h, statut, →id_tech, →id_client, →id_panne)<br>
+    FACTURE_INTERV(#id_fact, date_fact, montant, statut_paie, →id_interv)
+  </div>
+  <div class="cas-tasks">
+    <span class="tag tag-p">P1</span> <strong>Conception</strong>
+    <ol>
+      <li>Dictionnaire des donnees (identifier les calculees : montant = duree × tarif)</li>
+      <li>MCD avec cardinalites + CIF</li>
+      <li>MLD textuel + verifier 3NF</li>
+    </ol>
+    <span class="tag tag-p">P2</span><span class="tag tag-p">P3</span> <strong>Developpement</strong>
+    <ol start="4">
+      <li>CREATE TABLE + contraintes (CHECK duree > 0, ENUM statut)</li>
+      <li>INSERT donnees realistes (8 techniciens, 15 clients, 30 interventions)</li>
+      <li>Requetes : interventions par technicien, pannes les plus frequentes, temps moyen par type</li>
+      <li>JOIN : interventions avec nom technicien + nom client + type panne</li>
+    </ol>
+    <span class="tag tag-m">M3</span> <strong>Analyse</strong>
+    <ol start="8">
+      <li>KPI : taux de resolution, CA par technicien, repartition des pannes</li>
+    </ol>
+  </div>
+</div>
+
+<!-- CAS 3: Réservation de salles -->
+<div class="cas">
+  <div class="cas-header">
+    <h3>Cas 3 — MeetingHub : Reservation de salles</h3>
+    <span class="cas-badge">4 tables</span>
+  </div>
+  <div class="cas-desc">
+    MeetingHub gere les salles de reunion d'un immeuble de bureaux a Berne. Les employes reservent des salles pour des creneaux horaires. Chaque salle a une capacite et un equipement (projecteur, visio, tableau blanc). Chaque employe appartient a un departement.
+  </div>
+  <div class="cas-tables">
+    DEPARTEMENT(#id_dept, nom_dept)<br>
+    EMPLOYE(#id_emp, nom, prenom, email, →id_dept)<br>
+    SALLE(#id_salle, nom_salle, capacite, equipement, etage)<br>
+    RESERVATION(#id_resa, date_resa, heure_debut, heure_fin, objet, →id_emp, →id_salle)
+  </div>
+  <div class="cas-tasks">
+    <span class="tag tag-p">P1</span><span class="tag tag-m">M1</span> <strong>Conception + normalisation</strong>
+    <ol>
+      <li>MCD complet (attention : verifier qu'une salle ne peut pas etre reservee 2 fois au meme creneau)</li>
+      <li>MLD + MPD avec types MySQL et CHECK (heure_fin > heure_debut)</li>
+      <li>Verifier 3NF : est-ce que nom_dept doit etre dans EMPLOYE ?</li>
+    </ol>
+    <span class="tag tag-p">P2</span><span class="tag tag-p">P3</span> <strong>Developpement</strong>
+    <ol start="4">
+      <li>Script complet + peuplement</li>
+      <li>Requete : salles disponibles a une date/heure donnee</li>
+      <li>Taux d'occupation par salle (nb heures reservees / nb heures ouvrables)</li>
+    </ol>
+  </div>
+</div>
+
+<!-- CAS 4: Gestion de tickets support -->
+<div class="cas">
+  <div class="cas-header">
+    <h3>Cas 4 — HelpDesk : Gestion de tickets support</h3>
+    <span class="cas-badge">6 tables</span>
+  </div>
+  <div class="cas-desc">
+    HelpDesk est le systeme de support IT d'une entreprise a Zurich. Les utilisateurs ouvrent des tickets classes par categorie (reseau, logiciel, materiel, acces). Chaque ticket est assigne a un agent du support. Les agents ont un niveau (N1, N2, N3). On suit l'historique des actions sur chaque ticket (commentaires, changements de statut).
+  </div>
+  <div class="cas-tables">
+    CATEGORIE(#id_cat, nom_cat, description)<br>
+    AGENT(#id_agent, nom, prenom, email, niveau)<br>
+    UTILISATEUR(#id_user, nom, prenom, email, departement)<br>
+    TICKET(#id_ticket, titre, description, priorite, statut, date_creation, date_resolution, →id_user, →id_agent, →id_cat)<br>
+    ACTION_TICKET(#id_action, date_action, type_action, commentaire, →id_ticket, →id_agent)<br>
+    SLA(#id_sla, →id_cat, priorite, delai_max_h)
+  </div>
+  <div class="cas-tasks">
+    <span class="tag tag-p">P1</span><span class="tag tag-m">M1</span><span class="tag tag-d">D1</span> <strong>Conception complete</strong>
+    <ol>
+      <li>DD complet + matrice des DF</li>
+      <li>MCD avec 6 entites + cardinalites + CIF</li>
+      <li>MLD + normalisation 3NF</li>
+      <li>MPD avec types, contraintes, ENUM pour statut/priorite/niveau</li>
+      <li>D1 : evaluer le design (forces/faiblesses/ameliorations)</li>
+    </ol>
+    <span class="tag tag-p">P2</span><span class="tag tag-p">P3</span><span class="tag tag-m">M2</span><span class="tag tag-m">M3</span><span class="tag tag-d">D2</span> <strong>Developpement complet</strong>
+    <ol start="6">
+      <li>Script DDL + DML + 20 tickets avec actions</li>
+      <li>Vue : tickets ouverts avec info agent + utilisateur + categorie</li>
+      <li>Procedure : assigner_ticket(id_ticket, id_agent)</li>
+      <li>Requetes : temps moyen de resolution par categorie, tickets depassant le SLA</li>
+      <li>Securite : 3 roles (admin, agent, utilisateur) avec droits differencies</li>
+      <li>D2 : evaluer l'efficacite + proposer des ameliorations</li>
+    </ol>
+  </div>
+</div>
+
+</div>
+<a class="back" href="index.html">&larr; Retour au hub</a>
+</body></html>
