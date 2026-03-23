@@ -7,84 +7,121 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--dim:#334155;--border:rgba(255,255,255,.06);--lo1:#10b981;--accent:#f97316;--success:#10b981;--error:#ef4444;--partial:#f59e0b}
+:root{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--dim:#334155;--border:rgba(255,255,255,.06);--lo1:#10b981;--accent:#f97316;--success:#10b981;--error:#ef4444;--partial:#f59e0b;--code-bg:#0d1117}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--surface);padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem}
-.header h1{font-size:1.2rem;font-weight:800}
-.header .sub{font-size:.75rem;color:var(--muted)}
-.score-bar{display:flex;gap:.8rem}
-.sb{background:rgba(255,255,255,.06);padding:.25rem .7rem;border-radius:6px;text-align:center}
-.sb .l{font-size:.6rem;color:var(--muted);text-transform:uppercase}.sb .v{font-size:1.1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
-.container{max-width:1000px;margin:0 auto;padding:1.5rem}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem}
-.intro{text-align:center;margin-bottom:1.5rem}
-.intro h2{font-size:1.4rem;font-weight:800;margin-bottom:.5rem}
-.intro p{color:var(--muted);font-size:.88rem;max-width:650px;margin:0 auto;line-height:1.6}
-.legend{display:flex;gap:1rem;justify-content:center;margin:1rem 0;flex-wrap:wrap;font-size:.78rem}
-.legend span{display:flex;align-items:center;gap:.3rem}
-.dot{width:12px;height:12px;border-radius:3px}
-.rules{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:8px;padding:1rem;margin:1rem 0;font-size:.82rem;color:var(--lo1);line-height:1.7}
-.matrix-wrap{overflow-x:auto;margin:1rem 0}
-table{border-collapse:collapse;width:auto;margin:0 auto}
-th,td{border:1px solid rgba(255,255,255,.1);padding:0;text-align:center;width:42px;height:42px;font-size:.7rem}
-th{background:var(--surface);font-weight:700;font-size:.65rem;color:var(--lo1);padding:.3rem .2rem}
-th.row-h{text-align:right;padding-right:.4rem;min-width:100px;color:var(--text);font-weight:600}
-td.diag{background:rgba(255,255,255,.02);cursor:default}
-td.cell{cursor:pointer;transition:all .15s;font-weight:700;font-size:.9rem;font-family:'JetBrains Mono',monospace}
-td.cell:hover{background:rgba(255,255,255,.05)}
-td.cell.selected{background:rgba(16,185,129,.15);color:var(--lo1)}
-td.cell.correct{background:rgba(16,185,129,.2);color:var(--success)}
-td.cell.wrong{background:rgba(239,68,68,.15);color:var(--error)}
-td.cell.missed{background:rgba(245,158,11,.15);color:var(--partial)}
-.btn{padding:.6rem 1.5rem;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s}
-.btn-go{background:linear-gradient(135deg,var(--accent),#fb923c);color:#fff;box-shadow:0 3px 12px rgba(249,115,22,.25)}
-.btn-go:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(249,115,22,.35)}
-.btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--border)}
-.actions{display:flex;gap:.8rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
-.result{margin-top:1rem;padding:1rem;border-radius:10px;text-align:center}
-.result.pass{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
-.result.fail{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15)}
-.result h3{font-size:1.3rem;margin-bottom:.3rem}
-.result p{font-size:.85rem;color:var(--muted)}
-.source-tag{display:inline-block;padding:.15rem .4rem;border-radius:4px;font-size:.65rem;font-weight:700;background:rgba(16,185,129,.12);color:var(--lo1);margin:.2rem}
-.back{display:inline-block;margin-top:1rem;color:var(--muted);font-size:.8rem;font-weight:600}
+.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem}
+.header h1{font-size:1.1rem;font-weight:800}.header .sub{font-size:.72rem;color:var(--muted)}
+.sb{display:flex;gap:.6rem}
+.sbi{background:rgba(255,255,255,.06);padding:.2rem .6rem;border-radius:5px;text-align:center}
+.sbi .l{font-size:.55rem;color:var(--muted);text-transform:uppercase}.sbi .v{font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.main{max-width:1100px;margin:0 auto;padding:1.2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:1.2rem;margin-bottom:.8rem}
+.context{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);border-radius:8px;padding:.8rem 1rem;font-size:.78rem;color:var(--lo1);line-height:1.7;margin-bottom:1rem}
+.context h3{font-size:.88rem;font-weight:700;margin-bottom:.4rem;color:var(--text)}
+.context code{background:var(--code-bg);padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.72rem}
+.rules{background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.12);border-radius:8px;padding:.7rem 1rem;font-size:.76rem;color:var(--accent);line-height:1.6;margin-bottom:1rem}
+.matrix-wrap{overflow-x:auto;margin:.8rem 0;padding-bottom:.5rem}
+table{border-collapse:collapse;margin:0 auto}
+th,td{border:1px solid rgba(255,255,255,.08);text-align:center;font-size:.68rem}
+th{background:var(--surface);font-weight:700;padding:.35rem .25rem;min-width:38px}
+th.col-h{color:var(--lo1);writing-mode:vertical-rl;text-orientation:mixed;height:90px;white-space:nowrap;letter-spacing:.02em}
+th.row-h{text-align:right;padding:.25rem .5rem .25rem .3rem;min-width:110px;color:var(--text);font-weight:600;white-space:nowrap;background:var(--surface)}
+th.corner{background:var(--surface);min-width:110px}
+td.diag{background:rgba(255,255,255,.015);cursor:default;color:var(--dim);font-size:.6rem}
+td.cell{cursor:pointer;transition:all .12s;font-weight:700;font-size:.85rem;font-family:'JetBrains Mono',monospace;width:38px;height:38px;color:var(--dim)}
+td.cell:hover{background:rgba(255,255,255,.04)}
+td.cell.on{background:rgba(16,185,129,.12);color:var(--lo1)}
+td.cell.correct{background:rgba(16,185,129,.18);color:var(--success)}
+td.cell.wrong{background:rgba(239,68,68,.12);color:var(--error)}
+td.cell.missed{background:rgba(245,158,11,.12);color:var(--partial)}
+.btn{padding:.5rem 1.2rem;border:none;border-radius:7px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-go{background:linear-gradient(135deg,var(--accent),#fb923c);color:#fff;box-shadow:0 2px 10px rgba(249,115,22,.2)}
+.btn-go:hover{transform:translateY(-1px)}.btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+.add-row{display:flex;gap:.4rem;align-items:center;margin-top:.8rem;flex-wrap:wrap}
+.add-input{background:var(--code-bg);border:1px solid var(--border);border-radius:5px;padding:.3rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text);width:160px}
+.add-input:focus{outline:none;border-color:var(--lo1)}
+.result{padding:.8rem;border-radius:9px;text-align:center;margin-top:.8rem}
+.result.pass{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15)}
+.result.fail{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.1)}
+.result h3{font-size:1.2rem;margin-bottom:.2rem}
+.result p{font-size:.8rem;color:var(--muted)}
+.src-tag{display:inline-block;padding:.12rem .4rem;border-radius:4px;font-size:.65rem;font-weight:700;background:rgba(16,185,129,.1);color:var(--lo1);margin:.15rem}
+.legend{display:flex;gap:.8rem;justify-content:center;margin:.6rem 0;flex-wrap:wrap;font-size:.72rem}
+.legend span{display:flex;align-items:center;gap:.25rem}
+.dot{width:10px;height:10px;border-radius:2px}
+.back{display:inline-block;margin-top:.8rem;color:var(--muted);font-size:.75rem;font-weight:600}
+.hint-list{margin-top:.6rem;font-size:.76rem;color:var(--muted);line-height:1.8}
+.hint-list li{list-style:none;padding:.1rem 0}
+.hint-list li::before{content:"→ ";color:var(--lo1);font-weight:700}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div><h1>Matrice des Dependances Fonctionnelles</h1><div class="sub">Ch.4 — SwissSound Studios</div></div>
-  <div class="score-bar"><div class="sb"><div class="l">Score</div><div class="v" id="score">—</div></div></div>
+  <div class="sb"><div class="sbi"><div class="l">Score</div><div class="v" id="score">—</div></div></div>
 </div>
 
-<div class="container">
+<div class="main">
 
-<div class="card" id="introCard">
-  <div class="intro">
-    <h2>Remplissez la matrice des DF</h2>
-    <p>Cliquez sur les cases pour indiquer les dependances fonctionnelles entre les donnees de SwissSound Studios. Si A determine B, cliquez la case (ligne A, colonne B).</p>
+<!-- CONTEXT -->
+<div class="card">
+  <div class="context">
+    <h3>Contexte : SwissSound Studios</h3>
+    SwissSound est un studio d'enregistrement en Suisse romande. Apres l'interview du directeur et la construction du dictionnaire des donnees, voici les donnees identifiees :<br><br>
+    <code>id_artiste</code> — identifiant unique de l'artiste<br>
+    <code>nom_artiste</code> — nom de famille ou nom de scene<br>
+    <code>email_artiste</code> — email de contact (unique par artiste)<br>
+    <code>id_album</code> — identifiant unique de l'album<br>
+    <code>titre_album</code> — titre de l'album<br>
+    <code>prix_album</code> — prix de vente en CHF<br>
+    <code>id_salle</code> — identifiant unique de la salle<br>
+    <code>nom_salle</code> — nom de la salle (ex: Studio Pro A)<br>
+    <code>tarif_salle</code> — tarif horaire en CHF<br>
+    <code>id_session</code> — identifiant unique de la session d'enregistrement<br>
+    <code>id_ingenieur</code> — identifiant unique de l'ingenieur du son<br><br>
+    <strong>Regles de gestion :</strong> Un album est enregistre par un seul artiste. Une session se deroule dans une seule salle, avec un seul artiste et un seul ingenieur. Deux artistes peuvent avoir le meme nom (homonymes).
   </div>
+
   <div class="rules">
-    <strong>Rappel :</strong> A &rarr; B signifie « connaitre A suffit pour determiner B de facon unique ».<br>
-    Exemple : <code>id_artiste &rarr; nom_artiste</code> car un id identifie un seul artiste.<br>
-    Contre-exemple : <code>nom_artiste &rarr; id_artiste</code> est FAUX car il peut y avoir des homonymes.<br>
-    Les <strong>sources</strong> (lignes avec des 1 mais colonne sans 1) deviendront les futures cles primaires.
+    <strong>Comment remplir :</strong> Pour chaque case, demandez-vous : « Si je connais la donnee en <strong>ligne</strong>, est-ce que je peux determiner la donnee en <strong>colonne</strong> de facon unique ? »<br>
+    Si oui → cliquez pour mettre <strong>1</strong>. Sinon, laissez vide.<br>
+    Exemple : ligne <code>id_artiste</code>, colonne <code>nom_artiste</code> → un id determine un seul nom → <strong>1</strong>.
   </div>
 
   <div class="matrix-wrap">
     <table id="matrix"></table>
   </div>
 
-  <div class="legend">
-    <span><div class="dot" style="background:var(--lo1)"></div> Selectionnee (DF)</span>
-    <span><div class="dot" style="background:var(--surface);border:1px solid var(--border)"></div> Vide (pas de DF)</span>
-    <span><div class="dot" style="background:rgba(255,255,255,.02)"></div> Diagonale (ignore)</span>
+  <div class="legend" id="legend">
+    <span><div class="dot" style="background:var(--lo1)"></div> DF selectionnee (1)</span>
+    <span><div class="dot" style="background:var(--surface);border:1px solid var(--dim)"></div> Pas de DF (vide)</span>
+    <span><div class="dot" style="background:rgba(255,255,255,.015)"></div> Diagonale</span>
+  </div>
+
+  <!-- ADD CUSTOM ROW -->
+  <div class="add-row">
+    <span style="font-size:.75rem;color:var(--muted)">Ajouter une donnee :</span>
+    <input class="add-input" id="newDataInput" placeholder="ex: nom_ingenieur" maxlength="30">
+    <button class="btn btn-sec" onclick="addCustomData()" style="padding:.3rem .7rem;font-size:.75rem">+ Ajouter</button>
   </div>
 
   <div class="actions">
     <button class="btn btn-go" onclick="checkMatrix()">Verifier ma matrice</button>
-    <button class="btn btn-sec" onclick="resetMatrix()">Recommencer</button>
-    <button class="btn btn-sec" onclick="showHint()">Indice</button>
+    <button class="btn btn-sec" onclick="resetAll()">Recommencer</button>
+    <button class="btn btn-sec" onclick="toggleHints()">Indices</button>
+  </div>
+
+  <div id="hints" style="display:none">
+    <ul class="hint-list">
+      <li><code>id_artiste</code> determine <code>nom_artiste</code> et <code>email_artiste</code> (un id = un seul artiste)</li>
+      <li><code>nom_artiste</code> ne determine RIEN (homonymes possibles)</li>
+      <li><code>id_album</code> determine <code>titre_album</code>, <code>prix_album</code> et <code>id_artiste</code> (un album = un artiste)</li>
+      <li><code>id_salle</code> determine <code>nom_salle</code> et <code>tarif_salle</code></li>
+      <li><code>id_session</code> determine <code>id_artiste</code>, <code>id_salle</code> et <code>id_ingenieur</code> (une session = 1 artiste + 1 salle + 1 ingenieur)</li>
+      <li>Les <strong>sources</strong> sont les donnees qui ne sont determinees par aucune autre (pas de 1 dans leur colonne)</li>
+    </ul>
   </div>
 
   <div id="resultArea"></div>
@@ -94,150 +131,205 @@ td.cell.missed{background:rgba(245,158,11,.15);color:var(--partial)}
 </div>
 
 <script>
-// SwissSound DF data — simplified for student exercise (10 key data items)
-const data = [
-  "id_artiste", "nom_art", "email_art", "id_album", "titre_alb",
-  "prix_alb", "id_salle", "nom_salle", "tarif_salle", "id_session"
+// Initial data — students can add more
+let data = [
+  "id_artiste", "nom_artiste", "email_artiste",
+  "id_album", "titre_album", "prix_album",
+  "id_salle", "nom_salle", "tarif_salle",
+  "id_session", "id_ingenieur"
 ];
 
-// Expected DFs: matrix[row][col] = 1 if data[row] → data[col]
-const expected = [
-  //  id_a nom  email id_al titre prix id_s n_sal tarif id_se
-  [  0,   1,   1,    0,    0,    0,   0,   0,    0,    0  ], // id_artiste → nom, email
-  [  0,   0,   0,    0,    0,    0,   0,   0,    0,    0  ], // nom → rien (homonymes)
-  [  1,   0,   0,    0,    0,    0,   0,   0,    0,    0  ], // email → id_artiste (unique)
-  [  1,   0,   0,    0,    1,    1,   0,   0,    0,    0  ], // id_album → id_artiste, titre, prix
-  [  0,   0,   0,    0,    0,    0,   0,   0,    0,    0  ], // titre → rien (doublons possibles)
-  [  0,   0,   0,    0,    0,    0,   0,   0,    0,    0  ], // prix → rien
-  [  0,   0,   0,    0,    0,    0,   0,   1,    1,    0  ], // id_salle → nom_salle, tarif
-  [  0,   0,   0,    0,    0,    0,   0,   0,    0,    0  ], // nom_salle → rien (suppose non unique)
-  [  0,   0,   0,    0,    0,    0,   0,   0,    0,    0  ], // tarif → rien
-  [  1,   0,   0,    0,    0,    0,   1,   0,    0,    0  ], // id_session → id_artiste, id_salle
-];
+// Expected DF matrix: expected[row][col] = 1 means data[row] → data[col]
+// Row = DETERMINANT (ce qu'on connait), Col = DETERMINE (ce qu'on trouve)
+const baseExpected = {
+  // id_artiste → nom_artiste, email_artiste
+  "id_artiste|nom_artiste": 1,
+  "id_artiste|email_artiste": 1,
+  // id_album → titre_album, prix_album, id_artiste
+  "id_album|titre_album": 1,
+  "id_album|prix_album": 1,
+  "id_album|id_artiste": 1,
+  // id_salle → nom_salle, tarif_salle
+  "id_salle|nom_salle": 1,
+  "id_salle|tarif_salle": 1,
+  // id_session → id_artiste, id_salle, id_ingenieur
+  "id_session|id_artiste": 1,
+  "id_session|id_salle": 1,
+  "id_session|id_ingenieur": 1,
+};
 
-let student = data.map(() => data.map(() => 0));
+// Also accept these as bonus (not penalized if missing, not penalized if present)
+const bonusAccepted = {
+  "email_artiste|id_artiste": 1,  // email UNIQUE = bijection, mathematically correct
+  "nom_salle|id_salle": 1,       // if student considers nom_salle UNIQUE
+};
+
+let student = {}; // "row|col" → 1
 let checked = false;
-let hintCount = 0;
+let hintsVisible = false;
+
+function getExpected(r, c) {
+  const key = `${data[r]}|${data[c]}`;
+  return baseExpected[key] || 0;
+}
+
+function isBonus(r, c) {
+  const key = `${data[r]}|${data[c]}`;
+  return bonusAccepted[key] || 0;
+}
 
 function buildMatrix() {
   const table = document.getElementById('matrix');
-  let html = '<tr><th></th>';
-  data.forEach(d => { html += `<th>${d.replace('_','\n')}</th>`; });
+  const n = data.length;
+
+  // Header row with vertical column names
+  let html = '<tr><th class="corner">Ligne \\ Colonne</th>';
+  for (let c = 0; c < n; c++) {
+    html += `<th class="col-h">${data[c]}</th>`;
+  }
   html += '</tr>';
 
-  data.forEach((rowD, r) => {
-    html += `<tr><th class="row-h">${rowD}</th>`;
-    data.forEach((colD, c) => {
+  // Data rows
+  for (let r = 0; r < n; r++) {
+    html += `<tr><th class="row-h">${data[r]}</th>`;
+    for (let c = 0; c < n; c++) {
       if (r === c) {
-        html += `<td class="diag">—</td>`;
+        html += '<td class="diag">x</td>';
       } else {
-        const sel = student[r][c] ? ' selected' : '';
-        html += `<td class="cell${sel}" data-r="${r}" data-c="${c}" onclick="toggle(${r},${c})">${student[r][c] ? '1' : ''}</td>`;
+        const key = `${r}|${c}`;
+        const isOn = student[key] ? true : false;
+        const cls = checked ? '' : (isOn ? ' on' : '');
+        const text = isOn ? '1' : '';
+        html += `<td class="cell${cls}" data-r="${r}" data-c="${c}" id="c${r}_${c}" onclick="toggle(${r},${c})">${text}</td>`;
       }
-    });
+    }
     html += '</tr>';
-  });
+  }
+
   table.innerHTML = html;
 }
 
 function toggle(r, c) {
   if (checked) return;
-  student[r][c] = student[r][c] ? 0 : 1;
+  const key = `${r}|${c}`;
+  student[key] = student[key] ? 0 : 1;
+  buildMatrix();
+}
+
+function addCustomData() {
+  const input = document.getElementById('newDataInput');
+  const name = input.value.trim().toLowerCase().replace(/\s+/g, '_');
+  if (!name || data.includes(name)) {
+    input.value = '';
+    return;
+  }
+  data.push(name);
+  input.value = '';
   buildMatrix();
 }
 
 function checkMatrix() {
   checked = true;
-  let correct = 0, wrong = 0, missed = 0, total = 0;
+  const n = data.length;
+  let correct = 0, wrong = 0, missed = 0;
+  let totalExpected = Object.keys(baseExpected).length;
 
-  data.forEach((_, r) => {
-    data.forEach((_, c) => {
-      if (r === c) return;
-      total++;
-      if (expected[r][c] === 1 && student[r][c] === 1) correct++;
-      else if (expected[r][c] === 0 && student[r][c] === 1) wrong++;
-      else if (expected[r][c] === 1 && student[r][c] === 0) missed++;
-    });
-  });
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      if (r === c) continue;
+      const key = `${r}|${c}`;
+      const exp = getExpected(r, c);
+      const stu = student[key] || 0;
+      const bonus = isBonus(r, c);
+      const cell = document.getElementById(`c${r}_${c}`);
+      if (!cell) continue;
 
-  // Recolor cells
-  const cells = document.querySelectorAll('td.cell');
-  cells.forEach(cell => {
-    const r = +cell.dataset.r, c = +cell.dataset.c;
-    cell.classList.remove('selected');
-    if (expected[r][c] === 1 && student[r][c] === 1) cell.classList.add('correct');
-    else if (expected[r][c] === 0 && student[r][c] === 1) cell.classList.add('wrong');
-    else if (expected[r][c] === 1 && student[r][c] === 0) cell.classList.add('missed');
-    cell.textContent = expected[r][c] === 1 ? '1' : (student[r][c] === 1 ? '0' : '');
-    cell.onclick = null;
-  });
+      cell.onclick = null;
+      cell.classList.remove('on');
 
-  const totalDF = expected.flat().filter(v => v === 1).length;
-  const pct = Math.round((correct / totalDF) * 100);
+      if (exp === 1 && stu === 1) {
+        cell.classList.add('correct');
+        cell.textContent = '1';
+        correct++;
+      } else if (exp === 1 && stu === 0) {
+        cell.classList.add('missed');
+        cell.textContent = '1';
+        missed++;
+      } else if (exp === 0 && stu === 1 && bonus) {
+        // Bonus: accepted, not penalized
+        cell.classList.add('correct');
+        cell.textContent = '1';
+        correct++; // bonus point
+      } else if (exp === 0 && stu === 1) {
+        cell.classList.add('wrong');
+        cell.textContent = '0';
+        wrong++;
+      } else {
+        cell.textContent = '';
+        cell.style.opacity = '.3';
+      }
+    }
+  }
+
+  const pct = Math.round((correct / totalExpected) * 100);
   document.getElementById('score').textContent = pct + '%';
 
-  // Find sources
-  const sources = data.filter((_, i) => {
-    const colHasOne = data.some((_, r) => r !== i && expected[r][i] === 1);
-    const rowHasOne = data.some((_, c) => c !== i && expected[i][c] === 1);
-    return !colHasOne && rowHasOne;
+  // Find sources: columns with NO 1 in expected (except bonus)
+  const sources = data.filter((d, ci) => {
+    for (let ri = 0; ri < data.length; ri++) {
+      if (ri === ci) continue;
+      if (getExpected(ri, ci)) return false;
+    }
+    // Also check if this row HAS any 1 (it determines something)
+    for (let ci2 = 0; ci2 < data.length; ci2++) {
+      if (ci2 === ci) continue;
+      if (getExpected(ci, ci2)) return true;
+    }
+    return false;
   });
 
-  const resEl = document.getElementById('resultArea');
+  // Update legend
+  document.getElementById('legend').innerHTML = `
+    <span><div class="dot" style="background:var(--success)"></div> DF correcte</span>
+    <span><div class="dot" style="background:var(--error)"></div> Fausse</span>
+    <span><div class="dot" style="background:var(--partial)"></div> Manquee</span>
+  `;
+
   const pass = pct >= 70;
-  resEl.innerHTML = `
+  document.getElementById('resultArea').innerHTML = `
     <div class="result ${pass ? 'pass' : 'fail'}">
-      <h3>${pct}% — ${pass ? 'Bravo !' : 'A retravailler'}</h3>
-      <p>${correct} DF correctes, ${wrong} fausses, ${missed} manquees (sur ${totalDF} attendues)</p>
-      <div style="margin-top:.8rem">
-        <strong>Sources identifiees (futures PK) :</strong><br>
-        ${sources.map(s => `<span class="source-tag">${s}</span>`).join(' ')}
+      <h3>${pct}% — ${pass ? 'Bien joue !' : 'A retravailler'}</h3>
+      <p>${correct} correctes, ${wrong} fausses, ${missed} manquees (sur ${totalExpected} attendues)</p>
+      <div style="margin-top:.6rem">
+        <strong>Sources identifiees (futures cles primaires) :</strong><br>
+        ${sources.map(s => `<span class="src-tag">${s}</span>`).join(' ')}
       </div>
-      <div style="margin-top:.5rem;font-size:.78rem;color:var(--muted)">
-        Les sources sont les donnees qui determinent d'autres mais ne sont determinees par aucune.<br>
-        Elles deviendront les cles primaires des entites dans le MCD.
+      <div style="margin-top:.4rem;font-size:.72rem;color:var(--muted)">
+        Les sources ne sont determinees par aucune autre donnee.<br>
+        Chaque source deviendra l'identifiant (PK) d'une entite dans le MCD.
       </div>
     </div>
   `;
-
-  // Update legend
-  document.querySelector('.legend').innerHTML = `
-    <span><div class="dot" style="background:var(--success)"></div> DF correcte</span>
-    <span><div class="dot" style="background:var(--error)"></div> Fausse (pas de DF)</span>
-    <span><div class="dot" style="background:var(--partial)"></div> Manquee</span>
-  `;
 }
 
-function resetMatrix() {
-  student = data.map(() => data.map(() => 0));
+function resetAll() {
+  student = {};
   checked = false;
-  hintCount = 0;
   document.getElementById('resultArea').innerHTML = '';
   document.getElementById('score').textContent = '—';
-  document.querySelector('.legend').innerHTML = `
-    <span><div class="dot" style="background:var(--lo1)"></div> Selectionnee (DF)</span>
-    <span><div class="dot" style="background:var(--surface);border:1px solid var(--border)"></div> Vide (pas de DF)</span>
-    <span><div class="dot" style="background:rgba(255,255,255,.02)"></div> Diagonale (ignore)</span>
+  document.getElementById('legend').innerHTML = `
+    <span><div class="dot" style="background:var(--lo1)"></div> DF selectionnee (1)</span>
+    <span><div class="dot" style="background:var(--surface);border:1px solid var(--dim)"></div> Pas de DF (vide)</span>
+    <span><div class="dot" style="background:rgba(255,255,255,.015)"></div> Diagonale</span>
   `;
+  // Reset to base data (remove custom additions)
+  data = ["id_artiste","nom_artiste","email_artiste","id_album","titre_album","prix_album","id_salle","nom_salle","tarif_salle","id_session","id_ingenieur"];
   buildMatrix();
 }
 
-function showHint() {
-  const hints = [
-    "id_artiste determine nom_art et email_art (un id = un seul artiste).",
-    "id_album determine titre_alb, prix_alb ET id_artiste (un album = un artiste).",
-    "id_salle determine nom_salle et tarif_salle.",
-    "id_session determine id_artiste et id_salle (une session = un artiste + une salle).",
-    "email_art determine id_artiste (email unique, bijection).",
-    "nom_art ne determine RIEN car homonymes possibles.",
-    "Les SOURCES sont : id_artiste, id_album, id_salle, id_session (pas de 1 dans leur colonne sauf email).",
-  ];
-  if (hintCount < hints.length) {
-    alert("Indice " + (hintCount + 1) + " : " + hints[hintCount]);
-    hintCount++;
-  } else {
-    alert("Plus d'indices disponibles !");
-  }
+function toggleHints() {
+  hintsVisible = !hintsVisible;
+  document.getElementById('hints').style.display = hintsVisible ? 'block' : 'none';
 }
 
 buildMatrix();
