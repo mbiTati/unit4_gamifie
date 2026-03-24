@@ -1,140 +1,366 @@
 <!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Exercices SQL — Cas GESCOM</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exercices SQL — Partie 1 — GESCOM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--lo2:#2563eb;--accent:#ea580c;--success:#059669;--error:#dc2626;--code-bg:#1e293b}
-[data-theme="dark"]{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06);--code-bg:#0d1117}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
-.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+:root,[data-theme="dark"]{--bg:#0f172a;--surface:#1e293b;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;--accent:#3b82f6;--lo2:#3b82f6;--success:#10b981;--error:#ef4444;--code-bg:#0f172a;--section-bg:#1a2332}
+[data-theme="light"]{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--accent:#2563eb;--lo2:#2563eb;--success:#059669;--error:#dc2626;--code-bg:#f1f5f9;--section-bg:#f0f4f8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .header h1{font-size:1.05rem;font-weight:800}.sub{font-size:.7rem;color:var(--muted)}
 .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:.3s}
-[data-theme="dark"] .toggle::after{left:18px}
-.main{max-width:900px;margin:0 auto;padding:1.2rem}
-.progress{display:flex;gap:.15rem;margin-bottom:1rem;flex-wrap:wrap}
-.prog-dot{width:20px;height:6px;border-radius:3px;background:var(--border);transition:.3s}
-.prog-dot.done{background:var(--success)}.prog-dot.fail{background:var(--error)}.prog-dot.cur{background:var(--lo2)}
-.ex{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:.8rem;transition:.2s}
-.ex-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
-.ex-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;background:var(--lo2);color:#fff;padding:.15rem .45rem;border-radius:4px}
-.ex-cat{font-size:.65rem;font-weight:600;color:var(--muted);padding:.12rem .35rem;border:1px solid var(--border);border-radius:3px}
-.ex-q{font-size:.88rem;font-weight:600;margin-bottom:.5rem;line-height:1.5}
-.ex-q code{background:var(--code-bg);color:#93c5fd;padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.8rem}
-.editor{width:100%;min-height:70px;background:var(--code-bg);color:#d4d4d4;border:1px solid var(--border);border-radius:6px;padding:.6rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;resize:vertical;line-height:1.5}
-.editor:focus{outline:none;border-color:var(--lo2)}
-.actions{display:flex;gap:.3rem;margin:.5rem 0}
-.btn{padding:.35rem .8rem;border:none;border-radius:5px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s}
-.btn-run{background:var(--lo2);color:#fff}.btn-run:hover{background:#1d4ed8}
-.btn-hint{background:var(--surface);color:var(--muted);border:1px solid var(--border)}.btn-hint:hover{color:var(--lo2)}
-.btn-sol{background:var(--surface);color:var(--accent);border:1px solid var(--border)}
-.result{overflow-x:auto;margin-top:.4rem}
-.sql-table{border-collapse:collapse;width:100%;font-size:.72rem;font-family:'JetBrains Mono',monospace}
-.sql-table th{background:var(--surface);color:var(--lo2);padding:.3rem .4rem;text-align:left;border:1px solid var(--border);font-weight:600;white-space:nowrap}
-.sql-table td{padding:.25rem .4rem;border:1px solid var(--border);white-space:nowrap}
-.sql-table tr:nth-child(even){background:rgba(0,0,0,.02)}
-[data-theme="dark"] .sql-table tr:nth-child(even){background:rgba(255,255,255,.02)}
-.err{color:var(--error);font-size:.78rem;padding:.4rem;background:rgba(220,38,38,.05);border-radius:5px;margin-top:.3rem;font-family:'JetBrains Mono',monospace}
-.ok-msg{color:var(--success);font-size:.78rem;padding:.4rem}
-.row-count{font-size:.68rem;color:var(--muted);margin-top:.2rem}
-.hint-box{font-size:.78rem;color:var(--lo2);background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.1);border-radius:5px;padding:.4rem .6rem;margin-top:.3rem;display:none}
-.hint-box.show{display:block}
-.sol-box{font-size:.78rem;color:var(--accent);background:rgba(234,88,12,.05);border:1px solid rgba(234,88,12,.1);border-radius:5px;padding:.4rem .6rem;margin-top:.3rem;display:none;font-family:'JetBrains Mono',monospace;white-space:pre-wrap}
-.sol-box.show{display:block}
-.score-bar{display:flex;gap:.5rem;align-items:center}
-.score-bar .v{font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
-.back{display:inline-block;margin-top:.8rem;color:var(--muted);font-size:.75rem;font-weight:600;text-decoration:none}
-#loading{text-align:center;padding:3rem;color:var(--muted)}
-</style></head><body>
+[data-theme="light"] .toggle::after{left:18px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.progress{background:var(--border);border-radius:8px;height:8px;margin:1rem 0}
+.progress-bar{background:linear-gradient(90deg,var(--accent),var(--success));height:100%;border-radius:8px;transition:width .5s}
+.stats{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem 1rem;text-align:center}
+.stat .n{font-size:1.2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.stat .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.section{margin:2rem 0}
+.section h2{font-size:1.1rem;font-weight:800;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:2px solid var(--accent);color:var(--accent)}
+.explanation{background:var(--section-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin:.8rem 0;font-size:.82rem;line-height:1.7}
+.explanation strong{color:var(--accent)}
+.explanation .step{margin:.4rem 0;padding-left:.8rem;border-left:2px solid var(--accent)}
+.explanation code{background:var(--code-bg);padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.explanation .warning{color:var(--error);font-weight:600}
+.explanation .tip{color:var(--success);font-weight:600}
+.ex{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin:.8rem 0}
+.ex-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.ex-num{background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;font-family:'JetBrains Mono',monospace}
+.ex-cat{font-size:.65rem;font-weight:700;color:var(--muted);background:rgba(59,130,246,.08);padding:.12rem .4rem;border-radius:3px}
+.ex-status{margin-left:auto;font-size:.7rem;font-weight:700}
+.ex-status.ok{color:var(--success)}
+.ex-status.pending{color:var(--muted)}
+.ex-q{font-size:.85rem;margin-bottom:.6rem;line-height:1.5}
+.ex-q code{background:var(--code-bg);padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.78rem}
+textarea.sql-input{width:100%;min-height:60px;background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.5rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;resize:vertical}
+.btn-row{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap}
+.btn{padding:.35rem .8rem;border:none;border-radius:6px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-run{background:var(--accent);color:#fff}.btn-run:hover{opacity:.85}
+.btn-hint{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.btn-sol{background:rgba(139,92,246,.1);color:#8b5cf6;border:1px solid rgba(139,92,246,.2)}
+.btn-reset{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.result{margin-top:.5rem;max-height:200px;overflow:auto;font-size:.75rem}
+.result table{width:100%;border-collapse:collapse}
+.result th{background:var(--accent);color:#fff;padding:.25rem .4rem;font-size:.68rem;text-align:left;position:sticky;top:0}
+.result td{padding:.2rem .4rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.7rem}
+.result tr:nth-child(even){background:rgba(59,130,246,.03)}
+.result-info{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.hint-box,.sol-box{background:var(--section-bg);border:1px solid var(--border);border-radius:6px;padding:.5rem .8rem;margin-top:.4rem;font-size:.78rem;display:none}
+.hint-box{border-left:3px solid #f59e0b}
+.sol-box{border-left:3px solid #8b5cf6}
+.sol-box code{font-family:'JetBrains Mono',monospace;font-size:.78rem;white-space:pre-wrap}
+.error-msg{color:var(--error);font-size:.78rem;margin-top:.3rem}
+.nav-section{display:flex;gap:.3rem;flex-wrap:wrap;margin:1rem 0}
+.nav-btn{padding:.3rem .6rem;border-radius:5px;font-size:.7rem;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.2s}
+.nav-btn:hover,.nav-btn.active{background:rgba(59,130,246,.1);border-color:var(--accent);color:var(--accent)}
+.reset-banner{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:.6rem 1rem;margin:1rem 0;display:flex;align-items:center;gap:.8rem;font-size:.8rem}
+.reset-banner button{background:#ef4444;color:#fff;border:none;padding:.4rem .8rem;border-radius:6px;font-weight:700;cursor:pointer;font-size:.75rem;white-space:nowrap}
+@media(max-width:700px){.main{padding:1rem}.explanation{padding:.7rem}}
+</style>
+</head>
+<body>
 <div class="header">
-<a href="../../index.html" style="font-size:.78rem;color:var(--muted,#94a3b8);text-decoration:none;font-weight:600;padding:.3rem .6rem;border:1px solid rgba(148,163,184,.2);border-radius:5px;transition:.2s">← Hub</a>
-
-  <div><h1>Exercices SQL — Cas GESCOM</h1><div class="sub">29 exercices progressifs — SELECT, WHERE, ORDER BY, AND/OR, BETWEEN, IN, LIKE, DISTINCT, Agregation</div></div>
-  <div class="score-bar"><span class="v" id="score">0/29</span><div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div></div>
+<a href="../../index.html" style="font-size:.78rem;color:var(--muted,#94a3b8);text-decoration:none;font-weight:600;padding:.3rem .6rem;border:1px solid rgba(148,163,184,.2);border-radius:5px">← Hub</a>
+<div><h1>Exercices SQL — Partie 1</h1><div class="sub">GESCOM — SELECT, WHERE, ORDER BY, LIKE, DISTINCT, Agregation</div></div>
+<div style="display:flex;gap:.8rem;align-items:center">
+<div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div>
+</div>
 </div>
 <div class="main">
-<div class="progress" id="progress"></div>
-<div id="loading">Chargement de la base GESCOM (17 tables)...</div>
-<div id="exercises"></div>
+<div class="reset-banner">
+<span>Si vous avez modifie la BDD avec UPDATE/DELETE, vous pouvez la reinitialiser :</span>
+<button onclick="resetDB()">Reinitialiser la BDD</button>
 </div>
-<a class="back" href="index.html">&larr; Retour au hub</a>
+<div class="progress"><div class="progress-bar" id="pbar" style="width:0%"></div></div>
+<div class="stats">
+<div class="stat"><div class="n" id="solved">0</div><div class="l">Resolus</div></div>
+<div class="stat"><div class="n" id="total">0</div><div class="l">Exercices</div></div>
+<div class="stat"><div class="n" id="pct">0%</div><div class="l">Progression</div></div>
+</div>
+<div class="nav-section" id="navBtns"></div>
+<div id="content"></div>
+</div>
 <script>
-let db=null;let solved=0;
+let db=null;let sqlText='';let solved=0;
 
-const EX=[
-{n:1,cat:"SELECT FROM",q:"Lister le numero (<code>NOART</code>), la designation (<code>DESART</code>) et le numero de famille (<code>NOFAM</code>) de tous les articles.",hint:"SELECT col1, col2, col3 FROM table;",sol:"SELECT NOART, DESART, NOFAM FROM article;",check:r=>r.length>0&&r[0].columns.length===3&&r[0].values.length>=30},
-{n:2,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par designation alphabetique.",hint:"Ajoutez ORDER BY colonne ASC a la fin",sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY DESART ASC;",check:r=>r.length>0&&r[0].values.length>=30},
-{n:3,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par famille puis par designation.",hint:"ORDER BY col1 ASC, col2 ASC",sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY NOFAM ASC, DESART ASC;",check:r=>r.length>0},
-{n:4,cat:"WHERE",q:"Articles (<code>NOART, DESART, QTESTO</code>) ayant un stock inferieur a 100.",hint:"WHERE QTESTO < 100",sol:"SELECT NOART, DESART, QTESTO FROM article WHERE QTESTO < 100;",check:r=>r.length>0&&r[0].values.length>=3},
-{n:5,cat:"WHERE",q:"Articles dont le stock (<code>QTESTO</code>) est inferieur au stock minimum (<code>QTEMIN</code>).",hint:"WHERE QTESTO < QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO < QTEMIN;",check:r=>true},
-{n:6,cat:"WHERE",q:"Articles dont le stock est inferieur a 2 fois le stock minimum.",hint:"WHERE QTESTO < 2 * QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO < 2 * QTEMIN;",check:r=>r.length>0},
-{n:7,cat:"WHERE NOT",q:"Representants qui ne travaillent PAS sur le secteur 5.",hint:"WHERE NOSECT != 5 ou WHERE NOSECT <> 5",sol:"SELECT NOREP, NOMREP, PRNREP, NOSECT FROM representant WHERE NOSECT <> 5;",check:r=>r.length>0&&r[0].values.every(v=>v[3]!==5)},
-{n:8,cat:"AND",q:"Articles (<code>NOART, DESART, NOFOUR, NOFAM</code>) de la famille 51 ET du fournisseur 111.",hint:"WHERE NOFAM = 51 AND NOFOUR = 111",sol:"SELECT NOART, DESART, NOFOUR, NOFAM FROM article WHERE NOFAM = 51 AND NOFOUR = 111;",check:r=>r.length>0&&r[0].values.every(v=>v[3]===51&&v[2]===111)},
-{n:9,cat:"AND",q:"Articles de la famille 27 dont le stock est inferieur a 2 fois le minimum.",hint:"WHERE NOFAM = 27 AND QTESTO < 2 * QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFAM FROM article WHERE NOFAM = 27 AND QTESTO < 2 * QTEMIN;",check:r=>true},
-{n:10,cat:"OR",q:"Articles dont le stock est inferieur au minimum OU dont le fournisseur est 100.",hint:"WHERE QTESTO < QTEMIN OR NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFOUR FROM article WHERE QTESTO < QTEMIN OR NOFOUR = 100;",check:r=>r.length>0},
-{n:11,cat:"AND",q:"Articles dont le stock est inferieur au minimum ET dont le fournisseur est 100.",hint:"WHERE QTESTO < QTEMIN AND NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFOUR FROM article WHERE QTESTO < QTEMIN AND NOFOUR = 100;",check:r=>true},
-{n:12,cat:"AND OR",q:"Articles avec CA > 1 000 000, du fournisseur 103 OU de la famille 46.",hint:"Attention aux parentheses ! CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46)",sol:"SELECT NOART, DESART, CAART, NOFOUR, NOFAM FROM article WHERE CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46);",check:r=>true},
-{n:13,cat:"AND OR",q:"Clients a PARIS avec CA courant > 170 000, ET clients a LYON avec CA > 60 000.",hint:"(VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000)",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client WHERE (VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000);",check:r=>r.length>0},
-{n:14,cat:"AND OR",q:"Clients de GRENOBLE avec CA > 100 000, et TOUS les clients de LYON.",hint:"(VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON'",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client WHERE (VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON';",check:r=>r.length>0},
-{n:15,cat:"BETWEEN",q:"Clients dont le CA courant est entre 30 000 et 50 000 (tries par CA).",hint:"WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC",sol:"SELECT NOCLI, RSCLI, CACLIC FROM client WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC;",check:r=>r.length>0},
-{n:16,cat:"IN",q:"Articles des familles 57, 58, 71 ou 25.",hint:"WHERE NOFAM IN (57, 58, 71, 25)",sol:"SELECT NOART, DESART, NOFAM FROM article WHERE NOFAM IN (57, 58, 71, 25);",check:r=>r.length>0},
-{n:17,cat:"IN",q:"Representants (<code>NOREP, NOMREP, PRNREP</code>) habitant PARIS, LYON ou MARSEILLE.",hint:"WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE')",sol:"SELECT NOREP, NOMREP, PRNREP FROM representant WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE');",check:r=>r.length>0},
-{n:18,cat:"IN BETWEEN",q:"Representants a Paris, Lille ou Villeurbanne avec CA entre 800 000 et 900 000.",hint:"WHERE VILREP IN (...) AND CAREP BETWEEN 800000 AND 900000",sol:"SELECT NOREP, NOMREP, VILREP, CAREP FROM representant WHERE VILREP IN ('PARIS', 'LILLE', 'VILLEURBANNE') AND CAREP BETWEEN 800000 AND 900000;",check:r=>true},
-{n:19,cat:"IN NOT IN",q:"Articles des familles 46, 57, 58 SAUF les articles 26, 30 et 142.",hint:"WHERE NOFAM IN (...) AND NOART NOT IN (...)",sol:"SELECT NOART, DESART, NOFAM FROM article WHERE NOFAM IN (46, 57, 58) AND NOART NOT IN (26, 30, 142);",check:r=>r.length>0&&r[0].values.every(v=>![26,30,142].includes(v[0]))},
-{n:20,cat:"LIKE",q:"Articles dont la designation contient le mot 'ville'.",hint:"WHERE DESART LIKE '%ville%'",sol:"SELECT NOART, DESART FROM article WHERE DESART LIKE '%ville%';",check:r=>true},
-{n:21,cat:"LIKE",q:"Clients dont la raison sociale commence par 'BICYCLE'.",hint:"WHERE RSCLI LIKE 'BICYCLE%'",sol:"SELECT NOCLI, RSCLI FROM client WHERE RSCLI LIKE 'BICYCLE%';",check:r=>r.length>0},
-{n:22,cat:"DISTINCT",q:"Numeros de clients presents dans la table commande (sans doublons).",hint:"SELECT DISTINCT NOCLI FROM commande",sol:"SELECT DISTINCT NOCLI FROM commande;",check:r=>r.length>0},
-{n:23,cat:"DISTINCT",q:"Numeros de familles presentes dans la table article (sans doublons).",hint:"SELECT DISTINCT NOFAM FROM article",sol:"SELECT DISTINCT NOFAM FROM article ORDER BY NOFAM;",check:r=>r.length>0},
-{n:24,cat:"COUNT",q:"Nombre total d'articles dans la base.",hint:"SELECT COUNT(*) FROM article",sol:"SELECT COUNT(*) AS nb_articles FROM article;",check:r=>r.length>0&&r[0].values[0][0]>=30},
-{n:25,cat:"COUNT",q:"Nombre de clients en categorie 1.",hint:"SELECT COUNT(*) FROM client WHERE NOCAT = 1",sol:"SELECT COUNT(*) AS nb_clients_cat1 FROM client WHERE NOCAT = 1;",check:r=>r.length>0&&r[0].values[0][0]>0},
-{n:26,cat:"COUNT",q:"Nombre de commandes ayant un representant (NOREP non NULL).",hint:"COUNT(NOREP) ignore les NULL",sol:"SELECT COUNT(NOREP) AS cde_avec_rep FROM commande;",check:r=>r.length>0},
-{n:27,cat:"MIN MAX",q:"CA article minimum et maximum.",hint:"SELECT MIN(CAART), MAX(CAART) FROM article",sol:"SELECT MIN(CAART) AS ca_min, MAX(CAART) AS ca_max FROM article;",check:r=>r.length>0&&r[0].columns.length===2},
-{n:28,cat:"AVG",q:"CA article moyen (arrondi a 2 decimales).",hint:"ROUND(AVG(CAART), 2)",sol:"SELECT ROUND(AVG(CAART), 2) AS ca_moyen FROM article;",check:r=>r.length>0},
-{n:29,cat:"SUM",q:"Somme du CA des articles du fournisseur 45.",hint:"SUM(CAART) WHERE NOFOUR = 45",sol:"SELECT ROUND(SUM(CAART), 2) AS total_ca FROM article WHERE NOFOUR = 45;",check:r=>r.length>0},
+const SECTIONS = [
+{
+  id:"select",title:"4. SELECT ... FROM — Lister les colonnes",
+  explanations:[{html:`<strong>SELECT ... FROM</strong> — Syntaxe de base :<br>
+<code>SELECT colonne1, colonne2 FROM nom_table;</code><br><br>
+<div class="step">SELECT indique les colonnes a afficher. FROM indique la table source.<br>
+Exemple : <code>SELECT NOCLI, RSCLI, CPCLI FROM client;</code></div>
+<div class="step"><code>SELECT * FROM client;</code> → affiche TOUTES les colonnes.<br>
+<span class="tip">Astuce :</span> Evitez SELECT * en production : listez les colonnes necessaires. C'est plus lisible et performant.</div>`}],
+  exercises:[
+    {n:1,cat:"SELECT FROM",q:"Lister le numero (<code>NOART</code>), la designation (<code>DESART</code>) et le numero de famille (<code>NOFAM</code>) de tous les articles.",
+     hint:"SELECT col1, col2, col3 FROM table;",
+     sol:"SELECT NOART, DESART, NOFAM FROM article;",
+     check:r=>r.length>0&&r[0].columns.length===3&&r[0].values.length>=30}
+  ]
+},
+{
+  id:"orderby",title:"5. ORDER BY — Trier les resultats",
+  explanations:[{html:`<strong>ORDER BY</strong> — Trier les resultats.<br>
+<code>SELECT col1, col2 FROM table ORDER BY col1 ASC, col2 DESC;</code><br><br>
+<div class="step">ASC = croissant (par defaut). DESC = decroissant. On peut trier sur plusieurs colonnes.</div>
+<div class="step">Exemples :<br>
+<code>SELECT * FROM client ORDER BY CACLIC DESC;</code> — Clients tries par CA decroissant<br>
+<code>SELECT * FROM client ORDER BY NOCAT ASC, CACLIC DESC;</code> — Tri multi-colonnes</div>
+<div class="step"><span class="tip">Astuce :</span> Les colonnes de tri ne sont pas obligatoirement dans le SELECT. On peut trier par CACLIC sans l'afficher.</div>`}],
+  exercises:[
+    {n:2,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par designation alphabetique.",
+     hint:"Ajoutez ORDER BY DESART ASC a la fin",
+     sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY DESART ASC;",
+     check:r=>r.length>0&&r[0].values.length>=30},
+    {n:3,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par famille puis par designation.",
+     hint:"ORDER BY NOFAM ASC, DESART ASC",
+     sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY NOFAM ASC, DESART ASC;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"where",title:"6. WHERE — Filtrer les lignes",
+  explanations:[{html:`<strong>WHERE</strong> — Filtrer les lignes.<br>
+<code>SELECT col1, col2 FROM table WHERE condition;</code><br>
+Operateurs : <code>=</code>, <code>&lt;&gt;</code> (different), <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code><br><br>
+<div class="step">Exemples :<br>
+<code>SELECT NOCLI, RSCLI, CACLIC FROM client WHERE CACLIC &gt; 200000;</code><br>
+<code>SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO &lt; QTEMIN;</code></div>
+<div class="step"><span class="warning">Attention :</span> Numeriques SANS guillemets : <code>WHERE CACLIC &gt; 200000</code>. Texte AVEC guillemets : <code>WHERE VILCLI = 'PARIS'</code>.<br>
+<span class="tip">Astuce :</span> ORDER BY se place toujours APRES WHERE.</div>`}],
+  exercises:[
+    {n:4,cat:"WHERE",q:"Articles (<code>NOART, DESART, QTESTO</code>) ayant un stock inferieur a 100.",
+     hint:"WHERE QTESTO < 100",sol:"SELECT NOART, DESART, QTESTO FROM article WHERE QTESTO < 100;",check:r=>r.length>0&&r[0].values.length>=3},
+    {n:5,cat:"WHERE",q:"Articles dont le stock (<code>QTESTO</code>) est inferieur au stock minimum (<code>QTEMIN</code>).",
+     hint:"WHERE QTESTO < QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO < QTEMIN;",check:r=>true},
+    {n:6,cat:"WHERE",q:"Articles dont le stock est inferieur a 2 fois le stock minimum.",
+     hint:"WHERE QTESTO < 2 * QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO < 2 * QTEMIN;",check:r=>r.length>0},
+    {n:7,cat:"WHERE NOT",q:"Representants qui ne travaillent PAS sur le secteur 5.",
+     hint:"WHERE NOSECT <> 5 ou WHERE NOSECT != 5",sol:"SELECT NOREP, NOMREP, PRNREP, NOSECT FROM representant WHERE NOSECT <> 5;",check:r=>r.length>0&&r[0].values.every(v=>v[3]!==5)}
+  ]
+},
+{
+  id:"andor",title:"7. AND, OR, NOT — Conditions complexes",
+  explanations:[{html:`<strong>AND</strong> : les deux conditions vraies. <strong>OR</strong> : au moins une vraie. <strong>NOT</strong> : inverse.<br><br>
+<div class="step"><span class="warning">Attention :</span> AND est prioritaire sur OR. Utilisez des <strong>PARENTHESES</strong> pour clarifier !<br>
+Sans parentheses : <code>(NOCAT=1 AND CACLIC&gt;150000) OR CACLIP&gt;2000000</code> — inclurait TOUS les clients avec gros CA precedent !</div>
+<div class="step">Exemples :<br>
+<code>SELECT * FROM client WHERE NOCAT = 1 AND CACLIC &gt; 150000;</code><br>
+<code>SELECT * FROM client WHERE NOCAT = 1 AND (CACLIC &gt; 150000 OR CACLIP &gt; 2000000);</code></div>`}],
+  exercises:[
+    {n:8,cat:"AND",q:"Articles (<code>NOART, DESART, NOFOUR, NOFAM</code>) de la famille 51 ET du fournisseur 111.",
+     hint:"WHERE NOFAM = 51 AND NOFOUR = 111",sol:"SELECT NOART, DESART, NOFOUR, NOFAM FROM article WHERE NOFAM = 51 AND NOFOUR = 111;",check:r=>r.length>0&&r[0].values.every(v=>v[3]===51&&v[2]===111)},
+    {n:9,cat:"AND",q:"Articles de la famille 27 dont le stock est inferieur a 2 fois le minimum.",
+     hint:"WHERE NOFAM = 27 AND QTESTO < 2 * QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFAM FROM article WHERE NOFAM = 27 AND QTESTO < 2 * QTEMIN;",check:r=>true},
+    {n:10,cat:"OR",q:"Articles dont le stock est inferieur au minimum OU dont le fournisseur est 100.",
+     hint:"WHERE QTESTO < QTEMIN OR NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFOUR FROM article WHERE QTESTO < QTEMIN OR NOFOUR = 100;",check:r=>r.length>0},
+    {n:11,cat:"AND",q:"Articles dont le stock est inferieur au minimum ET dont le fournisseur est 100.",
+     hint:"WHERE QTESTO < QTEMIN AND NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, NOFOUR FROM article WHERE QTESTO < QTEMIN AND NOFOUR = 100;",check:r=>true},
+    {n:12,cat:"AND OR",q:"Articles avec CA > 1 000 000, du fournisseur 103 OU de la famille 46.",
+     hint:"WHERE CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46)",sol:"SELECT NOART, DESART, CAART, NOFOUR, NOFAM FROM article
+WHERE CAART > 1000000
+  AND (NOFOUR = 103 OR NOFAM = 46);",check:r=>r.length>0},
+    {n:13,cat:"AND OR",q:"Clients a PARIS avec CA courant > 170 000, ET clients a LYON avec CA > 60 000.",
+     hint:"(VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000)",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client
+WHERE (VILCLI = 'PARIS' AND CACLIC > 170000)
+   OR (VILCLI = 'LYON' AND CACLIC > 60000)
+ORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0},
+    {n:14,cat:"AND OR",q:"Clients de GRENOBLE avec CA > 100 000, et TOUS les clients de LYON.",
+     hint:"(VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON'",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client
+WHERE (VILCLI = 'GRENOBLE' AND CACLIC > 100000)
+   OR VILCLI = 'LYON'
+ORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0}
+  ]
+},
+{
+  id:"between",title:"8. BETWEEN, IN — Intervalles et ensembles",
+  explanations:[{html:`<strong>BETWEEN</strong> — Selectionne les valeurs dans un intervalle (bornes INCLUSES).<br>
+<code>SELECT NOART, DESART, CAART FROM article WHERE CAART BETWEEN 200000 AND 300000;</code><br><br>
+<strong>IN / NOT IN</strong> — Verifie si une valeur fait partie d'une liste.<br>
+<code>WHERE CPCLI IN ('69003', '69004', '69008')</code><br>
+<code>WHERE VILCLI NOT IN ('LYON', 'PARIS', 'BORDEAUX')</code><br><br>
+<div class="step"><span class="warning">Attention :</span> Le code postal est CHAR(5) = texte ! Guillemets obligatoires. CP '01000' ≠ nombre 1000.</div>`}],
+  exercises:[
+    {n:15,cat:"BETWEEN",q:"Clients dont le CA courant est entre 30 000 et 50 000 (tries par CA).",
+     hint:"WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC",sol:"SELECT NOCLI, RSCLI, CACLIC FROM client
+WHERE CACLIC BETWEEN 30000 AND 50000
+ORDER BY CACLIC;",check:r=>r.length>0},
+    {n:16,cat:"IN",q:"Articles des familles 57, 58, 71 ou 25.",
+     hint:"WHERE NOFAM IN (57, 58, 71, 25)",sol:"SELECT NOART, DESART, NOFAM FROM article
+WHERE NOFAM IN (57, 58, 71, 25);",check:r=>r.length>0},
+    {n:17,cat:"IN",q:"Representants (<code>NOREP, NOMREP, PRNREP</code>) habitant PARIS, LYON ou MARSEILLE.",
+     hint:"WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE')",sol:"SELECT NOREP, NOMREP, PRNREP, VILREP FROM representant
+WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE');",check:r=>r.length>0},
+    {n:18,cat:"IN BETWEEN",q:"Representants a Paris, Lille ou Villeurbanne avec CA entre 800 000 et 900 000.",
+     hint:"WHERE VILREP IN (...) AND CAREP BETWEEN 800000 AND 900000",sol:"SELECT NOREP, NOMREP, PRNREP, VILREP, CAREP FROM representant
+WHERE VILREP IN ('PARIS', 'LILLE', 'VILLEURBANNE')
+  AND CAREP BETWEEN 800000 AND 900000;",check:r=>true},
+    {n:19,cat:"IN NOT IN",q:"Articles des familles 46, 57, 58 SAUF les articles 26, 30 et 142.",
+     hint:"WHERE NOFAM IN (...) AND NOART NOT IN (...)",sol:"SELECT NOART, DESART FROM article
+WHERE NOFAM IN (46, 57, 58)
+  AND NOART NOT IN (26, 30, 142);",check:r=>r.length>0}
+  ]
+},
+{
+  id:"like",title:"9. LIKE — Recherche partielle",
+  explanations:[{html:`<strong>LIKE</strong> — Recherche partielle dans les chaines de caracteres.<br>
+<code>%</code> remplace n'importe quels caracteres. <code>_</code> remplace un seul caractere.<br><br>
+<div class="step">Exemples :<br>
+<code>WHERE RSCLI LIKE 'CA%'</code> — commence par 'CA'<br>
+<code>WHERE RSCLI LIKE '%SA'</code> — se termine par 'SA'<br>
+<code>WHERE RSCLI LIKE '%SA%'</code> — contient 'SA'<br>
+<code>WHERE DESART NOT LIKE '%VTT%'</code> — ne contient PAS 'VTT'</div>`}],
+  exercises:[
+    {n:20,cat:"LIKE",q:"Articles dont la designation contient le mot 'ville'.",
+     hint:"WHERE DESART LIKE '%ville%'",sol:"SELECT NOART, DESART FROM article WHERE DESART LIKE '%ville%';",check:r=>r.length>0},
+    {n:21,cat:"LIKE",q:"Clients dont la raison sociale commence par 'BICYCLE'.",
+     hint:"WHERE RSCLI LIKE 'BICYCLE%'",sol:"SELECT NOCLI, RSCLI FROM client WHERE RSCLI LIKE 'BICYCLE%';",check:r=>r.length>0}
+  ]
+},
+{
+  id:"distinct",title:"10. DISTINCT — Eliminer les doublons",
+  explanations:[{html:`<strong>DISTINCT</strong> — Elimine les doublons dans le resultat.<br>
+<code>SELECT DISTINCT colonne FROM table;</code><br><br>
+<div class="step">Sans DISTINCT, si 19 clients sont en categorie 1, le numero de categorie apparait 19 fois.<br>
+Avec : <code>SELECT DISTINCT NOCAT FROM client;</code> → chaque categorie une seule fois.</div>`}],
+  exercises:[
+    {n:22,cat:"DISTINCT",q:"Numeros de clients presents dans la table commande (sans doublons).",
+     hint:"SELECT DISTINCT NOCLI FROM commande",sol:"SELECT DISTINCT NOCLI FROM commande;",check:r=>r.length>0},
+    {n:23,cat:"DISTINCT",q:"Numeros de familles presentes dans la table article (sans doublons, tries).",
+     hint:"SELECT DISTINCT NOFAM FROM article ORDER BY NOFAM",sol:"SELECT DISTINCT NOFAM FROM article ORDER BY NOFAM;",check:r=>r.length>0}
+  ]
+},
+{
+  id:"agregation",title:"11. Fonctions d'agregation",
+  explanations:[{html:`<strong>Fonctions d'agregation</strong> — Calculs sur un ensemble de lignes.<br><br>
+<code>COUNT(*)</code> — Nombre de lignes<br>
+<code>COUNT(col)</code> — Valeurs non NULL<br>
+<code>COUNT(DISTINCT col)</code> — Valeurs distinctes<br>
+<code>MIN(col)</code> / <code>MAX(col)</code> — Minimum / Maximum<br>
+<code>AVG(col)</code> — Moyenne | <code>SUM(col)</code> — Somme<br><br>
+<div class="step">Exemples :<br>
+<code>SELECT COUNT(*) AS nb_clients FROM client;</code><br>
+<code>SELECT MIN(CACLIC), MAX(CACLIC) FROM client;</code><br>
+<code>SELECT ROUND(AVG(CACLIC), 2) AS 'CA moyen' FROM client;</code></div>
+<div class="step"><span class="tip">MySQL :</span> <code>ROUND(valeur, 2)</code> arrondit a 2 decimales.</div>`}],
+  exercises:[
+    {n:24,cat:"COUNT",q:"Nombre total d'articles dans la base.",
+     hint:"SELECT COUNT(*) FROM article",sol:"SELECT COUNT(*) AS nb_articles FROM article;",check:r=>r.length>0&&r[0].values[0][0]>=30},
+    {n:25,cat:"COUNT",q:"Nombre de clients en categorie 1.",
+     hint:"SELECT COUNT(*) FROM client WHERE NOCAT = 1",sol:"SELECT COUNT(*) AS nb_clients_cat1 FROM client WHERE NOCAT = 1;",check:r=>r.length>0},
+    {n:26,cat:"COUNT",q:"Nombre de commandes ayant un representant (<code>NOREP</code> non NULL).",
+     hint:"COUNT(NOREP) ignore les NULL automatiquement",sol:"SELECT COUNT(NOREP) AS cde_avec_rep FROM commande;",check:r=>r.length>0},
+    {n:27,cat:"MIN MAX",q:"CA article minimum et maximum.",
+     hint:"SELECT MIN(CAART), MAX(CAART) FROM article",sol:"SELECT MIN(CAART) AS ca_min, MAX(CAART) AS ca_max FROM article;",check:r=>r.length>0&&r[0].columns.length===2},
+    {n:28,cat:"AVG",q:"CA article moyen (arrondi a 2 decimales).",
+     hint:"ROUND(AVG(CAART), 2)",sol:"SELECT ROUND(AVG(CAART), 2) AS 'CA moyen' FROM article;",check:r=>r.length>0},
+    {n:29,cat:"SUM",q:"Somme du CA des articles du fournisseur 45.",
+     hint:"SUM(CAART) WHERE NOFOUR = 45",sol:"SELECT SUM(CAART) AS 'Total CA four. 45' FROM article WHERE NOFOUR = 45;",check:r=>r.length>0}
+  ]
+}
 ];
 
-async function init(){
-  const SQL=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/'+f});
-  db=new SQL.Database();
-  const resp=await fetch('../../sql/gescom_sqlite.sql');
-  const sql=await resp.text();
-  sql.split(';').filter(s=>s.trim()).forEach(s=>{try{db.run(s+';')}catch(e){}});
-  document.getElementById('loading').style.display='none';
+// Load GESCOM database
+async function initDB(){
+  const sqlPromise = initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}`});
+  const dataPromise = fetch("../../sql/gescom_sqlite.sql").then(r=>r.text());
+  const [SQL, data] = await Promise.all([sqlPromise, dataPromise]);
+  window.SQL = SQL;
+  sqlText = data;
+  db = new SQL.Database();
+  loadSQL();
   renderAll();
 }
 
+function loadSQL(){
+  const stmts = sqlText.split(';').filter(s=>s.trim());
+  for(const s of stmts){try{db.run(s+';');}catch(e){}}
+}
+
+function resetDB(){
+  if(db) db.close();
+  db = new window.SQL.Database();
+  loadSQL();
+  alert('BDD reinitialisee ! Toutes les donnees sont revenues a l\'etat initial.');
+}
+
 function renderAll(){
-  document.getElementById('progress').innerHTML=EX.map((_,i)=>'<div class="prog-dot" id="pd'+i+'"></div>').join('');
-  document.getElementById('exercises').innerHTML=EX.map((ex,i)=>'<div class="ex" id="ex'+i+'"><div class="ex-head"><span class="ex-num">'+ex.n+'</span><span class="ex-cat">'+ex.cat+'</span></div><div class="ex-q">'+ex.q+'</div><textarea class="editor" id="ed'+i+'" placeholder="-- Votre requete SQL ici"></textarea><div class="actions"><button class="btn btn-run" onclick="run('+i+')">Executer</button><button class="btn btn-hint" onclick="hint('+i+')">Indice</button><button class="btn btn-sol" onclick="sol('+i+')">Solution</button></div><div class="hint-box" id="h'+i+'"></div><div class="sol-box" id="s'+i+'"></div><div class="result" id="r'+i+'"></div></div>').join('');
-}
-
-function run(i){
-  const sql=document.getElementById('ed'+i).value.trim();
-  const el=document.getElementById('r'+i);
-  if(!sql){el.innerHTML='';return}
-  try{
-    const results=db.exec(sql);
-    if(results.length===0){el.innerHTML='<div class="ok-msg">Requete executee (aucun resultat).</div>';return}
-    let html='';
-    results.forEach(r=>{
-      html+='<table class="sql-table"><tr>'+r.columns.map(c=>'<th>'+c+'</th>').join('')+'</tr>';
-      r.values.forEach(row=>{html+='<tr>'+row.map(v=>'<td>'+(v===null?'NULL':v)+'</td>').join('')+'</tr>'});
-      html+='</table><div class="row-count">'+r.values.length+' ligne(s)</div>';
+  const container = document.getElementById('content');
+  const nav = document.getElementById('navBtns');
+  let totalEx = 0;
+  let html = '';
+  let navHtml = '';
+  
+  SECTIONS.forEach(sec => {
+    navHtml += `<button class="nav-btn" onclick="document.getElementById('sec_${sec.id}').scrollIntoView({behavior:'smooth'})">${sec.title.replace(/^\d+\.\s*/,'')}</button>`;
+    html += `<div class="section" id="sec_${sec.id}"><h2>${sec.title}</h2>`;
+    sec.explanations.forEach(exp => { html += `<div class="explanation">${exp.html}</div>`; });
+    sec.exercises.forEach(ex => {
+      totalEx++;
+      html += `<div class="ex" id="ex_${ex.n}">
+        <div class="ex-header">
+          <span class="ex-num">Ex. ${ex.n}</span>
+          <span class="ex-cat">${ex.cat}</span>
+          <span class="ex-status pending" id="status_${ex.n}">En attente</span>
+        </div>
+        <div class="ex-q">${ex.q}</div>
+        <textarea class="sql-input" id="input_${ex.n}" placeholder="-- Ecrivez votre requete SQL ici..."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-run" onclick="runEx(${ex.n})">RUN</button>
+          <button class="btn btn-hint" onclick="toggle('hint_${ex.n}')">Indice</button>
+          <button class="btn btn-sol" onclick="toggle('sol_${ex.n}')">Solution</button>
+        </div>
+        <div class="hint-box" id="hint_${ex.n}">${ex.hint}</div>
+        <div class="sol-box" id="sol_${ex.n}"><code>${ex.sol.replace(/\n/g,'<br>')}</code></div>
+        <div class="result" id="result_${ex.n}"></div>
+        <div class="error-msg" id="err_${ex.n}"></div>
+      </div>`;
     });
-    el.innerHTML=html;
-    if(EX[i].check(results)){
-      const dot=document.getElementById('pd'+i);
-      if(!dot.classList.contains('done')){dot.classList.add('done');solved++;document.getElementById('score').textContent=solved+'/29'}
-    }
-  }catch(e){el.innerHTML='<div class="err">'+e.message+'</div>'}
+    html += '</div>';
+  });
+  container.innerHTML = html;
+  nav.innerHTML = navHtml;
+  document.getElementById('total').textContent = totalEx;
 }
 
-function hint(i){const el=document.getElementById('h'+i);el.textContent=EX[i].hint;el.classList.toggle('show')}
-function sol(i){const el=document.getElementById('s'+i);el.textContent=EX[i].sol;el.classList.toggle('show')}
+function toggle(id){const el=document.getElementById(id);el.style.display=el.style.display==='block'?'none':'block';}
 
-document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){const a=document.activeElement;if(a&&a.classList.contains('editor')){const i=+a.id.replace('ed','');run(i)}}});
+function runEx(n){
+  const sql=document.getElementById('input_'+n).value.trim();
+  const resultDiv=document.getElementById('result_'+n);
+  const errDiv=document.getElementById('err_'+n);
+  errDiv.textContent='';resultDiv.innerHTML='';
+  if(!sql){errDiv.textContent='Ecrivez une requete avant de cliquer RUN.';return;}
+  try{
+    const r=db.exec(sql);
+    if(r.length>0){
+      let tbl='<table><tr>';
+      r[0].columns.forEach(c=>tbl+=`<th>${c}</th>`);
+      tbl+='</tr>';
+      r[0].values.forEach(row=>{tbl+='<tr>';row.forEach(v=>tbl+=`<td>${v===null?'<em style="color:var(--muted)">NULL</em>':v}</td>`);tbl+='</tr>';});
+      tbl+='</table>';
+      resultDiv.innerHTML=tbl+`<div class="result-info">${r[0].values.length} ligne(s)</div>`;
+      const sec=SECTIONS.find(s=>s.exercises.some(e=>e.n===n));
+      const ex=sec?.exercises.find(e=>e.n===n);
+      if(ex&&ex.check(r)){const st=document.getElementById('status_'+n);if(st.textContent!=='✅ Correct'){st.textContent='✅ Correct';st.className='ex-status ok';solved++;updateProgress();}}
+    }else{resultDiv.innerHTML='<div class="result-info">Aucun resultat.</div>';}
+  }catch(e){errDiv.textContent='❌ Erreur SQL : '+e.message;}
+}
 
-init();
-</script></body></html>
+function updateProgress(){
+  const total=SECTIONS.reduce((s,sec)=>s+sec.exercises.length,0);
+  document.getElementById('solved').textContent=solved;
+  document.getElementById('pct').textContent=Math.round(solved/total*100)+'%';
+  document.getElementById('pbar').style.width=Math.round(solved/total*100)+'%';
+}
+
+initDB();
+</script>
+</body></html>

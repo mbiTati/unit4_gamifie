@@ -77,6 +77,10 @@ textarea.sql-input{width:100%;min-height:60px;background:var(--code-bg);color:va
 <div class="stat"><div class="n" id="total">0</div><div class="l">Exercices</div></div>
 <div class="stat"><div class="n" id="pct">0%</div><div class="l">Progression</div></div>
 </div>
+<div class="reset-banner" style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:.6rem 1rem;margin:1rem 0;display:flex;align-items:center;gap:.8rem;font-size:.8rem;flex-wrap:wrap">
+<span>Si vous avez modifie la BDD avec UPDATE/DELETE, vous pouvez la reinitialiser :</span>
+<button onclick="resetDB()" style="background:#ef4444;color:#fff;border:none;padding:.4rem .8rem;border-radius:6px;font-weight:700;cursor:pointer;font-size:.75rem;white-space:nowrap">Reinitialiser la BDD</button>
+</div>
 <div class="nav-section" id="navBtns"></div>
 <div id="content"></div>
 </div>
@@ -448,6 +452,17 @@ Si une etape echoue → ROLLBACK annule TOUT.</div>`}
 ];
 
 // Load GESCOM database
+
+function resetDB(){
+  if(db) db.close();
+  fetch("../../sql/gescom_sqlite.sql").then(r=>r.text()).then(sqlText=>{
+    db = new (db.constructor.constructor === Function ? db.constructor : window.SQL).Database();
+    const stmts = sqlText.split(';').filter(s=>s.trim());
+    for(const s of stmts){try{db.run(s+';');}catch(e){}}
+    alert('BDD reinitialisee ! Toutes les donnees sont revenues a l\'etat initial.');
+  });
+}
+
 async function initDB(){
   const sqlPromise = initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}`});
   const dataPromise = fetch("../../sql/gescom_sqlite.sql").then(r=>r.text());
