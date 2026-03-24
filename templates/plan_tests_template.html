@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Template Plan de Tests — SwissSound</title>
 <style>body{font-family:Arial;margin:2rem;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #ccc;padding:8px;font-size:12px;}th{background:#1565C0;color:#fff;text-align:left;}tr:nth-child(even){background:#f5f5f5;}.status-ok{background:#E8F5E9;}.status-ko{background:#FFEBEE;}</style></head>
-<body><h1>🧪 Plan de Tests — SwissSound Studios</h1><p>Module 17-18 | LO3 | Critères P4, M4</p>
+<body><h1>Plan de Tests — SwissSound Studios</h1><p>Module 17-18 | LO3 | Critères P4, M4</p>
 <table><thead><tr><th>ID</th><th>Description</th><th>Type</th><th>Entrée / Action</th><th>Résultat attendu</th><th>Résultat obtenu</th><th>Statut</th></tr></thead><tbody>
 <tr><td>T01</td><td>INSERT artiste valide</td><td>Normal</td><td>INSERT INTO artiste (nom,email) VALUES ('Test','test@mail.ch')</td><td>1 ligne insérée</td><td></td><td></td></tr>
 <tr><td>T02</td><td>INSERT artiste sans nom (NOT NULL)</td><td>Erroné</td><td>INSERT INTO artiste (nom) VALUES (NULL)</td><td>Erreur 1048</td><td></td><td></td></tr>
