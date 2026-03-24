@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SQL a trous — Completez les requetes</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--lo2:#2563eb;--accent:#ea580c;--success:#059669;--error:#dc2626;--code-bg:#1e293b}
+[data-theme="dark"]{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06);--code-bg:#0d1117}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.header h1{font-size:1.05rem;font-weight:800}.sub{font-size:.7rem;color:var(--muted)}
+.toggle{width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--lo2);border-radius:50%;transition:.3s}
+[data-theme="dark"] .toggle::after{left:18px}
+.main{max-width:800px;margin:0 auto;padding:1.2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:.8rem}
+.card h2{font-size:1rem;font-weight:700;margin-bottom:.6rem}
+.code-block{background:var(--code-bg);border-radius:8px;padding:.8rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:2;color:#d4d4d4;margin-bottom:.5rem}
+.code-block .kw{color:#569cd6}.code-block .fn{color:#dcdcaa}.code-block .str{color:#ce9178}
+.gap{display:inline-block;min-width:100px;border-bottom:2px solid var(--lo2);background:rgba(37,99,235,.05);padding:.1rem .4rem;color:var(--lo2);font-weight:600;outline:none;font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.gap.correct{border-color:var(--success);background:rgba(5,150,105,.08);color:var(--success)}
+.gap.wrong{border-color:var(--error);background:rgba(220,38,38,.05);color:var(--error)}
+.desc{font-size:.85rem;color:var(--muted);margin-bottom:.5rem}
+.btn{padding:.5rem 1.2rem;border:none;border-radius:7px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-go{background:var(--lo2);color:#fff}.btn-go:hover{background:#1d4ed8}
+.btn-reset{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.result{text-align:center;padding:.8rem;margin-top:.8rem;border-radius:8px}
+.result.pass{background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.15)}
+.result.fail{background:rgba(220,38,38,.05);border:1px solid rgba(220,38,38,.1)}
+.score-v{font-size:.95rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.back{display:inline-block;margin-top:.8rem;color:var(--muted);font-size:.75rem;font-weight:600;text-decoration:none}
+</style></head><body>
+<div class="header">
+  <div><h1>SQL a trous — Completez les requetes</h1><div class="sub">Remplissez les mots-cles manquants</div></div>
+  <div style="display:flex;gap:.5rem;align-items:center"><span class="score-v" id="score">0/20</span><div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div></div>
+</div>
+<div class="main" id="exercises"></div>
+<div style="text-align:center;margin:1rem"><button class="btn btn-go" onclick="checkAll()">Verifier</button> <button class="btn btn-reset" onclick="location.reload()">Recommencer</button></div>
+<div id="resultArea" style="max-width:800px;margin:0 auto;padding:0 1.2rem"></div>
+<a class="back" href="index.html" style="display:block;text-align:center;margin:1rem">&larr; Retour au hub</a>
+<script>
+const gaps = [
+  {desc:"Afficher tous les artistes actifs",code:'<span class="kw">SELECT</span> * <span class="kw">FROM</span> artiste <span class="kw">WHERE</span> <span class="gap" data-a="actif" contenteditable></span> = TRUE;',a:["actif"]},
+  {desc:"Trier les albums par prix decroissant",code:'<span class="kw">SELECT</span> titre, prix <span class="kw">FROM</span> album <span class="kw"><span class="gap" data-a="ORDER BY" contenteditable></span></span> prix <span class="gap" data-a="DESC" contenteditable></span>;',a:["ORDER BY","DESC"]},
+  {desc:"Albums entre 20 et 30 CHF",code:'<span class="kw">SELECT</span> * <span class="kw">FROM</span> album <span class="kw">WHERE</span> prix <span class="gap" data-a="BETWEEN" contenteditable></span> 20 <span class="kw"><span class="gap" data-a="AND" contenteditable></span></span> 30;',a:["BETWEEN","AND"]},
+  {desc:"Artistes dont le nom commence par M",code:'<span class="kw">SELECT</span> * <span class="kw">FROM</span> artiste <span class="kw">WHERE</span> nom <span class="gap" data-a="LIKE" contenteditable></span> <span class="str">'<span class="gap" data-a="M%" contenteditable></span>'</span>;',a:["LIKE","M%"]},
+  {desc:"Artistes sans prenom (groupes)",code:'<span class="kw">SELECT</span> * <span class="kw">FROM</span> artiste <span class="kw">WHERE</span> prenom <span class="gap" data-a="IS NULL" contenteditable></span>;',a:["IS NULL"]},
+  {desc:"Top 5 albums les plus chers",code:'<span class="kw">SELECT</span> titre, prix <span class="kw">FROM</span> album <span class="kw">ORDER BY</span> prix DESC <span class="gap" data-a="LIMIT" contenteditable></span> <span class="gap" data-a="5" contenteditable></span>;',a:["LIMIT","5"]},
+  {desc:"Nombre d'artistes actifs",code:'<span class="kw">SELECT</span> <span class="fn"><span class="gap" data-a="COUNT" contenteditable></span></span>(*) <span class="kw">AS</span> nb <span class="kw">FROM</span> artiste <span class="kw">WHERE</span> actif = TRUE;',a:["COUNT"]},
+  {desc:"Prix moyen des albums",code:'<span class="kw">SELECT</span> ROUND(<span class="fn"><span class="gap" data-a="AVG" contenteditable></span></span>(prix), 2) <span class="kw">AS</span> prix_moyen <span class="kw">FROM</span> album;',a:["AVG"]},
+  {desc:"Nombre d'albums PAR artiste",code:'<span class="kw">SELECT</span> id_artiste, COUNT(*) <span class="kw">FROM</span> album <span class="kw"><span class="gap" data-a="GROUP BY" contenteditable></span></span> id_artiste;',a:["GROUP BY"]},
+  {desc:"Artistes avec plus de 1 album",code:'<span class="kw">SELECT</span> id_artiste, COUNT(*) AS nb <span class="kw">FROM</span> album <span class="kw">GROUP BY</span> id_artiste <span class="kw"><span class="gap" data-a="HAVING" contenteditable></span></span> nb > 1;',a:["HAVING"]},
+  {desc:"Albums avec nom d'artiste (jointure)",code:'<span class="kw">SELECT</span> a.nom, al.titre <span class="kw">FROM</span> artiste a <span class="kw"><span class="gap" data-a="JOIN" contenteditable></span></span> album al <span class="kw"><span class="gap" data-a="ON" contenteditable></span></span> a.id_artiste = al.id_artiste;',a:["JOIN","ON"]},
+  {desc:"Artistes SANS album",code:'<span class="kw">SELECT</span> a.nom <span class="kw">FROM</span> artiste a <span class="kw"><span class="gap" data-a="LEFT JOIN" contenteditable></span></span> album al <span class="kw">ON</span> a.id_artiste = al.id_artiste <span class="kw">WHERE</span> al.id_album <span class="gap" data-a="IS NULL" contenteditable></span>;',a:["LEFT JOIN","IS NULL"]},
+  {desc:"Creer la table album avec FK",code:'<span class="kw">CREATE TABLE</span> album (<br>  id_album INT <span class="gap" data-a="AUTO_INCREMENT" contenteditable></span> <span class="kw">PRIMARY KEY</span>,<br>  titre VARCHAR(200) <span class="gap" data-a="NOT NULL" contenteditable></span>,<br>  id_artiste INT,<br>  <span class="kw"><span class="gap" data-a="FOREIGN KEY" contenteditable></span></span> (id_artiste) REFERENCES artiste(id_artiste)<br>);',a:["AUTO_INCREMENT","NOT NULL","FOREIGN KEY"]},
+  {desc:"Donner le droit SELECT au comptable",code:'<span class="kw"><span class="gap" data-a="GRANT" contenteditable></span></span> SELECT <span class="kw">ON</span> facture <span class="kw">TO</span> <span class="str">'comptable'</span>;',a:["GRANT"]},
+  {desc:"Sessions avec artiste + salle + ingenieur (3 JOIN)",code:'<span class="kw">SELECT</span> se.date_session, a.nom, s.nom, i.nom<br><span class="kw">FROM</span> session_enregistrement se<br><span class="kw">JOIN</span> artiste a <span class="kw">ON</span> se.<span class="gap" data-a="id_artiste" contenteditable></span> = a.id_artiste<br><span class="kw">JOIN</span> salle s <span class="kw">ON</span> se.<span class="gap" data-a="id_salle" contenteditable></span> = s.id_salle<br><span class="kw">JOIN</span> ingenieur i <span class="kw">ON</span> se.<span class="gap" data-a="id_ingenieur" contenteditable></span> = i.id_ingenieur;',a:["id_artiste","id_salle","id_ingenieur"]},
+];
+
+let totalGaps = 0;
+
+function render() {
+  document.getElementById('exercises').innerHTML = gaps.map((g, i) =>
+    '<div class="card"><h2>' + (i+1) + '. ' + g.desc + '</h2><div class="code-block">' + g.code + '</div></div>'
+  ).join('');
+  totalGaps = document.querySelectorAll('.gap').length;
+}
+
+function checkAll() {
+  let correct = 0;
+  document.querySelectorAll('.gap').forEach(g => {
+    const expected = g.dataset.a.toLowerCase().trim();
+    const answer = g.textContent.toLowerCase().trim();
+    if (answer === expected) {
+      g.classList.add('correct');
+      correct++;
+    } else {
+      g.classList.add('wrong');
+      g.title = 'Attendu: ' + g.dataset.a;
+    }
+    g.contentEditable = 'false';
+  });
+  document.getElementById('score').textContent = correct + '/' + totalGaps;
+  const pct = Math.round(correct / totalGaps * 100);
+  document.getElementById('resultArea').innerHTML = '<div class="result ' + (pct >= 60 ? 'pass' : 'fail') + '"><strong>' + pct + '%</strong> — ' + correct + '/' + totalGaps + ' trous corrects</div>';
+}
+
+render();
+</script></body></html>

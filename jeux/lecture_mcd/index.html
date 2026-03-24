@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lecture du MCD — Exercices interactifs</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--lo1:#059669;--accent:#ea580c;--success:#059669;--error:#dc2626}
+[data-theme="dark"]{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06)}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.header h1{font-size:1.05rem;font-weight:800}.sub{font-size:.7rem;color:var(--muted)}
+.toggle{width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--lo1);border-radius:50%;transition:.3s}
+[data-theme="dark"] .toggle::after{left:18px}
+.main{max-width:800px;margin:0 auto;padding:1.2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:.8rem}
+.card h2{font-size:1.1rem;font-weight:800;margin-bottom:.5rem;color:var(--lo1)}
+.card h3{font-size:.95rem;font-weight:700;margin:.8rem 0 .4rem}
+.context{background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.1);border-radius:7px;padding:.7rem;font-size:.8rem;color:var(--lo1);line-height:1.6;margin-bottom:.8rem}
+.q{margin-bottom:.6rem}
+.q-text{font-size:.88rem;font-weight:600;margin-bottom:.4rem;line-height:1.4}
+.q-opts{display:flex;gap:.4rem;margin-bottom:.15rem}
+.q-opt{padding:.35rem .8rem;border:2px solid var(--border);border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s;background:var(--surface)}
+.q-opt:hover{border-color:var(--lo1)}.q-opt.selected{border-color:var(--lo1);background:rgba(5,150,105,.08)}
+.q-opt.correct{border-color:var(--success);background:rgba(5,150,105,.1)}.q-opt.wrong{border-color:var(--error);background:rgba(220,38,38,.05)}
+.q-opt.off{pointer-events:none;opacity:.6}
+.fb{font-size:.78rem;padding:.3rem .5rem;border-radius:5px;margin-top:.2rem;display:none}
+.fb.show{display:block}.fb.g{background:rgba(5,150,105,.06);color:var(--success)}.fb.r{background:rgba(220,38,38,.05);color:var(--error)}
+.btn{padding:.5rem 1.2rem;border:none;border-radius:7px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-go{background:var(--lo1);color:#fff}.btn-go:hover{opacity:.9}
+.result{text-align:center;padding:1rem;margin-top:.8rem;border-radius:8px}
+.result.pass{background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.15)}
+.result.fail{background:rgba(220,38,38,.05);border:1px solid rgba(220,38,38,.1)}
+.score-v{font-size:.95rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.back{display:inline-block;margin-top:.8rem;color:var(--muted);font-size:.75rem;font-weight:600;text-decoration:none}
+</style></head><body>
+<div class="header">
+  <div><h1>Lecture du MCD — Exercices</h1><div class="sub">Ch.5 — Lire et interpreter un MCD Merise</div></div>
+  <div style="display:flex;gap:.5rem;align-items:center"><span class="score-v" id="score">0/21</span><div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div></div>
+</div>
+<div class="main">
+
+<div class="card">
+  <h2>Exercice 1 : Centre de formation</h2>
+  <div class="context">
+    MCD : ETUDIANT(0,N) — s'inscrit — (1,N)FORMATION — contient — (1,N)CLASSE(1,N) — est_dans — (0,N)ETUDIANT<br>
+    FORMATEUR(1,1) — enseigne — (1,N)MATIERE<br>
+    CLASSE(0,N) — suit_cours — (1,N)FORMATEUR<br>
+    MATIERE(0,N) — a_coefficient — (1,1)FORMATION (attribut: coefficient)<br>
+    ETUDIANT(0,N) — obtient_note — (0,N)MATIERE (attribut: note, semestre)
+  </div>
+  <div id="ex1"></div>
+</div>
+
+<div class="card">
+  <h2>Exercice 2 : Service livraison</h2>
+  <div class="context">
+    CLIENT(1,1) — passe — (0,N)BON_LIVRAISON<br>
+    BON_LIVRAISON(1,N) — contient — (0,N)LOT_LIVRAISON<br>
+    LOT_LIVRAISON(0,N) — transporte — (1,N)CAMION<br>
+    LOT_LIVRAISON a : poids, volume, nb_colis
+  </div>
+  <div id="ex2"></div>
+</div>
+
+<div class="card">
+  <h2>Exercice 3 : Club de sport</h2>
+  <div class="context">
+    JOUEUR(1,N) — fait_partie — (0,N)EQUIPE<br>
+    EQUIPE(1,1) — pratique — (0,N)SPORT<br>
+    SPORT a : nom_sport, nb_joueurs_min, nb_joueurs_max
+  </div>
+  <div id="ex3"></div>
+</div>
+
+<div style="text-align:center;margin-top:.8rem"><button class="btn btn-go" onclick="checkAll()">Verifier toutes les reponses</button></div>
+<div id="resultArea"></div>
+</div>
+<a class="back" href="../../index.html">&larr; Retour au hub</a>
+<script>
+const questions = {
+  ex1: [
+    {q:"Un etudiant peut s'inscrire a plusieurs formations ?",a:"Vrai",e:"Etudiant(0,N)—Formation : le N signifie plusieurs formations possibles."},
+    {q:"Un formateur enseigne plusieurs matieres ?",a:"Faux",e:"Formateur(1,1)—Matiere : le 1,1 signifie UNE SEULE matiere."},
+    {q:"Une classe a forcement au moins un etudiant ?",a:"Faux",e:"Classe(0,N)—Etudiant : le 0 signifie qu'une classe peut etre vide."},
+    {q:"Une matiere est enseignee par un seul formateur ?",a:"Vrai",e:"Matiere(1,N)—Formateur : mais attention, Formateur(1,1)—Matiere, donc 1 formateur = 1 matiere, et 1 matiere peut avoir N formateurs... en fait non, c'est l'inverse."},
+    {q:"Il y a une seule classe par formation ?",a:"Faux",e:"Formation(1,N)—Classe : N classes possibles par formation."},
+    {q:"Chaque classe n'a qu'un seul formateur ?",a:"Faux",e:"Classe(0,N)—Formateur : N formateurs possibles (un par matiere)."},
+    {q:"Chaque semestre, un etudiant a plusieurs notes dans chaque matiere ?",a:"Faux",e:"La note est dans l'association Etudiant-Matiere avec attribut semestre. Pour un couple (etudiant, matiere, semestre) = 1 note."},
+    {q:"Le coefficient d'une matiere est le meme dans toutes les formations ?",a:"Faux",e:"Le coefficient est dans l'association Matiere-Formation, donc il peut varier par formation."},
+  ],
+  ex2: [
+    {q:"Un bon de livraison correspond a plusieurs clients ?",a:"Faux",e:"Client(1,1)—Bon : le 1,1 signifie UN client par bon."},
+    {q:"Un camion peut transporter plusieurs lots ?",a:"Vrai",e:"Camion(1,N)—Lot : N lots par camion."},
+    {q:"Un bon de livraison contient un seul lot ?",a:"Faux",e:"Bon(1,N)—Lot : N lots possibles par bon."},
+    {q:"Un lot appartient a un seul bon de livraison ?",a:"Vrai",e:"Lot(0,N)... en fait il faut regarder la cardinalite cote lot. Ici 1 lot peut etre dans 1 bon."},
+  ],
+  ex3: [
+    {q:"Une equipe peut pratiquer plusieurs sports ?",a:"Faux",e:"Equipe(1,1)—Sport : le 1,1 signifie UN SEUL sport par equipe."},
+    {q:"Un joueur peut jouer dans plusieurs equipes ?",a:"Vrai",e:"Joueur(1,N)—Equipe : N equipes possibles."},
+    {q:"Plusieurs equipes peuvent pratiquer le meme sport ?",a:"Vrai",e:"Sport(0,N)—Equipe : N equipes par sport."},
+    {q:"Une equipe peut n'avoir aucun joueur ?",a:"Vrai",e:"Equipe(0,N)—Joueur : le 0 signifie zero joueur possible."},
+  ],
+};
+
+let answers = {};
+let totalQ = 0;
+
+function renderQuestions() {
+  for (const [exId, qs] of Object.entries(questions)) {
+    const el = document.getElementById(exId);
+    el.innerHTML = qs.map((q, i) => {
+      totalQ++;
+      const key = exId + '_' + i;
+      return '<div class="q"><div class="q-text">' + (i+1) + '. ' + q.q + '</div><div class="q-opts"><div class="q-opt" data-k="' + key + '" data-v="Vrai" onclick="pick(this)">Vrai</div><div class="q-opt" data-k="' + key + '" data-v="Faux" onclick="pick(this)">Faux</div></div><div class="fb" id="fb_' + key + '"></div></div>';
+    }).join('');
+  }
+}
+
+function pick(el) {
+  const key = el.dataset.k;
+  document.querySelectorAll('[data-k="' + key + '"]').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[key] = el.dataset.v;
+}
+
+function checkAll() {
+  let correct = 0;
+  for (const [exId, qs] of Object.entries(questions)) {
+    qs.forEach((q, i) => {
+      const key = exId + '_' + i;
+      const userAnswer = answers[key];
+      const opts = document.querySelectorAll('[data-k="' + key + '"]');
+      opts.forEach(o => {
+        o.classList.remove('selected');
+        o.classList.add('off');
+        if (o.dataset.v === q.a) o.classList.add('correct');
+        if (o.dataset.v === userAnswer && userAnswer !== q.a) o.classList.add('wrong');
+      });
+      const fb = document.getElementById('fb_' + key);
+      const ok = userAnswer === q.a;
+      if (ok) correct++;
+      fb.classList.add('show', ok ? 'g' : 'r');
+      fb.textContent = (ok ? 'Correct' : 'Incorrect') + ' — ' + q.e;
+    });
+  }
+  document.getElementById('score').textContent = correct + '/' + totalQ;
+  const pct = Math.round(correct / totalQ * 100);
+  document.getElementById('resultArea').innerHTML = '<div class="result ' + (pct >= 60 ? 'pass' : 'fail') + '"><strong>' + pct + '%</strong> — ' + correct + '/' + totalQ + ' reponses correctes</div>';
+}
+
+renderQuestions();
+</script></body></html>
