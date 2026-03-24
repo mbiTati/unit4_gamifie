@@ -9,6 +9,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--dim:#334155;--border:rgba(255,255,255,.06);--lo2:#3b82f6;--accent:#f97316;--success:#10b981;--error:#ef4444;--code-bg:#0d1117}
+[data-theme="light"]{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--code-bg:#1e293b}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text)}
 .header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem}
 .header h1{font-size:1.1rem;font-weight:800}.header .sub{font-size:.72rem;color:var(--muted)}
@@ -58,7 +59,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text)}
     <span class="tab" onclick="showTab('exercises')">Exercices guides</span>
     <span class="tab" onclick="showTab('schema')">Schema</span>
     <span class="tab" onclick="loadGescom()" id="gescomBtn">Charger GESCOM</span>
-  </div>
+  <div style="width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--lo2);border-radius:50%;transition:.3s"></div></div></div>
 </div>
 
 <div class="main">
