@@ -73,7 +73,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text)}
 SELECT * FROM artiste LIMIT 5;">-- Bienvenue ! Essayez :
 SELECT * FROM artiste LIMIT 5;</textarea>
     <div class="actions">
-      <button class="btn btn-run" onclick="runSQL()">&#9654; Executer (Ctrl+Enter)</button>
+      <button class="btn btn-run" onclick="runSQL()">RUN Executer (Ctrl+Enter)</button>
       <button class="btn btn-reset" onclick="resetDB()">Reinitialiser la base</button>
     </div>
     <div class="result-area" id="freeResult"></div>
@@ -196,7 +196,7 @@ function renderExercises() {
       <div class="ex-hint" onclick="this.textContent=this.textContent.includes('Indice')?'${ex.hint}':'Indice'">Indice</div>
       <textarea class="editor" id="exInput${i}" style="min-height:60px" placeholder="-- Votre requete ici">${i===0?ex.answer.replace(';',';\n-- Modifiez et testez !'):''}</textarea>
       <div class="actions">
-        <button class="btn btn-run" onclick="runEx(${i})">&#9654; Executer</button>
+        <button class="btn btn-run" onclick="runEx(${i})">RUN Executer</button>
         <button class="btn btn-reset" onclick="document.getElementById('exInput${i}').value='';document.getElementById('exRes${i}').innerHTML=''">Effacer</button>
       </div>
       <div class="result-area" id="exRes${i}"></div>
