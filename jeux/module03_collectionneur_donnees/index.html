@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📋 Le Collectionneur — Module 3</title>
+<title> Le Collectionneur — Module 3</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -47,7 +47,7 @@
 </head>
 <body>
 <div class="header">
-  <div><h1>📋 Le Collectionneur</h1><div class="sub">Module 3 — Dictionnaire des données</div></div>
+  <div><h1> Le Collectionneur</h1><div class="sub">Module 3 — Dictionnaire des données</div></div>
   <div class="score-bar">
     <div class="score-box"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
     <div class="score-box"><div class="lbl">Question</div><div class="val"><span id="qNum">0</span>/<span id="qTotal">0</span></div></div>
@@ -56,11 +56,11 @@
 <div class="container">
 
   <div id="intro" class="card fade-in" style="text-align:center;">
-    <div style="font-size:3rem;margin-bottom:0.5rem;">📋</div>
+    <div style="font-size:3rem;margin-bottom:0.5rem;"></div>
     <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">Le Collectionneur</h2>
     <p style="color:var(--muted);margin-bottom:0.5rem;">Dictionnaire des données</p>
     <p style="color:var(--muted);margin-bottom:1.5rem;font-size:0.9rem;">Classez : donnée élémentaire (stockée) ou calculée (dérivée) ?</p>
-    <button class="btn btn-go" onclick="startGame()">🚀 Commencer</button>
+    <button class="btn btn-go" onclick="startGame()"> Commencer</button>
   </div>
   <div id="game" class="hidden"></div>
   <div id="result" class="hidden"></div>
@@ -128,7 +128,7 @@
     document.getElementById('game').classList.add('hidden');
     document.getElementById('result').classList.remove('hidden');
     const pct = score;
-    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+    const stars = pct >= 90 ? '' : pct >= 70 ? '' : pct >= 50 ? '' : '—';
     document.getElementById('result').innerHTML = `
       <div class="card fade-in" style="text-align:center;">
         <div class="final-score">${correct}/${items.length}</div>

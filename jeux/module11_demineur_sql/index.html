@@ -59,12 +59,12 @@
     <div style="font-size:3rem;margin-bottom:0.5rem;">💣</div>
     <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">Le Démineur SQL</h2>
     <p style="color:var(--muted);margin-bottom:1.5rem;">DML — INSERT, UPDATE, DELETE, ACID<br>8 questions — Testez vos connaissances !</p>
-    <button class="btn btn-go" onclick="startQuiz()">🚀 Commencer</button>
+    <button class="btn btn-go" onclick="startQuiz()"> Commencer</button>
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
   <script>
-  const questions = [{"q":"DELETE FROM artiste; (sans WHERE) va :","opts":["Supprimer un artiste","Supprimer TOUS les artistes !","Ne rien faire","Supprimer la table"],"correct":1,"expl":"⚠️ DELETE sans WHERE supprime TOUTES les lignes ! Toujours vérifier le WHERE."},{"q":"UPDATE artiste SET email = 'new@mail.ch'; (sans WHERE) va :","opts":["Modifier un email","Modifier l'email de TOUS les artistes !","Ne rien faire","Créer un nouveau champ"],"correct":1,"expl":"⚠️ UPDATE sans WHERE modifie TOUTES les lignes ! Toujours ajouter WHERE."},{"q":"BEGIN; UPDATE ...; ROLLBACK; — que se passe-t-il ?","opts":["Les modifications sont sauvegardées","Les modifications sont annulées","La table est supprimée","Erreur"],"correct":1,"expl":"ROLLBACK annule toutes les modifications depuis le BEGIN. La BDD revient à l'état d'avant."},{"q":"COMMIT fait quoi dans une transaction ?","opts":["Annule les changements","Valide et enregistre définitivement les changements","Ferme la connexion","Affiche les données"],"correct":1,"expl":"COMMIT = valider. Après COMMIT, impossible de revenir en arrière avec ROLLBACK."},{"q":"L'Atomicité dans ACID signifie :","opts":["Valeurs indivisibles dans les cellules (1NF)","Une transaction est tout-ou-rien","Les données sont petites","Chaque opération est rapide"],"correct":1,"expl":"ACID Atomicité = la transaction entière réussit ou échoue complètement. ≠ atomicité 1NF !"},{"q":"INSERT INTO artiste VALUES (...) vs INSERT INTO artiste (nom, prenom) VALUES (...) :","opts":["Aucune différence","La 2e est plus sûre car elle nomme les colonnes","La 1ère est plus rapide","La 2e crée des erreurs"],"correct":1,"expl":"Nommer les colonnes est une bonne pratique : plus lisible, plus sûr si la structure change."},{"q":"Pour insérer 100 artistes d'un coup, utiliser :","opts":["100 requêtes INSERT séparées","INSERT INTO artiste VALUES (...), (...), (...);","UPDATE 100 fois","CREATE 100 tables"],"correct":1,"expl":"INSERT multiple = une seule requête avec plusieurs jeux de valeurs. Beaucoup plus rapide."},{"q":"La propriété 'Durabilité' dans ACID signifie :","opts":["La BDD est rapide","Une fois COMMIT, les données survivent même à un crash","Les données sont chiffrées","La BDD est portable"],"correct":1,"expl":"Durabilité : après COMMIT, les données sont écrites sur disque et survivent à un crash serveur."}];
+  const questions = [{"q":"DELETE FROM artiste; (sans WHERE) va :","opts":["Supprimer un artiste","Supprimer TOUS les artistes !","Ne rien faire","Supprimer la table"],"correct":1,"expl":"! DELETE sans WHERE supprime TOUTES les lignes ! Toujours vérifier le WHERE."},{"q":"UPDATE artiste SET email = 'new@mail.ch'; (sans WHERE) va :","opts":["Modifier un email","Modifier l'email de TOUS les artistes !","Ne rien faire","Créer un nouveau champ"],"correct":1,"expl":"! UPDATE sans WHERE modifie TOUTES les lignes ! Toujours ajouter WHERE."},{"q":"BEGIN; UPDATE ...; ROLLBACK; — que se passe-t-il ?","opts":["Les modifications sont sauvegardées","Les modifications sont annulées","La table est supprimée","Erreur"],"correct":1,"expl":"ROLLBACK annule toutes les modifications depuis le BEGIN. La BDD revient à l'état d'avant."},{"q":"COMMIT fait quoi dans une transaction ?","opts":["Annule les changements","Valide et enregistre définitivement les changements","Ferme la connexion","Affiche les données"],"correct":1,"expl":"COMMIT = valider. Après COMMIT, impossible de revenir en arrière avec ROLLBACK."},{"q":"L'Atomicité dans ACID signifie :","opts":["Valeurs indivisibles dans les cellules (1NF)","Une transaction est tout-ou-rien","Les données sont petites","Chaque opération est rapide"],"correct":1,"expl":"ACID Atomicité = la transaction entière réussit ou échoue complètement. ≠ atomicité 1NF !"},{"q":"INSERT INTO artiste VALUES (...) vs INSERT INTO artiste (nom, prenom) VALUES (...) :","opts":["Aucune différence","La 2e est plus sûre car elle nomme les colonnes","La 1ère est plus rapide","La 2e crée des erreurs"],"correct":1,"expl":"Nommer les colonnes est une bonne pratique : plus lisible, plus sûr si la structure change."},{"q":"Pour insérer 100 artistes d'un coup, utiliser :","opts":["100 requêtes INSERT séparées","INSERT INTO artiste VALUES (...), (...), (...);","UPDATE 100 fois","CREATE 100 tables"],"correct":1,"expl":"INSERT multiple = une seule requête avec plusieurs jeux de valeurs. Beaucoup plus rapide."},{"q":"La propriété 'Durabilité' dans ACID signifie :","opts":["La BDD est rapide","Une fois COMMIT, les données survivent même à un crash","Les données sont chiffrées","La BDD est portable"],"correct":1,"expl":"Durabilité : après COMMIT, les données sont écrites sur disque et survivent à un crash serveur."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
@@ -86,7 +86,7 @@
         </div>
         <div id="feedback" class="hidden" style="margin-top:1rem;padding:1rem;border-radius:10px;"></div>
         <div id="nextArea" class="hidden" style="text-align:center;margin-top:1rem;">
-          <button class="btn btn-go" onclick="nextQ()">${current < questions.length - 1 ? 'Suivante →' : '🏆 Résultat'}</button>
+          <button class="btn btn-go" onclick="nextQ()">${current < questions.length - 1 ? 'Suivante →' : ' Résultat'}</button>
         </div>
       </div>
     `;
@@ -124,7 +124,7 @@
   function showResult() {
     document.getElementById('quiz').classList.add('hidden');
     const pct = Math.round((score / (questions.length * 10)) * 100);
-    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+    const stars = pct >= 90 ? '' : pct >= 70 ? '' : pct >= 50 ? '' : '—';
     const msg = pct >= 90 ? 'Excellent !' : pct >= 70 ? 'Bon travail !' : pct >= 50 ? 'Passable.' : 'À revoir !';
     document.getElementById('result').classList.remove('hidden');
     document.getElementById('result').innerHTML = `

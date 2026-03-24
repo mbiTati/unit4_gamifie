@@ -414,12 +414,12 @@
       
       <div class="rules-grid">
         <div class="rule-card">
-          <div class="emoji">📝</div>
+          <div class="emoji"></div>
           <h4>Écrivez les étapes</h4>
           <p>Décrivez chaque action utilisateur dans l'ordre</p>
         </div>
         <div class="rule-card">
-          <div class="emoji">🎯</div>
+          <div class="emoji"></div>
           <h4>Soyez précis</h4>
           <p>Nommez les boutons, menus et champs exacts</p>
         </div>
@@ -429,13 +429,13 @@
           <p>3 minutes par tâche — la rapidité rapporte des bonus</p>
         </div>
         <div class="rule-card">
-          <div class="emoji">⭐</div>
+          <div class="emoji"></div>
           <h4>Combos</h4>
           <p>Guides parfaits consécutifs = multiplicateur de score</p>
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="startGame()">🚀 Commencer</button>
+      <button class="btn btn-primary" onclick="startGame()"> Commencer</button>
     </div>
   </div>
 
@@ -450,7 +450,7 @@
     <div class="task-card">
       <div class="task-desc" id="taskDesc"></div>
       
-      <h3>📝 Vos instructions étape par étape :</h3>
+      <h3> Vos instructions étape par étape :</h3>
       <div class="steps-area" id="stepsArea"></div>
       <button class="add-step-btn" id="addStepBtn" onclick="addStep()">
         + Ajouter une étape
@@ -537,7 +537,7 @@ const tasks = [
     expectedSteps: [
       { text: "Se connecter avec le compte 'admin_studio'", keywords: ["connecter", "admin"] },
       { text: "Vérifier l'équipement : SELECT * FROM equipement WHERE id_equipement = 12;", keywords: ["vérifier", "select", "equipement", "12"] },
-      { text: "⚠️ Vérifier qu'aucune session future ne référence cet équipement (vérifier les contraintes FK)", keywords: ["vérifier", "session", "contrainte", "fk", "future"] },
+      { text: "! Vérifier qu'aucune session future ne référence cet équipement (vérifier les contraintes FK)", keywords: ["vérifier", "session", "contrainte", "fk", "future"] },
       { text: "Par sécurité, commencer une transaction : START TRANSACTION;", keywords: ["transaction", "start", "begin", "sécurité"] },
       { text: "Supprimer l'équipement : DELETE FROM equipement WHERE id_equipement = 12;", keywords: ["delete", "equipement", "12", "where"] },
       { text: "Vérifier la suppression : SELECT * FROM equipement WHERE id_equipement = 12; (doit retourner 0 ligne)", keywords: ["vérifier", "select", "0", "suppression"] },
@@ -713,7 +713,7 @@ function submitAnswer() {
 function showResult(result) {
   const { expected, studentResults, matchedExpected, rawScore, timeBonus, taskScore, fullMatches, totalExpected } = result;
   
-  const grade = rawScore >= 90 ? '🌟 Excellent !' : rawScore >= 70 ? '👍 Bon travail !' : rawScore >= 50 ? '📝 Passable' : '⚠️ À améliorer';
+  const grade = rawScore >= 90 ? ' Excellent !' : rawScore >= 70 ? '👍 Bon travail !' : rawScore >= 50 ? ' Passable' : '! À améliorer';
   const circleColor = rawScore >= 70 ? '#2E7D32' : rawScore >= 50 ? '#FF6F00' : '#C62828';
 
   let html = `
@@ -739,7 +739,7 @@ function showResult(result) {
 
       <div class="comparison-grid">
         <div class="comparison-col">
-          <h4>📋 Étapes attendues (corrigé)</h4>
+          <h4> Étapes attendues (corrigé)</h4>
           ${expected.map((e, i) => `
             <div class="expected-step" style="${matchedExpected.has(i) ? '' : 'background:#FFEBEE; border-color:#C62828;'}">
               <strong>${i+1}.</strong> ${e.text} ${matchedExpected.has(i) ? '✅' : '❌ manquante'}
@@ -752,7 +752,7 @@ function showResult(result) {
             studentResults.map((s, i) => `
               <div class="student-step ${s.status}">
                 <strong>${i+1}.</strong> ${s.text} 
-                ${s.status === 'matched' ? '✅' : s.status === 'partial' ? '⚠️' : '➕'}
+                ${s.status === 'matched' ? '✅' : s.status === 'partial' ? '!' : '➕'}
               </div>
             `).join('')}
           ${Array.from({length: totalExpected - fullMatches}, (_, i) => 
@@ -764,7 +764,7 @@ function showResult(result) {
   `;
 
   $('resultContent').innerHTML = html;
-  $('nextBtn').textContent = state.currentTask < tasks.length - 1 ? 'Tâche suivante →' : '🏆 Voir le résultat final';
+  $('nextBtn').textContent = state.currentTask < tasks.length - 1 ? 'Tâche suivante →' : ' Voir le résultat final';
   showScreen('result');
 }
 
@@ -780,11 +780,11 @@ function nextTask() {
 function showFinal() {
   const maxPossible = tasks.length * 115 * 5; // rough max
   const pct = Math.min(100, Math.round((state.totalScore / (tasks.length * 100)) * 100));
-  const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+  const stars = pct >= 90 ? '' : pct >= 70 ? '' : pct >= 50 ? '' : '—';
   const message = pct >= 90 ? 'Rédacteur technique expert !' : pct >= 70 ? 'Bon rédacteur, quelques détails à peaufiner.' : pct >= 50 ? 'Les bases sont là, mais il manque de la précision.' : 'La documentation mérite plus de détails et de rigueur.';
 
   let html = `
-    <h2>🏆 Résultat final</h2>
+    <h2> Résultat final</h2>
     <div class="big-score">${state.totalScore} pts</div>
     <div class="stars">${stars}</div>
     <p style="color:var(--text-muted); font-size:1.1rem; margin-bottom:2rem;">${message}</p>

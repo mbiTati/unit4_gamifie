@@ -59,12 +59,12 @@
     <div style="font-size:3rem;margin-bottom:0.5rem;">🧹</div>
     <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">Le Nettoyeur de Tables</h2>
     <p style="color:var(--muted);margin-bottom:1.5rem;">Normalisation 1NF → 2NF → 3NF<br>8 questions — Testez vos connaissances !</p>
-    <button class="btn btn-go" onclick="startQuiz()">🚀 Commencer</button>
+    <button class="btn btn-go" onclick="startQuiz()"> Commencer</button>
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
   <script>
-  const questions = [{"q":"La 1NF (première forme normale) exige :","opts":["Pas de clé primaire","Des valeurs atomiques dans chaque cellule","Pas de clé étrangère","Au moins 3 colonnes"],"correct":1,"expl":"1NF : chaque cellule contient une seule valeur indivisible (atomique). Pas de listes ni de groupes."},{"q":"Une table avec la colonne 'genres: rock, jazz, blues' viole :","opts":["La 2NF","La 1NF (valeur non atomique)","La 3NF","Aucune forme normale"],"correct":1,"expl":"Plusieurs valeurs dans une seule cellule → violation de la 1NF (atomicité)."},{"q":"⚠️ L'atomicité en 1NF et l'atomicité dans ACID sont :","opts":["La même chose","Deux concepts DIFFÉRENTS","Liées mais identiques","L'un inclut l'autre"],"correct":1,"expl":"1NF atomicité = valeur indivisible dans une cellule. ACID atomicité = transaction tout-ou-rien. Deux sens différents !"},{"q":"La 2NF élimine les dépendances :","opts":["Transitives","Partielles (partie de la PK composée)","Fonctionnelles","Toutes les dépendances"],"correct":1,"expl":"2NF : chaque attribut non-clé dépend de la TOTALITÉ de la PK, pas d'une partie seulement."},{"q":"La 3NF élimine les dépendances :","opts":["Partielles","Transitives (A→B→C)","Directes","Toutes"],"correct":1,"expl":"3NF : pas de dépendance transitive. Si A→B→C, alors C ne doit pas être dans la même table que A."},{"q":"Si une table a une PK simple (non composée), la 2NF est :","opts":["Violée par défaut","Automatiquement respectée","Impossible à vérifier","Toujours violée"],"correct":1,"expl":"La 2NF ne concerne que les PK composées. Avec une PK simple, il n'y a pas de dépendance partielle possible."},{"q":"La dénormalisation consiste à :","opts":["Ajouter plus de tables","Volontairement violer une NF pour améliorer les performances","Supprimer la PK","Chiffrer les données"],"correct":1,"expl":"On peut dénormaliser (ex: dupliquer un nom) pour éviter des JOIN coûteux. C'est un choix conscient."},{"q":"Anomalie de mise à jour = :","opts":["Impossible de créer la table","Modifier une donnée à un endroit mais pas aux autres copies","Le serveur plante","La requête est lente"],"correct":1,"expl":"Si une donnée est dupliquée et qu'on ne met à jour qu'une copie → incohérence = anomalie de MAJ."}];
+  const questions = [{"q":"La 1NF (première forme normale) exige :","opts":["Pas de clé primaire","Des valeurs atomiques dans chaque cellule","Pas de clé étrangère","Au moins 3 colonnes"],"correct":1,"expl":"1NF : chaque cellule contient une seule valeur indivisible (atomique). Pas de listes ni de groupes."},{"q":"Une table avec la colonne 'genres: rock, jazz, blues' viole :","opts":["La 2NF","La 1NF (valeur non atomique)","La 3NF","Aucune forme normale"],"correct":1,"expl":"Plusieurs valeurs dans une seule cellule → violation de la 1NF (atomicité)."},{"q":"! L'atomicité en 1NF et l'atomicité dans ACID sont :","opts":["La même chose","Deux concepts DIFFÉRENTS","Liées mais identiques","L'un inclut l'autre"],"correct":1,"expl":"1NF atomicité = valeur indivisible dans une cellule. ACID atomicité = transaction tout-ou-rien. Deux sens différents !"},{"q":"La 2NF élimine les dépendances :","opts":["Transitives","Partielles (partie de la PK composée)","Fonctionnelles","Toutes les dépendances"],"correct":1,"expl":"2NF : chaque attribut non-clé dépend de la TOTALITÉ de la PK, pas d'une partie seulement."},{"q":"La 3NF élimine les dépendances :","opts":["Partielles","Transitives (A→B→C)","Directes","Toutes"],"correct":1,"expl":"3NF : pas de dépendance transitive. Si A→B→C, alors C ne doit pas être dans la même table que A."},{"q":"Si une table a une PK simple (non composée), la 2NF est :","opts":["Violée par défaut","Automatiquement respectée","Impossible à vérifier","Toujours violée"],"correct":1,"expl":"La 2NF ne concerne que les PK composées. Avec une PK simple, il n'y a pas de dépendance partielle possible."},{"q":"La dénormalisation consiste à :","opts":["Ajouter plus de tables","Volontairement violer une NF pour améliorer les performances","Supprimer la PK","Chiffrer les données"],"correct":1,"expl":"On peut dénormaliser (ex: dupliquer un nom) pour éviter des JOIN coûteux. C'est un choix conscient."},{"q":"Anomalie de mise à jour = :","opts":["Impossible de créer la table","Modifier une donnée à un endroit mais pas aux autres copies","Le serveur plante","La requête est lente"],"correct":1,"expl":"Si une donnée est dupliquée et qu'on ne met à jour qu'une copie → incohérence = anomalie de MAJ."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
@@ -86,7 +86,7 @@
         </div>
         <div id="feedback" class="hidden" style="margin-top:1rem;padding:1rem;border-radius:10px;"></div>
         <div id="nextArea" class="hidden" style="text-align:center;margin-top:1rem;">
-          <button class="btn btn-go" onclick="nextQ()">${current < questions.length - 1 ? 'Suivante →' : '🏆 Résultat'}</button>
+          <button class="btn btn-go" onclick="nextQ()">${current < questions.length - 1 ? 'Suivante →' : ' Résultat'}</button>
         </div>
       </div>
     `;
@@ -124,7 +124,7 @@
   function showResult() {
     document.getElementById('quiz').classList.add('hidden');
     const pct = Math.round((score / (questions.length * 10)) * 100);
-    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+    const stars = pct >= 90 ? '' : pct >= 70 ? '' : pct >= 50 ? '' : '—';
     const msg = pct >= 90 ? 'Excellent !' : pct >= 70 ? 'Bon travail !' : pct >= 50 ? 'Passable.' : 'À revoir !';
     document.getElementById('result').classList.remove('hidden');
     document.getElementById('result').innerHTML = `

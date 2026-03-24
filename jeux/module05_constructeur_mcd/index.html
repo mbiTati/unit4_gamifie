@@ -60,7 +60,7 @@
     <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">Le Constructeur de MCD</h2>
     <p style="color:var(--muted);margin-bottom:0.5rem;">Entités, associations, CIF</p>
     <p style="color:var(--muted);margin-bottom:1.5rem;font-size:0.9rem;">Classez : est-ce une ENTITÉ ou un ATTRIBUT de SwissSound ?</p>
-    <button class="btn btn-go" onclick="startGame()">🚀 Commencer</button>
+    <button class="btn btn-go" onclick="startGame()"> Commencer</button>
   </div>
   <div id="game" class="hidden"></div>
   <div id="result" class="hidden"></div>
@@ -128,7 +128,7 @@
     document.getElementById('game').classList.add('hidden');
     document.getElementById('result').classList.remove('hidden');
     const pct = score;
-    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : pct >= 50 ? '⭐' : '—';
+    const stars = pct >= 90 ? '' : pct >= 70 ? '' : pct >= 50 ? '' : '—';
     document.getElementById('result').innerHTML = `
       <div class="card fade-in" style="text-align:center;">
         <div class="final-score">${correct}/${items.length}</div>
