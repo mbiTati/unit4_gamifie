@@ -1,141 +1,587 @@
 <!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Exercices SQL Avances — GESCOM</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exercices SQL — Parties 2, 3, 4 — GESCOM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--lo2:#2563eb;--accent:#ea580c;--success:#059669;--error:#dc2626;--code-bg:#1e293b}
-[data-theme="dark"]{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06);--code-bg:#0d1117}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
-.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+:root,[data-theme="dark"]{--bg:#0f172a;--surface:#1e293b;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;--accent:#3b82f6;--lo2:#3b82f6;--success:#10b981;--error:#ef4444;--code-bg:#0f172a;--section-bg:#1a2332}
+[data-theme="light"]{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--accent:#2563eb;--lo2:#2563eb;--success:#059669;--error:#dc2626;--code-bg:#f1f5f9;--section-bg:#f0f4f8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .header h1{font-size:1.05rem;font-weight:800}.sub{font-size:.7rem;color:var(--muted)}
 .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:.3s}
-[data-theme="dark"] .toggle::after{left:18px}
-.main{max-width:900px;margin:0 auto;padding:1.2rem}
-.section{margin-bottom:1.5rem}
-.section h2{font-size:1.1rem;font-weight:800;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
-.ex{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.7rem}
-.ex-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
-.ex-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;background:var(--lo2);color:#fff;padding:.12rem .4rem;border-radius:4px}
-.ex-cat{font-size:.62rem;font-weight:600;color:var(--muted);padding:.1rem .3rem;border:1px solid var(--border);border-radius:3px}
-.ex-q{font-size:.85rem;font-weight:600;margin-bottom:.4rem;line-height:1.5}
-.ex-q code{background:var(--code-bg);color:#93c5fd;padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.78rem}
-.ex-expected{font-size:.72rem;color:var(--muted);margin-bottom:.4rem;font-style:italic}
-.editor{width:100%;min-height:65px;background:var(--code-bg);color:#d4d4d4;border:1px solid var(--border);border-radius:6px;padding:.5rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;resize:vertical;line-height:1.5}
-.editor:focus{outline:none;border-color:var(--lo2)}
-.actions{display:flex;gap:.3rem;margin:.4rem 0}
-.btn{padding:.3rem .7rem;border:none;border-radius:5px;font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:.2s}
-.btn-run{background:var(--lo2);color:#fff}.btn-hint{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
-.btn-sol{background:var(--surface);color:var(--accent);border:1px solid var(--border)}
-.result{overflow-x:auto;margin-top:.3rem}
-.sql-table{border-collapse:collapse;width:100%;font-size:.7rem;font-family:'JetBrains Mono',monospace}
-.sql-table th{background:var(--surface);color:var(--lo2);padding:.25rem .35rem;text-align:left;border:1px solid var(--border);font-weight:600;white-space:nowrap}
-.sql-table td{padding:.2rem .35rem;border:1px solid var(--border);white-space:nowrap}
-.sql-table tr:nth-child(even){background:rgba(0,0,0,.02)}
-[data-theme="dark"] .sql-table tr:nth-child(even){background:rgba(255,255,255,.02)}
-.err{color:var(--error);font-size:.75rem;padding:.3rem;background:rgba(220,38,38,.05);border-radius:4px;margin-top:.3rem;font-family:'JetBrains Mono',monospace}
-.ok-msg{color:var(--success);font-size:.75rem;padding:.3rem}
-.row-count{font-size:.65rem;color:var(--muted);margin-top:.15rem}
-.hint-box,.sol-box{font-size:.75rem;padding:.35rem .5rem;border-radius:5px;margin-top:.3rem;display:none}
-.hint-box{color:var(--lo2);background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.1)}
-.sol-box{color:var(--accent);background:rgba(234,88,12,.05);border:1px solid rgba(234,88,12,.1);font-family:'JetBrains Mono',monospace;white-space:pre-wrap}
-.hint-box.show,.sol-box.show{display:block}
-.score-bar .v{font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
-.progress{display:flex;gap:.12rem;margin-bottom:1rem;flex-wrap:wrap}
-.prog-dot{width:16px;height:5px;border-radius:3px;background:var(--border);transition:.3s}
-.prog-dot.done{background:var(--success)}
-.back{display:inline-block;margin-top:.8rem;color:var(--muted);font-size:.75rem;font-weight:600;text-decoration:none}
-#loading{text-align:center;padding:3rem;color:var(--muted)}
-</style></head><body>
+[data-theme="light"] .toggle::after{left:18px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.progress{background:var(--border);border-radius:8px;height:8px;margin:1rem 0}
+.progress-bar{background:linear-gradient(90deg,var(--accent),var(--success));height:100%;border-radius:8px;transition:width .5s}
+.stats{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem 1rem;text-align:center}
+.stat .n{font-size:1.2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.stat .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.section{margin:2rem 0}
+.section h2{font-size:1.1rem;font-weight:800;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:2px solid var(--accent);color:var(--accent)}
+.section h3{font-size:.95rem;font-weight:700;margin:1rem 0 .5rem;color:var(--text)}
+.explanation{background:var(--section-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin:.8rem 0;font-size:.82rem;line-height:1.7}
+.explanation strong{color:var(--accent)}
+.explanation .step{margin:.4rem 0;padding-left:.8rem;border-left:2px solid var(--accent)}
+.explanation code{background:var(--code-bg);padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.explanation .warning{color:var(--error);font-weight:600}
+.explanation .tip{color:var(--success);font-weight:600}
+.ex{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin:.8rem 0;position:relative}
+.ex-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.ex-num{background:var(--accent);color:#fff;font-size:.7rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;font-family:'JetBrains Mono',monospace}
+.ex-cat{font-size:.65rem;font-weight:700;color:var(--muted);background:rgba(59,130,246,.08);padding:.12rem .4rem;border-radius:3px}
+.ex-status{margin-left:auto;font-size:.7rem;font-weight:700}
+.ex-status.ok{color:var(--success)}
+.ex-status.pending{color:var(--muted)}
+.ex-q{font-size:.85rem;margin-bottom:.6rem;line-height:1.5}
+.ex-q code{background:var(--code-bg);padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.78rem}
+textarea.sql-input{width:100%;min-height:60px;background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.5rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;resize:vertical}
+.btn-row{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap}
+.btn{padding:.35rem .8rem;border:none;border-radius:6px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-run{background:var(--accent);color:#fff}.btn-run:hover{opacity:.85}
+.btn-hint{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.btn-sol{background:rgba(139,92,246,.1);color:#8b5cf6;border:1px solid rgba(139,92,246,.2)}
+.result{margin-top:.5rem;max-height:200px;overflow:auto;font-size:.75rem}
+.result table{width:100%;border-collapse:collapse}
+.result th{background:var(--accent);color:#fff;padding:.25rem .4rem;font-size:.68rem;text-align:left;position:sticky;top:0}
+.result td{padding:.2rem .4rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.7rem}
+.result tr:nth-child(even){background:rgba(59,130,246,.03)}
+.result-info{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.hint-box,.sol-box{background:var(--section-bg);border:1px solid var(--border);border-radius:6px;padding:.5rem .8rem;margin-top:.4rem;font-size:.78rem;display:none}
+.hint-box{border-left:3px solid #f59e0b}
+.sol-box{border-left:3px solid #8b5cf6}
+.sol-box code{font-family:'JetBrains Mono',monospace;font-size:.78rem;white-space:pre-wrap}
+.error-msg{color:var(--error);font-size:.78rem;margin-top:.3rem}
+.nav-section{display:flex;gap:.3rem;flex-wrap:wrap;margin:1rem 0}
+.nav-btn{padding:.3rem .6rem;border-radius:5px;font-size:.7rem;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.2s}
+.nav-btn:hover,.nav-btn.active{background:rgba(59,130,246,.1);border-color:var(--accent);color:var(--accent)}
+@media(max-width:700px){.main{padding:1rem}.explanation{padding:.7rem}.header{padding:.8rem}}
+</style>
+</head>
+<body>
 <div class="header">
-  <div><h1>Exercices SQL Avances — GESCOM</h1><div class="sub">GROUP BY, JOIN, sous-requetes, DML — Adapte des parties 2-4</div></div>
-  <div style="display:flex;gap:.5rem;align-items:center"><span class="v" id="score">0/25</span><div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div></div>
+<div><h1>Exercices SQL — Parties 2, 3 & 4</h1><div class="sub">GESCOM — GROUP BY, JOIN, Sous-requetes, DML — Adapte Oracle → MySQL</div></div>
+<div style="display:flex;gap:.8rem;align-items:center">
+<a href="../../index.html" style="font-size:.75rem;color:var(--muted);text-decoration:none">← Hub</a>
+<div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div>
+</div>
 </div>
 <div class="main">
-<div class="progress" id="progress"></div>
-<div id="loading">Chargement GESCOM (17 tables)...</div>
-<div id="exercises"></div>
+<div class="progress"><div class="progress-bar" id="pbar" style="width:0%"></div></div>
+<div class="stats">
+<div class="stat"><div class="n" id="solved">0</div><div class="l">Resolus</div></div>
+<div class="stat"><div class="n" id="total">0</div><div class="l">Exercices</div></div>
+<div class="stat"><div class="n" id="pct">0%</div><div class="l">Progression</div></div>
 </div>
-<a class="back" href="index.html">&larr; Retour au hub</a>
+<div class="nav-section" id="navBtns"></div>
+<div id="content"></div>
+</div>
 <script>
-let db=null,solved=0;
-const EX=[
-// GROUP BY (from Oracle P2)
-{n:1,cat:"GROUP BY",q:"CA courant (<code>CACLIC</code>) par categorie de client (<code>NOCAT</code>).",hint:"SELECT NOCAT, SUM(CACLIC) FROM client GROUP BY NOCAT",sol:"SELECT NOCAT, SUM(CACLIC) AS ca_total FROM client GROUP BY NOCAT ORDER BY NOCAT;"},
-{n:2,cat:"GROUP BY",q:"Nombre d'articles par famille (<code>NOFAM</code>).",hint:"COUNT(*) GROUP BY NOFAM",sol:"SELECT NOFAM, COUNT(*) AS nb_articles FROM article GROUP BY NOFAM ORDER BY nb_articles DESC;"},
-{n:3,cat:"HAVING",q:"Familles ayant plus de 3 articles.",hint:"GROUP BY NOFAM HAVING COUNT(*) > 3",sol:"SELECT NOFAM, COUNT(*) AS nb FROM article GROUP BY NOFAM HAVING COUNT(*) > 3;"},
-{n:4,cat:"GROUP BY",q:"Nombre de commandes par client (avec raison sociale).",hint:"JOIN client + GROUP BY + COUNT",sol:"SELECT c.NOCLI, c.RSCLI, COUNT(*) AS nb_cde FROM commande co JOIN client c ON co.NOCLI = c.NOCLI GROUP BY c.NOCLI, c.RSCLI ORDER BY nb_cde DESC;"},
-{n:5,cat:"GROUP BY",q:"CA moyen par categorie de client, arrondi a 2 decimales.",hint:"ROUND(AVG(CACLIC), 2) GROUP BY NOCAT",sol:"SELECT NOCAT, ROUND(AVG(CACLIC), 2) AS ca_moyen FROM client GROUP BY NOCAT;"},
-// JOINTURES (from Oracle P2)
-{n:6,cat:"JOIN",q:"Articles avec leur nom de famille (JOIN article + famille).",hint:"JOIN famille f ON a.NOFAM = f.NOFAM",sol:"SELECT a.NOART, a.DESART, f.LIBFAM FROM article a JOIN famille f ON a.NOFAM = f.NOFAM ORDER BY f.LIBFAM;"},
-{n:7,cat:"JOIN",q:"Commandes avec nom du client et nom du representant.",hint:"JOIN client + JOIN representant (LEFT pour representant car NULL possible)",sol:"SELECT co.NOCDE, co.DATCDE, c.RSCLI, r.NOMREP FROM commande co JOIN client c ON co.NOCLI = c.NOCLI LEFT JOIN representant r ON co.NOREP = r.NOREP ORDER BY co.DATCDE;"},
-{n:8,cat:"JOIN",q:"Articles avec nom de famille ET nom de fournisseur.",hint:"Double JOIN : article → famille + article → fournisseur",sol:"SELECT a.NOART, a.DESART, f.LIBFAM, fo.RSFOUR FROM article a JOIN famille f ON a.NOFAM = f.NOFAM JOIN fournisseur fo ON a.NOFOUR = fo.NOFOUR ORDER BY f.LIBFAM, a.DESART;"},
-{n:9,cat:"JOIN",q:"Detail des commandes : n commande, date, client, article, quantite.",hint:"commande → client + lignecde → article",sol:"SELECT co.NOCDE, co.DATCDE, c.RSCLI, a.DESART, lc.QTECDE FROM commande co JOIN client c ON co.NOCLI = c.NOCLI JOIN lignecde lc ON co.NOCDE = lc.NOCDE JOIN article a ON lc.NOART = a.NOART ORDER BY co.NOCDE;"},
-{n:10,cat:"JOIN",q:"CA par fournisseur (somme du CA de tous ses articles).",hint:"JOIN fournisseur + SUM(CAART) GROUP BY fournisseur",sol:"SELECT fo.NOFOUR, fo.RSFOUR, SUM(a.CAART) AS ca_total FROM fournisseur fo JOIN article a ON fo.NOFOUR = a.NOFOUR GROUP BY fo.NOFOUR, fo.RSFOUR ORDER BY ca_total DESC;"},
-{n:11,cat:"JOIN+HAVING",q:"Fournisseurs ayant plus de 5 articles.",hint:"JOIN + GROUP BY + HAVING COUNT > 5",sol:"SELECT fo.RSFOUR, COUNT(*) AS nb_art FROM fournisseur fo JOIN article a ON fo.NOFOUR = a.NOFOUR GROUP BY fo.NOFOUR, fo.RSFOUR HAVING COUNT(*) > 5;"},
-{n:12,cat:"JOIN",q:"Representants et le nombre de commandes qu'ils ont pris.",hint:"LEFT JOIN commande + GROUP BY representant",sol:"SELECT r.NOREP, r.NOMREP, COUNT(co.NOCDE) AS nb_cde FROM representant r LEFT JOIN commande co ON r.NOREP = co.NOREP GROUP BY r.NOREP, r.NOMREP ORDER BY nb_cde DESC;"},
-{n:13,cat:"JOIN",q:"Livraisons avec nom client, detail articles livres et quantites.",hint:"livraison → client + ligneliv → article",sol:"SELECT l.NOLIV, l.DATLIV, c.RSCLI, a.DESART, ll.QTELIV FROM livraison l JOIN client c ON l.NOCLI = c.NOCLI JOIN ligneliv ll ON l.NOLIV = ll.NOLIV JOIN article a ON ll.NOART = a.NOART ORDER BY l.NOLIV;"},
-// SOUS-REQUETES (from Oracle P3)
-{n:14,cat:"Sous-requete",q:"Nombre de commandes par categorie de client.",hint:"Jointure commande → client puis GROUP BY NOCAT",sol:"SELECT c.NOCAT, COUNT(*) AS nb_cde FROM commande co JOIN client c ON co.NOCLI = c.NOCLI GROUP BY c.NOCAT ORDER BY c.NOCAT;"},
-{n:15,cat:"Sous-requete",q:"Articles n'ayant JAMAIS ete commandes.",hint:"NOT IN (SELECT NOART FROM lignecde)",sol:"SELECT NOART, DESART FROM article WHERE NOART NOT IN (SELECT DISTINCT NOART FROM lignecde);"},
-{n:16,cat:"Sous-requete",q:"Client(s) ayant commande l'article avec le plus fort CA.",hint:"WHERE NOART = (SELECT NOART FROM article WHERE CAART = (SELECT MAX(CAART) FROM article))",sol:"SELECT DISTINCT c.NOCLI, c.RSCLI, a.NOART, a.DESART FROM commande co JOIN lignecde lc ON co.NOCDE = lc.NOCDE JOIN client c ON co.NOCLI = c.NOCLI JOIN article a ON lc.NOART = a.NOART WHERE a.CAART = (SELECT MAX(CAART) FROM article);"},
-{n:17,cat:"Sous-requete",q:"Clients ayant passe au moins 2 commandes.",hint:"GROUP BY NOCLI HAVING COUNT >= 2",sol:"SELECT c.NOCLI, c.RSCLI, COUNT(*) AS nb FROM commande co JOIN client c ON co.NOCLI = c.NOCLI GROUP BY c.NOCLI, c.RSCLI HAVING COUNT(*) >= 2 ORDER BY nb DESC;"},
-{n:18,cat:"Sous-requete",q:"Article le plus cher (selon le dernier tarif).",hint:"MAX(PRXART) FROM tarif",sol:"SELECT a.NOART, a.DESART, t.PRXART FROM article a JOIN tarif t ON a.NOART = t.NOART WHERE t.DATPRX = '1999-02-01' ORDER BY t.PRXART DESC LIMIT 1;"},
-// DML (from Oracle P4)
-{n:19,cat:"INSERT",q:"Inserer un nouveau client : NOCLI=700, NOCAT=3, RSCLI='TEST CLIENT', VILCLI='ZURICH', CPCLI='8000'.",hint:"INSERT INTO client (...) VALUES (...)",sol:"INSERT INTO client (NOCLI, NOCAT, RSCLI, VILCLI, CPCLI, CACLIC, CACLIP, ETACLI) VALUES (700, 3, 'TEST CLIENT', 'ZURICH', '8000', 0, 0, 'ACTIF');"},
-{n:20,cat:"UPDATE",q:"Augmenter de 10% le CA de tous les articles du fournisseur 80.",hint:"UPDATE article SET CAART = CAART * 1.1 WHERE NOFOUR = 80",sol:"UPDATE article SET CAART = ROUND(CAART * 1.1, 2) WHERE NOFOUR = 80;"},
-{n:21,cat:"DELETE",q:"Supprimer le client TEST (NOCLI=700) qu'on vient d'inserer.",hint:"DELETE FROM client WHERE NOCLI = 700",sol:"DELETE FROM client WHERE NOCLI = 700;"},
-{n:22,cat:"JOIN avance",q:"Montant total facture par client (SUM montant HT).",hint:"facture + client + SUM(TOTHT)",sol:"SELECT c.NOCLI, c.RSCLI, SUM(f.TOTHT) AS total_ht FROM facture f JOIN client c ON f.NOCLI = c.NOCLI GROUP BY c.NOCLI, c.RSCLI ORDER BY total_ht DESC;"},
-{n:23,cat:"JOIN avance",q:"Prix actuel de chaque article (tarif du 01/02/1999) avec nom famille.",hint:"article + tarif + famille, WHERE DATPRX = ...",sol:"SELECT a.NOART, a.DESART, f.LIBFAM, t.PRXART FROM article a JOIN tarif t ON a.NOART = t.NOART JOIN famille f ON a.NOFAM = f.NOFAM WHERE t.DATPRX = '1999-02-01' ORDER BY t.PRXART DESC;"},
-{n:24,cat:"Synthese",q:"Top 5 articles les plus commandes (quantite totale).",hint:"lignecde + article + SUM(QTECDE) + LIMIT 5",sol:"SELECT a.NOART, a.DESART, SUM(lc.QTECDE) AS total_qte FROM lignecde lc JOIN article a ON lc.NOART = a.NOART GROUP BY a.NOART, a.DESART ORDER BY total_qte DESC LIMIT 5;"},
-{n:25,cat:"Synthese",q:"Dashboard : nb clients actifs, nb articles, nb commandes, CA total factures.",hint:"4 SELECT avec UNION ALL",sol:"SELECT 'Clients actifs' AS kpi, COUNT(*) AS valeur FROM client WHERE ETACLI = 'ACTIF' UNION ALL SELECT 'Articles', COUNT(*) FROM article UNION ALL SELECT 'Commandes', COUNT(*) FROM commande UNION ALL SELECT 'CA total HT', ROUND(SUM(TOTHT),2) FROM facture;"},
+let db=null;let solved=0;
+
+
+const SECTIONS = [
+// =========== PARTIE 2 : GROUP BY, HAVING, JOINTURES, SOUS-REQUETES ===========
+{
+  id:"groupby",
+  title:"Partie 2 — Les regroupements (GROUP BY)",
+  explanations:[
+    {html:`<strong>GROUP BY</strong> — Comment regrouper les enregistrements sur une caracteristique commune ?<br><br>
+Par exemple, on souhaite calculer le chiffre d'affaires (<code>CACLIC</code>) pour chaque categorie de client (<code>NOCAT</code>) ?<br>
+Dans la table CLIENT, il y a 36 clients, donc 36 CACLIC.<br><br>
+<div class="step">Etape 1 : Visualiser les donnees triees par categorie :<br><code>SELECT NOCLI, RSCLI, NOCAT, CACLIC FROM client ORDER BY NOCAT;</code></div>
+<div class="step">Etape 2 : On souhaite additionner les CA pour chacune des categories. Deux commandes necessaires :<br>
+• <code>GROUP BY NOCAT</code> pour regrouper par categorie<br>
+• <code>SUM(CACLIC)</code> pour additionner les CA<br>
+<code>SELECT NOCAT, SUM(CACLIC) FROM client GROUP BY NOCAT;</code></div>
+<div class="step"><span class="warning">⚠ Regle GROUP BY :</span> Seules les colonnes "regroupables" peuvent etre dans le SELECT.<br>
+• <code>SUM(CACLIC)</code> peut etre affiche (c'est une agregation)<br>
+• <code>NOCLI</code>, <code>RSCLI</code> ne peuvent PAS etre affiches (pas dans le GROUP BY).<br>
+Si on ajoute RSCLI → erreur "n'est pas une expression du GROUP BY".</div>`}
+  ],
+  exercises:[
+    {n:1,cat:"GROUP BY",q:"Quel est le chiffre d'affaires moyen, maxi et mini par n° de famille d'article ?",
+     hint:"Utilisez AVG(), MAX(), MIN() avec GROUP BY NOFAM",
+     sol:"SELECT NOFAM, ROUND(AVG(CAART),2) AS 'CA moyen', MAX(CAART) AS 'CA maxi', MIN(CAART) AS 'CA mini'\nFROM article\nGROUP BY NOFAM;",
+     check:r=>r.length>0&&r[0].columns.length>=4},
+    {n:2,cat:"GROUP BY",q:"Calculer la somme des chiffres d'affaires des articles par n° de fournisseur. Respecter l'ordre et utiliser un alias de colonne.",
+     hint:"SUM(CAART) avec GROUP BY NOFOUR, ORDER BY NOFOUR",
+     sol:"SELECT NOFOUR, SUM(CAART) AS 'Total CA'\nFROM article\nGROUP BY NOFOUR\nORDER BY NOFOUR;",
+     check:r=>r.length>0&&r[0].columns.length>=2},
+    {n:3,cat:"GROUP BY",q:"Afficher le chiffre d'affaires (<code>CAREP</code>) total des representants par n° de secteur (<code>NOSECT</code>). Respecter l'ordre et l'alias.",
+     hint:"SUM(CAREP) avec GROUP BY NOSECT, ORDER BY NOSECT",
+     sol:"SELECT NOSECT, SUM(CAREP) AS 'CA total'\nFROM representant\nGROUP BY NOSECT\nORDER BY NOSECT;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"having",
+  title:"Partie 2 — Conditionner les regroupements (HAVING)",
+  explanations:[
+    {html:`<strong>HAVING</strong> — Si on ne souhaite pas afficher TOUS les regroupements, mais uniquement ceux correspondant a une condition, on utilise <code>HAVING</code> (en plus de GROUP BY).<br><br>
+Exemple : CA moyen par categorie, uniquement pour les categories ayant un CA moyen > 98 000 :<br>
+<code>SELECT NOCAT, ROUND(AVG(CACLIC),2) AS "CA moyen" FROM client<br>GROUP BY NOCAT<br>HAVING AVG(CACLIC) > 98000;</code><br><br>
+<div class="step"><span class="warning">⚠ Difference cruciale :</span><br>
+• <strong>WHERE</strong> = condition sur les <strong>enregistrements</strong> (avant regroupement)<br>
+• <strong>HAVING</strong> = condition sur les <strong>groupes</strong> (apres regroupement)<br><br>
+1. Selectionner certains enregistrements, puis les regrouper → <code>WHERE + GROUP BY</code><br>
+2. Regrouper, puis selectionner certains groupes → <code>GROUP BY + HAVING</code></div>`}
+  ],
+  exercises:[
+    {n:4,cat:"HAVING",q:"Somme et moyenne des chiffres d'affaires des articles par n° de famille ayant un chiffre d'affaires moyen superieur a 500 000.",
+     hint:"GROUP BY NOFAM HAVING AVG(CAART) > 500000",
+     sol:"SELECT NOFAM, SUM(CAART) AS 'Somme CA', ROUND(AVG(CAART),2) AS 'Moyenne CA'\nFROM article\nGROUP BY NOFAM\nHAVING AVG(CAART) > 500000;",
+     check:r=>r.length>0},
+    {n:5,cat:"WHERE+GROUP BY",q:"Somme et moyenne des CA des articles par n° de famille, pour les articles des fournisseurs n° 80, 100, 105, 111, 112.",
+     hint:"WHERE NOFOUR IN (...) + GROUP BY NOFAM — ici WHERE filtre AVANT le regroupement",
+     sol:"SELECT NOFAM, SUM(CAART) AS 'Somme CA', ROUND(AVG(CAART),2) AS 'Moyenne CA'\nFROM article\nWHERE NOFOUR IN (80, 100, 105, 111, 112)\nGROUP BY NOFAM;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"jointures",
+  title:"Partie 2 — Les jointures",
+  explanations:[
+    {html:`<strong>JOINTURE</strong> — Une jointure permet d'afficher dans le resultat d'une requete des attributs presents dans <strong>plusieurs tables</strong>.<br><br>
+Exemple : On veut afficher les clients et leur categorie. Le libelle de la categorie se trouve dans la table <code>CATEGORIE</code>, pas dans <code>CLIENT</code>.<br>
+<code>SELECT NOCLI, RSCLI, LIBCAT<br>FROM client, categorie<br>WHERE client.NOCAT = categorie.NOCAT;</code><br><br>
+<div class="step"><strong>Syntaxe MySQL avec JOIN :</strong><br>
+<code>SELECT NOCLI, RSCLI, LIBCAT<br>FROM client<br>JOIN categorie ON client.NOCAT = categorie.NOCAT;</code><br>
+Les deux syntaxes sont equivalentes.</div>`}
+  ],
+  exercises:[
+    {n:6,cat:"JOIN",q:"Lister les articles et le libelle de leur famille. Le resultat contient 38 lignes.",
+     hint:"JOIN article et famille sur NOFAM",
+     sol:"SELECT article.NOART, DESART, LIBFAM\nFROM article\nJOIN famille ON article.NOFAM = famille.NOFAM;",
+     check:r=>r.length>0&&r[0].values.length>=30},
+    {n:7,cat:"JOIN",q:"Lister les representants et le libelle de leur secteur.",
+     hint:"JOIN representant et secteur sur NOSECT",
+     sol:"SELECT representant.NOREP, NOMREP, PRNREP, LIBSECT\nFROM representant\nJOIN secteur ON representant.NOSECT = secteur.NOSECT;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"join_multi",
+  title:"Partie 2 — Jointures multiples",
+  explanations:[
+    {html:`<strong>Plusieurs jointures dans une meme requete</strong><br><br>
+Exemple : Lister les clients (NOCLI, RSCLI), commandes (NOCDE) et articles (NOART, DESART) :<br>
+<code>SELECT client.NOCLI, RSCLI, commande.NOCDE, article.NOART, DESART<br>FROM client<br>JOIN commande ON client.NOCLI = commande.NOCLI<br>JOIN lignecde ON commande.NOCDE = lignecde.NOCDE<br>JOIN article ON lignecde.NOART = article.NOART;</code><br><br>
+<div class="step">On liste toutes les tables necessaires dans les JOIN (y compris celles ou aucune rubrique ne sera affichee, comme LIGNECDE).<br>
+Le resultat comporte 122 lignes.</div>`}
+  ],
+  exercises:[
+    {n:8,cat:"JOIN multiple",q:"Lister les livraisons en affichant le n° du client, sa raison sociale, le n° de livraison, le n° et la designation des articles, ainsi que la quantite livree dans l'ordre des n° de livraison. (102 lignes)",
+     hint:"4 tables : livraison → client + ligneliv → article, ORDER BY NOLIV",
+     sol:"SELECT client.NOCLI, RSCLI, livraison.NOLIV, article.NOART, DESART, QTELIV\nFROM livraison\nJOIN client ON livraison.NOCLI = client.NOCLI\nJOIN ligneliv ON livraison.NOLIV = ligneliv.NOLIV\nJOIN article ON ligneliv.NOART = article.NOART\nORDER BY livraison.NOLIV;",
+     check:r=>r.length>0&&r[0].values.length>=80},
+    {n:9,cat:"JOIN+LIKE",q:"Lister les articles dont la designation contient VTT (<code>NOART</code> et <code>DESART</code>), ainsi que leur famille (<code>LIBFAM</code>), fournisseur (<code>RSFOUR</code>) et branche (<code>LIBBRAN</code>).",
+     hint:"4 tables : article → famille → fournisseur + branche, WHERE DESART LIKE '%VTT%'",
+     sol:"SELECT article.NOART, DESART, LIBFAM, RSFOUR, LIBBRAN\nFROM article\nJOIN famille ON article.NOFAM = famille.NOFAM\nJOIN fournisseur ON article.NOFOUR = fournisseur.NOFOUR\nJOIN branche ON fournisseur.NOBRAN = branche.NOBRAN\nWHERE DESART LIKE '%VTT%';",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"join_group",
+  title:"Partie 2 — Jointures + GROUP BY + Conditions",
+  explanations:[
+    {html:`<strong>Combiner jointures, conditions et regroupements</strong><br><br>
+Exemple : Cumul des quantites commandees par article, pour les commandes restant a traiter (ETACDE = 'N') :<br><br>
+<div class="step"><strong>Etape 1 :</strong> Le systeme execute la jointure entre les deux tables<br>
+<code>SELECT NOART, QTECDE FROM lignecde<br>JOIN commande ON lignecde.NOCDE = commande.NOCDE<br>ORDER BY NOART;</code></div>
+<div class="step"><strong>Etape 2 :</strong> Il applique la condition et ne retient que les enregistrements correspondants<br>
+<code>SELECT NOART, QTECDE FROM lignecde<br>JOIN commande ON lignecde.NOCDE = commande.NOCDE<br>WHERE ETACDE = 'N'<br>ORDER BY NOART;</code></div>
+<div class="step"><strong>Etape 3 :</strong> Il effectue en dernier les regroupements et calcule la somme des QTECDE<br>
+<code>SELECT NOART, SUM(QTECDE) AS 'Cumul quantites commandees'<br>FROM lignecde<br>JOIN commande ON lignecde.NOCDE = commande.NOCDE<br>WHERE ETACDE = 'N'<br>GROUP BY NOART;</code><br>
+Le resultat compte 17 enregistrements.</div>`}
+  ],
+  exercises:[
+    {n:10,cat:"JOIN+GROUP+WHERE",q:"Lister le nombre de commandes par secteur, pour les representants dont le CA est superieur a 800 000.",
+     hint:"JOIN representant + commande, WHERE CAREP > 800000, GROUP BY NOSECT",
+     sol:"SELECT representant.NOSECT, COUNT(NOCDE) AS 'Nb commandes'\nFROM representant\nJOIN commande ON representant.NOREP = commande.NOREP\nWHERE CAREP > 800000\nGROUP BY representant.NOSECT;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"group_col",
+  title:"Partie 2 — Afficher une colonne hors GROUP BY",
+  explanations:[
+    {html:`<strong>Comment afficher une colonne sur laquelle ne porte pas le regroupement ?</strong><br><br>
+On souhaite calculer le nombre de commandes par representant. On ne peut pas faire le GROUP BY sur NOMREP (risque d'homonymie). On regroupe sur NOREP.<br><br>
+<div class="step">Requete avec seulement NOREP :<br><code>SELECT representant.NOREP, COUNT(NOCDE) AS 'Nb commandes'<br>FROM representant<br>JOIN commande ON representant.NOREP = commande.NOREP<br>GROUP BY representant.NOREP;</code></div>
+<div class="step">Si on ajoute NOMREP dans le SELECT → <span class="warning">erreur "n'est pas une expression GROUP BY"</span><br>
+→ Il faut ajouter NOMREP dans le GROUP BY :<br>
+<code>SELECT representant.NOREP, NOMREP, COUNT(NOCDE) AS 'Nb commandes'<br>FROM representant<br>JOIN commande ON representant.NOREP = commande.NOREP<br>GROUP BY representant.NOREP, NOMREP;</code></div>`}
+  ],
+  exercises:[]
+},
+{
+  id:"sousreq",
+  title:"Partie 2 — Les sous-requetes",
+  explanations:[
+    {html:`<strong>SOUS-REQUETE</strong> — Comment integrer une requete dans une requete ?<br><br>
+Exemple : Lister les clients dont le CACLIC est superieur au CA courant moyen.<br><br>
+<div class="step"><strong>Methodologie :</strong> On commence par la fin !<br>
+1. Ecrire la requete qui trouve le CA moyen : <code>SELECT AVG(CACLIC) FROM client;</code><br>
+2. Ecrire la requete qui liste les clients dont le CA > ce resultat<br>
+3. Remplacer la valeur par la sous-requete :<br>
+<code>SELECT NOCLI, RSCLI, CACLIC FROM client<br>WHERE CACLIC > (SELECT AVG(CACLIC) FROM client);</code></div>`}
+  ],
+  exercises:[
+    {n:11,cat:"Sous-requete",q:"Lister toutes les commandes ayant deja eu une livraison et ayant encore des articles en attente de livraison (utiliser l'ETACDE = 'N').",
+     hint:"ETACDE = 'N' signifie que la commande n'est pas totalement livree mais une livraison existe",
+     sol:"SELECT * FROM commande\nWHERE ETACDE = 'N';",
+     check:r=>r.length>0},
+    {n:12,cat:"NOT IN",q:"Les articles sont vendus de deux manieres : directement au magasin ou par le biais de commandes. Lister tous les articles n'ayant pas ete commandes.",
+     hint:"Articles dont NOART n'est PAS dans la table lignecde → NOT IN ou NOT EXISTS",
+     sol:"SELECT NOART, DESART FROM article\nWHERE NOART NOT IN (SELECT DISTINCT NOART FROM lignecde);",
+     check:r=>r.length>0},
+    {n:13,cat:"Sous-requete",q:"Tous les clients ayant commande l'article ayant le plus fort chiffre d'affaires de tous les articles commandes.",
+     hint:"D'abord trouver le NOART avec le MAX(CAART) parmi les articles commandes, puis trouver les clients",
+     sol:"SELECT DISTINCT client.NOCLI, RSCLI, article.NOART, DESART\nFROM client\nJOIN commande ON client.NOCLI = commande.NOCLI\nJOIN lignecde ON commande.NOCDE = lignecde.NOCDE\nJOIN article ON lignecde.NOART = article.NOART\nWHERE article.NOART = (\n  SELECT lignecde.NOART FROM lignecde\n  JOIN article ON lignecde.NOART = article.NOART\n  ORDER BY CAART DESC LIMIT 1\n);",
+     check:r=>r.length>0},
+    {n:14,cat:"HAVING+GROUP",q:"Lister tous les clients ayant passe au moins 2 commandes. Respecter l'ordre des enregistrements.",
+     hint:"GROUP BY NOCLI HAVING COUNT(*) >= 2, JOIN client pour avoir RSCLI",
+     sol:"SELECT client.NOCLI, RSCLI\nFROM client\nJOIN commande ON client.NOCLI = commande.NOCLI\nGROUP BY client.NOCLI, RSCLI\nHAVING COUNT(*) >= 2\nORDER BY client.NOCLI;",
+     check:r=>r.length>0},
+    {n:15,cat:"JOIN+GROUP",q:"Par n° de famille, le chiffre d'affaires moyen, maxi et mini des articles commandes.<br><span class='warning'>Attention : bien verifier le nombre de lignes et les montants de la famille 52.</span>",
+     hint:"JOIN lignecde → article, GROUP BY NOFAM, avec AVG/MAX/MIN sur CAART des articles COMMANDES",
+     sol:"SELECT article.NOFAM, ROUND(AVG(CAART),2) AS 'CA Moyen',\n       MAX(CAART) AS 'CA Maxi', MIN(CAART) AS 'CA mini'\nFROM article\nJOIN lignecde ON article.NOART = lignecde.NOART\nGROUP BY article.NOFAM\nORDER BY article.NOFAM;",
+     check:r=>r.length>0},
+    {n:16,cat:"NOT LIKE+WHERE",q:"Lister les clients n'appartenant pas au groupe VELOCIP (la raison sociale ne doit pas contenir VELOCIP) et n'appartenant pas a la categorie n° 6, classes par categorie, puis par raison sociale.",
+     hint:"WHERE RSCLI NOT LIKE '%VELOCIP%' AND NOCAT <> 6 ORDER BY NOCAT, RSCLI",
+     sol:"SELECT NOCLI, RSCLI, NOCAT FROM client\nWHERE RSCLI NOT LIKE '%VELOCIP%'\n  AND NOCAT <> 6\nORDER BY NOCAT, RSCLI;",
+     check:r=>r.length>0},
+    {n:17,cat:"GROUP BY",q:"Quel est le nombre d'articles par famille ?",
+     hint:"COUNT(*) + GROUP BY NOFAM, JOIN famille pour le libelle",
+     sol:"SELECT famille.NOFAM, LIBFAM, COUNT(*) AS 'Nb articles'\nFROM article\nJOIN famille ON article.NOFAM = famille.NOFAM\nGROUP BY famille.NOFAM, LIBFAM\nORDER BY famille.NOFAM;",
+     check:r=>r.length>0},
+    {n:18,cat:"WHERE+GROUP",q:"Combien de commandes ont ete passees par les representants n° 103, 105 et 110 ?",
+     hint:"WHERE NOREP IN (103, 105, 110) + GROUP BY + JOIN pour le nom",
+     sol:"SELECT representant.NOREP, NOMREP, COUNT(NOCDE) AS 'Nb commandes'\nFROM representant\nJOIN commande ON representant.NOREP = commande.NOREP\nWHERE representant.NOREP IN (103, 105, 110)\nGROUP BY representant.NOREP, NOMREP;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"correlees",
+  title:"Partie 2 — Les sous-requetes correlees",
+  explanations:[
+    {html:`<strong>SOUS-REQUETES CORRELEES</strong> — Comment comparer une valeur d'un enregistrement a un sous-ensemble d'enregistrements auquel il appartient ?<br><br>
+Exemple : Lister les clients dont le CACLIC est inferieur au CA moyen de LEUR categorie :<br>
+<code>SELECT NOCLI, RSCLI, CACLIC FROM client cl1<br>WHERE CACLIC < (SELECT AVG(CACLIC) FROM client cl2 WHERE cl2.NOCAT = cl1.NOCAT);</code><br><br>
+<div class="step">La sous-requete est dite <strong>correlee</strong> car elle ne fait la moyenne que sur les clients dont le n° categorie est le meme que celui de la requete principale. D'ou la condition <code>cl2.NOCAT = cl1.NOCAT</code>.</div>`}
+  ],
+  exercises:[
+    {n:19,cat:"Correlee",q:"Lister les articles ayant le plus fort chiffre d'affaires de leur famille (NOART, DESART, LIBFAM).",
+     hint:"WHERE CAART = (SELECT MAX(CAART) FROM article a2 WHERE a2.NOFAM = a1.NOFAM) — sous-requete correlee",
+     sol:"SELECT a1.NOART, a1.DESART, LIBFAM\nFROM article a1\nJOIN famille ON a1.NOFAM = famille.NOFAM\nWHERE a1.CAART = (\n  SELECT MAX(CAART) FROM article a2 WHERE a2.NOFAM = a1.NOFAM\n);",
+     check:r=>r.length>0}
+  ]
+},
+// =========== PARTIE 3 : COMPLEMENTS ===========
+{
+  id:"externe",
+  title:"Partie 3 — Jointures externes (LEFT JOIN)",
+  explanations:[
+    {html:`<strong>Jointure externe (LEFT JOIN)</strong> — Lister toutes les lignes d'une table et seulement les lignes de l'autre table verifiant la jointure.<br><br>
+Exemple : Lister toutes les categories y compris celles sans client :<br>
+<div class="step"><strong>Syntaxe Oracle :</strong> <code>WHERE cl.NOCAT(+) = cat.NOCAT</code> (le (+) est Oracle seulement)<br>
+<strong>Syntaxe MySQL/standard :</strong> <code>LEFT JOIN</code><br>
+<code>SELECT LIBCAT, NOCLI, RSCLI<br>FROM categorie<br>LEFT JOIN client ON client.NOCAT = categorie.NOCAT<br>ORDER BY LIBCAT;</code><br>
+Les categories sans client affichent NULL pour NOCLI et RSCLI.</div>`}
+  ],
+  exercises:[
+    {n:20,cat:"LEFT JOIN",q:"Lister tous les clients, leur categorie et les dates de leurs commandes, y compris ceux qui n'ont pas passe de commandes.",
+     hint:"client LEFT JOIN categorie + client LEFT JOIN commande",
+     sol:"SELECT client.NOCLI, RSCLI, LIBCAT, DATCDE\nFROM client\nJOIN categorie ON client.NOCAT = categorie.NOCAT\nLEFT JOIN commande ON client.NOCLI = commande.NOCLI\nORDER BY client.NOCLI;",
+     check:r=>r.length>0&&r[0].values.length>=25}
+  ]
+},
+{
+  id:"union",
+  title:"Partie 3 — UNION",
+  explanations:[
+    {html:`<strong>UNION</strong> — Comment realiser un OU portant sur des tables differentes ?<br><br>
+Exemple : Clients avec CA < moyenne de leur categorie <strong>OU</strong> n'ayant effectue qu'une seule commande :<br>
+<code>SELECT NOCLI, RSCLI, CACLIC FROM client WHERE NOCLI IN<br>  (SELECT NOCLI FROM commande GROUP BY NOCLI HAVING COUNT(*) = 1)<br>UNION<br>SELECT NOCLI, RSCLI, CACLIC FROM client cl1 WHERE CACLIC <<br>  (SELECT AVG(CACLIC) FROM client cl2 WHERE cl2.NOCAT = cl1.NOCAT)<br>ORDER BY 2;</code><br><br>
+<div class="step"><span class="warning">⚠</span> UNION elimine les doublons. Les colonnes des deux SELECT doivent etre compatibles (meme nombre, memes types).<br>
+En MySQL, utiliser <code>UNION ALL</code> pour garder les doublons.</div>`}
+  ],
+  exercises:[
+    {n:21,cat:"UNION",q:"Lister tous les articles ayant le CA superieur au CA moyen de leur famille OU ayant ete commandes plus de trois fois.",
+     hint:"Deux SELECT avec UNION : 1) sous-requete correlee pour CA > moyenne famille, 2) GROUP BY NOART HAVING COUNT > 3",
+     sol:"SELECT a1.NOART, a1.DESART, a1.CAART FROM article a1\nWHERE a1.CAART > (SELECT AVG(CAART) FROM article a2 WHERE a2.NOFAM = a1.NOFAM)\nUNION\nSELECT article.NOART, DESART, CAART FROM article\nJOIN lignecde ON article.NOART = lignecde.NOART\nGROUP BY article.NOART, DESART, CAART\nHAVING COUNT(*) > 3\nORDER BY 1;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"intersect",
+  title:"Partie 3 — INTERSECT",
+  explanations:[
+    {html:`<strong>INTERSECT</strong> — Comment realiser un ET portant sur des tables differentes ?<br><br>
+Exemple : Clients avec CA < moyenne <strong>ET</strong> n'ayant qu'une seule commande.<br>
+<div class="step"><span class="tip">Note MySQL :</span> MySQL ne supporte INTERSECT qu'a partir de la version 8.0.31. En SQLite c'est supporte. Alternative : utiliser <code>IN</code> avec une sous-requete.<br>
+<code>SELECT NOART, DESART, CAART FROM article a1<br>WHERE CAART > (SELECT AVG(CAART) FROM article a2 WHERE a2.NOFAM = a1.NOFAM)<br>AND NOART IN (<br>  SELECT NOART FROM lignecde GROUP BY NOART HAVING COUNT(*) > 3<br>);</code></div>`}
+  ],
+  exercises:[
+    {n:22,cat:"INTERSECT",q:"Lister tous les articles ayant le CA superieur au CA moyen de leur famille ET ayant ete commandes plus de trois fois.",
+     hint:"Combiner les deux conditions avec AND ... IN (sous-requete)",
+     sol:"SELECT a1.NOART, a1.DESART, a1.CAART FROM article a1\nWHERE a1.CAART > (SELECT AVG(CAART) FROM article a2 WHERE a2.NOFAM = a1.NOFAM)\nAND a1.NOART IN (\n  SELECT NOART FROM lignecde GROUP BY NOART HAVING COUNT(*) > 3\n)\nORDER BY 1;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"minus",
+  title:"Partie 3 — EXCEPT (MINUS)",
+  explanations:[
+    {html:`<strong>EXCEPT</strong> (Oracle: MINUS) — Difference entre deux requetes.<br><br>
+Exemple : CA < moyenne de categorie <strong>SAUF</strong> ceux n'ayant qu'une seule commande.<br>
+<div class="step"><span class="warning">⚠ Attention :</span> l'ordre des requetes est capital ! Si on inverse, le resultat change completement.<br>
+En MySQL >= 8.0.31 : <code>EXCEPT</code>. En SQLite : <code>EXCEPT</code>.<br>
+Alternative : <code>AND NOART NOT IN (...)</code></div>`}
+  ],
+  exercises:[
+    {n:23,cat:"EXCEPT",q:"Lister tous les articles ayant le CA superieur au CA moyen de leur famille SAUF ceux ayant ete commandes plus de trois fois.",
+     hint:"Meme logique que l'INTERSECT, mais avec NOT IN au lieu de IN",
+     sol:"SELECT a1.NOART, a1.DESART, a1.CAART FROM article a1\nWHERE a1.CAART > (SELECT AVG(CAART) FROM article a2 WHERE a2.NOFAM = a1.NOFAM)\nAND a1.NOART NOT IN (\n  SELECT NOART FROM lignecde GROUP BY NOART HAVING COUNT(*) > 3\n)\nORDER BY 1;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"any_all",
+  title:"Partie 3 — ANY et ALL",
+  explanations:[
+    {html:`<strong>ANY</strong> — Comparer une valeur a <em>n'importe quelle</em> valeur ramenee par une sous-requete.<br>
+<code>WHERE CACLIC > ANY (SELECT CACLIC FROM client WHERE NOCAT = 1)</code><br>
+→ CA superieur a <strong>au moins un</strong> client de categorie 1 (= superieur au MIN).<br><br>
+<strong>ALL</strong> — Comparer une valeur a <em>toutes</em> les valeurs ramenees.<br>
+<code>WHERE CACLIC > ALL (SELECT CACLIC FROM client WHERE NOCAT = 1)</code><br>
+→ CA superieur a <strong>tous</strong> les clients de categorie 1 (= superieur au MAX).<br><br>
+<div class="step"><span class="tip">Equivalences :</span><br>
+• <code>> ANY(...)</code> = <code>> MIN(...)</code><br>
+• <code>> ALL(...)</code> = <code>> MAX(...)</code><br>
+En SQLite, ANY/ALL ne sont pas supportes directement → utiliser MIN/MAX.</div>`}
+  ],
+  exercises:[
+    {n:24,cat:"ANY (MIN)",q:"Lister tous les articles ayant un CA superieur au CA de n'importe quel article de la famille 52.",
+     hint:"En SQLite : WHERE CAART > (SELECT MIN(CAART) FROM article WHERE NOFAM = 52)",
+     sol:"SELECT NOART, DESART, CAART FROM article\nWHERE CAART > (SELECT MIN(CAART) FROM article WHERE NOFAM = 52)\nORDER BY NOART;",
+     check:r=>r.length>0},
+    {n:25,cat:"ALL (MAX)",q:"Lister tous les articles ayant un CA superieur a TOUS les CA des articles de la famille 52.",
+     hint:"En SQLite : WHERE CAART > (SELECT MAX(CAART) FROM article WHERE NOFAM = 52)",
+     sol:"SELECT NOART, DESART, CAART FROM article\nWHERE CAART > (SELECT MAX(CAART) FROM article WHERE NOFAM = 52)\nORDER BY NOART;",
+     check:r=>r.length>0}
+  ]
+},
+{
+  id:"exists",
+  title:"Partie 3 — EXISTS",
+  explanations:[
+    {html:`<strong>EXISTS</strong> — Tester l'existence d'une occurrence.<br><br>
+Exemple : Clients n'ayant jamais commande :<br>
+<code>SELECT NOCLI, RSCLI FROM client cl1<br>WHERE NOT EXISTS (SELECT * FROM commande WHERE NOCLI = cl1.NOCLI);</code><br><br>
+<div class="step">EXISTS renvoie Vrai ou Faux. Il s'utilise dans une sous-requete correlee.<br>
+<span class="tip">Remarque :</span> EXISTS peut etre remplace par NOT IN :<br>
+<code>SELECT NOCLI, RSCLI FROM client<br>WHERE NOCLI NOT IN (SELECT DISTINCT NOCLI FROM commande);</code></div>`}
+  ],
+  exercises:[
+    {n:26,cat:"NOT EXISTS",q:"Lister tous les articles n'ayant jamais ete commandes.",
+     hint:"WHERE NOT EXISTS (SELECT * FROM lignecde WHERE lignecde.NOART = article.NOART) ou NOT IN",
+     sol:"SELECT NOART, DESART FROM article\nWHERE NOART NOT IN (SELECT DISTINCT NOART FROM lignecde);",
+     check:r=>r.length>0}
+  ]
+},
+// =========== PARTIE 4 : DML ===========
+{
+  id:"insert",
+  title:"Partie 4 — INSERT INTO",
+  explanations:[
+    {html:`<strong>INSERT INTO</strong> — Ajouter des donnees.<br><br>
+<code>INSERT INTO secteur (NOSECT, LIBSECT) VALUES (18, 'NORMANDIE');</code><br><br>
+<div class="step">INSERT permet aussi d'ajouter des donnees a partir d'une autre table.<br>
+Toujours nommer les colonnes explicitement — c'est une bonne pratique.</div>`}
+  ],
+  exercises:[]
+},
+{
+  id:"update",
+  title:"Partie 4 — UPDATE / DELETE",
+  explanations:[
+    {html:`<strong>UPDATE</strong> — Modifier des donnees.<br>
+<code>UPDATE article SET QTESTO = 150 WHERE NOART = 100;</code><br><br>
+<strong>DELETE</strong> — Supprimer des donnees.<br>
+<code>DELETE FROM client WHERE NOCLI = 601;</code><br><br>
+<div class="step"><span class="warning">⚠ REGLE D'OR :</span> Toujours verifier le WHERE avant d'executer un UPDATE ou DELETE !<br>
+Astuce : faire un <code>SELECT ... WHERE ...</code> avant pour voir les lignes concernees.</div>`}
+  ],
+  exercises:[
+    {n:27,cat:"UPDATE",q:"Mettre la quantite de reapprovisionnement (<code>QTEREAS</code>) a 100 et doubler les quantites mini (<code>QTEMIN</code>) de tous les articles de la famille 52.<br><small>Puis verifiez avec un SELECT.</small>",
+     hint:"UPDATE article SET QTEREAS = 100, QTEMIN = QTEMIN * 2 WHERE NOFAM = 52",
+     sol:"UPDATE article SET QTEREAS = 100, QTEMIN = QTEMIN * 2 WHERE NOFAM = 52;\n-- Verification :\nSELECT NOART, DESART, QTEREAS, QTEMIN FROM article WHERE NOFAM = 52;",
+     check:r=>true},
+    {n:28,cat:"INSERT+DELETE",q:"Ajouter la TVA 17% (<code>CODTVA</code>: 5, <code>TXTVA</code>: 17.00) a la table TVA. Puis supprimez-la.",
+     hint:"INSERT INTO tva VALUES (5, 17.00); puis DELETE FROM tva WHERE CODTVA = 5;",
+     sol:"INSERT INTO tva (CODTVA, TXTVA) VALUES (5, 17.00);\nSELECT * FROM tva;\n-- Puis pour supprimer :\n-- DELETE FROM tva WHERE CODTVA = 5;",
+     check:r=>true}
+  ]
+},
+{
+  id:"transactions",
+  title:"Partie 4 — Transactions (COMMIT, ROLLBACK)",
+  explanations:[
+    {html:`<strong>Gestion des transactions</strong><br><br>
+Les mises a jour se font a travers des <strong>transactions</strong>. Toutes les operations effectuees entre le dernier COMMIT ou ROLLBACK sont temporaires.<br><br>
+<div class="step">Exemple pratique (a tester dans le bac a sable) :<br>
+<code>-- Verifier les donnees avant<br>SELECT * FROM lignefact LIMIT 5;<br><br>-- Supprimer toutes les lignes<br>DELETE FROM lignefact;<br>SELECT * FROM lignefact;  -- vide !<br><br>-- Annuler avec ROLLBACK<br>-- (en SQLite : pas de ROLLBACK sans BEGIN)<br>-- En MySQL : ROLLBACK; restitue les donnees</code></div>
+<div class="step"><span class="tip">Cas d'usage :</span> L'enregistrement d'une commande necessite :<br>
+1. Ajout de l'entete de commande (INSERT sur COMMANDE)<br>
+2. Ajout des lignes de commande (INSERT sur LIGNECDE)<br>
+3. Mise a jour du stock (UPDATE sur ARTICLE)<br>
+Si une etape echoue → ROLLBACK annule TOUT.</div>`}
+  ],
+  exercises:[]
+}
 ];
 
-async function init(){
-  const SQL=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/'+f});
-  db=new SQL.Database();
-  const resp=await fetch('../../sql/gescom_sqlite.sql');
-  const sql=await resp.text();
-  sql.split(';').filter(s=>s.trim()).forEach(s=>{try{db.run(s+';')}catch(e){}});
-  document.getElementById('loading').style.display='none';
+// Load GESCOM database
+async function initDB(){
+  const sqlPromise = initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}`});
+  const dataPromise = fetch("../../sql/gescom_sqlite.sql").then(r=>r.text());
+  const [SQL, sqlText] = await Promise.all([sqlPromise, dataPromise]);
+  db = new SQL.Database();
+  const stmts = sqlText.split(';').filter(s=>s.trim());
+  for(const s of stmts){try{db.run(s+';');}catch(e){}}
   renderAll();
 }
 
 function renderAll(){
-  document.getElementById('progress').innerHTML=EX.map((_,i)=>'<div class="prog-dot" id="pd'+i+'"></div>').join('');
-  const sections={
-    'GROUP BY / HAVING':[0,1,2,3,4],
-    'JOINTURES':[5,6,7,8,9,10,11,12],
-    'SOUS-REQUETES':[13,14,15,16,17],
-    'DML (INSERT/UPDATE/DELETE)':[18,19,20],
-    'SYNTHESE':[21,22,23,24]
-  };
-  let html='';
-  for(const[title,indices] of Object.entries(sections)){
-    html+='<div class="section"><h2>'+title+'</h2>';
-    indices.forEach(i=>{const ex=EX[i];
-      html+='<div class="ex"><div class="ex-head"><span class="ex-num">'+ex.n+'</span><span class="ex-cat">'+ex.cat+'</span></div><div class="ex-q">'+ex.q+'</div><textarea class="editor" id="ed'+i+'" placeholder="-- Votre requete"></textarea><div class="actions"><button class="btn btn-run" onclick="run('+i+')">Executer</button><button class="btn btn-hint" onclick="tog(\'h'+i+'\')">Indice</button><button class="btn btn-sol" onclick="tog(\'s'+i+'\')">Solution</button></div><div class="hint-box" id="h'+i+'">'+ex.hint+'</div><div class="sol-box" id="s'+i+'">'+ex.sol+'</div><div class="result" id="r'+i+'"></div></div>';
+  const container = document.getElementById('content');
+  const nav = document.getElementById('navBtns');
+  let totalEx = 0;
+  let html = '';
+  let navHtml = '';
+  
+  SECTIONS.forEach((sec,si) => {
+    navHtml += `<button class="nav-btn" onclick="document.getElementById('sec_${sec.id}').scrollIntoView({behavior:'smooth'})">${sec.title.replace(/Partie \d+ — /,'')}</button>`;
+    html += `<div class="section" id="sec_${sec.id}"><h2>${sec.title}</h2>`;
+    
+    // Render explanations
+    sec.explanations.forEach(exp => {
+      html += `<div class="explanation">${exp.html}</div>`;
     });
-    html+='</div>';
-  }
-  document.getElementById('exercises').innerHTML=html;
+    
+    // Render exercises
+    sec.exercises.forEach(ex => {
+      totalEx++;
+      html += `<div class="ex" id="ex_${ex.n}">
+        <div class="ex-header">
+          <span class="ex-num">Ex. ${ex.n}</span>
+          <span class="ex-cat">${ex.cat}</span>
+          <span class="ex-status pending" id="status_${ex.n}">En attente</span>
+        </div>
+        <div class="ex-q">${ex.q}</div>
+        <textarea class="sql-input" id="input_${ex.n}" placeholder="-- Ecrivez votre requete SQL ici..."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-run" onclick="runEx(${ex.n})">RUN</button>
+          <button class="btn btn-hint" onclick="toggleHint(${ex.n})">Indice</button>
+          <button class="btn btn-sol" onclick="toggleSol(${ex.n})">Solution</button>
+        </div>
+        <div class="hint-box" id="hint_${ex.n}">${ex.hint}</div>
+        <div class="sol-box" id="sol_${ex.n}"><code>${ex.sol.replace(/\n/g,'<br>')}</code></div>
+        <div class="result" id="result_${ex.n}"></div>
+        <div class="error-msg" id="err_${ex.n}"></div>
+      </div>`;
+    });
+    
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+  nav.innerHTML = navHtml;
+  document.getElementById('total').textContent = totalEx;
 }
 
-function tog(id){document.getElementById(id).classList.toggle('show')}
-function run(i){
-  const sql=document.getElementById('ed'+i).value.trim();
-  const el=document.getElementById('r'+i);
-  if(!sql){el.innerHTML='';return}
-  try{
-    const results=db.exec(sql);
-    if(!results.length){el.innerHTML='<div class="ok-msg">Execute (aucun resultat).</div>';const d=document.getElementById('pd'+i);if(!d.classList.contains('done')){d.classList.add('done');solved++;document.getElementById('score').textContent=solved+'/25'}return}
-    let h='';results.forEach(r=>{h+='<table class="sql-table"><tr>'+r.columns.map(c=>'<th>'+c+'</th>').join('')+'</tr>';r.values.forEach(row=>{h+='<tr>'+row.map(v=>'<td>'+(v===null?'NULL':v)+'</td>').join('')+'</tr>'});h+='</table><div class="row-count">'+r.values.length+' ligne(s)</div>'});
-    el.innerHTML=h;
-    const d=document.getElementById('pd'+i);if(!d.classList.contains('done')){d.classList.add('done');solved++;document.getElementById('score').textContent=solved+'/25'}
-  }catch(e){el.innerHTML='<div class="err">'+e.message+'</div>'}
+function toggleHint(n){
+  const el = document.getElementById('hint_'+n);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
-document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){const a=document.activeElement;if(a&&a.classList.contains('editor')){run(+a.id.replace('ed',''))}}});
-init();
-</script></body></html>
+
+function toggleSol(n){
+  const el = document.getElementById('sol_'+n);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+function runEx(n){
+  const sql = document.getElementById('input_'+n).value.trim();
+  const resultDiv = document.getElementById('result_'+n);
+  const errDiv = document.getElementById('err_'+n);
+  errDiv.textContent = '';
+  resultDiv.innerHTML = '';
+  
+  if(!sql){errDiv.textContent = 'Ecrivez une requete avant de cliquer RUN.';return;}
+  
+  try{
+    // Execute potentially multiple statements
+    const statements = sql.split(';').filter(s=>s.trim());
+    let lastResult = null;
+    for(const stmt of statements){
+      const trimmed = stmt.trim();
+      if(!trimmed) continue;
+      if(trimmed.toUpperCase().startsWith('SELECT')){
+        lastResult = db.exec(trimmed);
+      } else {
+        db.run(trimmed);
+        // If DML, show affected message
+        if(!trimmed.toUpperCase().startsWith('SELECT')){
+          resultDiv.innerHTML += `<div class="result-info">✅ Commande executee : ${trimmed.substring(0,40)}...</div>`;
+        }
+      }
+    }
+    
+    if(lastResult && lastResult.length > 0){
+      const r = lastResult;
+      let tbl = '<table><tr>';
+      r[0].columns.forEach(c => tbl += `<th>${c}</th>`);
+      tbl += '</tr>';
+      r[0].values.forEach(row => {
+        tbl += '<tr>';
+        row.forEach(v => tbl += `<td>${v===null?'<em style="color:var(--muted)">NULL</em>':v}</td>`);
+        tbl += '</tr>';
+      });
+      tbl += '</table>';
+      resultDiv.innerHTML = tbl + `<div class="result-info">${r[0].values.length} ligne(s) retournee(s)</div>`;
+      
+      // Check if correct
+      const sec = SECTIONS.find(s => s.exercises.some(e => e.n === n));
+      const ex = sec?.exercises.find(e => e.n === n);
+      if(ex && ex.check(r)){
+        const st = document.getElementById('status_'+n);
+        if(st.textContent !== '✅ Correct'){
+          st.textContent = '✅ Correct';
+          st.className = 'ex-status ok';
+          solved++;
+          updateProgress();
+        }
+      }
+    } else if(resultDiv.innerHTML === ''){
+      resultDiv.innerHTML = '<div class="result-info">Commande executee (pas de resultat SELECT).</div>';
+    }
+  }catch(e){
+    errDiv.textContent = '❌ Erreur SQL : ' + e.message;
+  }
+}
+
+function updateProgress(){
+  const total = SECTIONS.reduce((s,sec) => s + sec.exercises.length, 0);
+  document.getElementById('solved').textContent = solved;
+  document.getElementById('pct').textContent = Math.round(solved/total*100) + '%';
+  document.getElementById('pbar').style.width = Math.round(solved/total*100) + '%';
+}
+
+initDB();
+</script>
+</body></html>
