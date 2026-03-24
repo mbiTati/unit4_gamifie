@@ -164,19 +164,11 @@ Sans parentheses : <code>(NOCAT=1 AND CACLIC&gt;150000) OR CACLIP&gt;2000000</co
     {n:11,cat:"AND",q:"Articles dont le stock est inferieur au minimum ET dont le fournisseur est 100.",
      hint:"WHERE QTESTO < QTEMIN AND NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, NOFOUR FROM article WHERE QTESTO < QTEMIN AND NOFOUR = 100;",check:r=>true},
     {n:12,cat:"AND OR",q:"Articles avec CA > 1 000 000, du fournisseur 103 OU de la famille 46.",
-     hint:"WHERE CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46)",sol:"SELECT NOART, DESART, CAART, NOFOUR, NOFAM FROM article
-WHERE CAART > 1000000
-  AND (NOFOUR = 103 OR NOFAM = 46);",check:r=>r.length>0},
+     hint:"WHERE CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46)",sol:"SELECT NOART, DESART, CAART, NOFOUR, NOFAM FROM article\nWHERE CAART > 1000000\n  AND (NOFOUR = 103 OR NOFAM = 46);",check:r=>r.length>0},
     {n:13,cat:"AND OR",q:"Clients a PARIS avec CA courant > 170 000, ET clients a LYON avec CA > 60 000.",
-     hint:"(VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000)",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client
-WHERE (VILCLI = 'PARIS' AND CACLIC > 170000)
-   OR (VILCLI = 'LYON' AND CACLIC > 60000)
-ORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0},
+     hint:"(VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000)",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client\nWHERE (VILCLI = 'PARIS' AND CACLIC > 170000)\n   OR (VILCLI = 'LYON' AND CACLIC > 60000)\nORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0},
     {n:14,cat:"AND OR",q:"Clients de GRENOBLE avec CA > 100 000, et TOUS les clients de LYON.",
-     hint:"(VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON'",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client
-WHERE (VILCLI = 'GRENOBLE' AND CACLIC > 100000)
-   OR VILCLI = 'LYON'
-ORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0}
+     hint:"(VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON'",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client\nWHERE (VILCLI = 'GRENOBLE' AND CACLIC > 100000)\n   OR VILCLI = 'LYON'\nORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0}
   ]
 },
 {
@@ -189,23 +181,15 @@ ORDER BY VILCLI, CACLIC DESC;",check:r=>r.length>0}
 <div class="step"><span class="warning">Attention :</span> Le code postal est CHAR(5) = texte ! Guillemets obligatoires. CP '01000' ≠ nombre 1000.</div>`}],
   exercises:[
     {n:15,cat:"BETWEEN",q:"Clients dont le CA courant est entre 30 000 et 50 000 (tries par CA).",
-     hint:"WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC",sol:"SELECT NOCLI, RSCLI, CACLIC FROM client
-WHERE CACLIC BETWEEN 30000 AND 50000
-ORDER BY CACLIC;",check:r=>r.length>0},
+     hint:"WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC",sol:"SELECT NOCLI, RSCLI, CACLIC FROM client\nWHERE CACLIC BETWEEN 30000 AND 50000\nORDER BY CACLIC;",check:r=>r.length>0},
     {n:16,cat:"IN",q:"Articles des familles 57, 58, 71 ou 25.",
-     hint:"WHERE NOFAM IN (57, 58, 71, 25)",sol:"SELECT NOART, DESART, NOFAM FROM article
-WHERE NOFAM IN (57, 58, 71, 25);",check:r=>r.length>0},
+     hint:"WHERE NOFAM IN (57, 58, 71, 25)",sol:"SELECT NOART, DESART, NOFAM FROM article\nWHERE NOFAM IN (57, 58, 71, 25);",check:r=>r.length>0},
     {n:17,cat:"IN",q:"Representants (<code>NOREP, NOMREP, PRNREP</code>) habitant PARIS, LYON ou MARSEILLE.",
-     hint:"WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE')",sol:"SELECT NOREP, NOMREP, PRNREP, VILREP FROM representant
-WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE');",check:r=>r.length>0},
+     hint:"WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE')",sol:"SELECT NOREP, NOMREP, PRNREP, VILREP FROM representant\nWHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE');",check:r=>r.length>0},
     {n:18,cat:"IN BETWEEN",q:"Representants a Paris, Lille ou Villeurbanne avec CA entre 800 000 et 900 000.",
-     hint:"WHERE VILREP IN (...) AND CAREP BETWEEN 800000 AND 900000",sol:"SELECT NOREP, NOMREP, PRNREP, VILREP, CAREP FROM representant
-WHERE VILREP IN ('PARIS', 'LILLE', 'VILLEURBANNE')
-  AND CAREP BETWEEN 800000 AND 900000;",check:r=>true},
+     hint:"WHERE VILREP IN (...) AND CAREP BETWEEN 800000 AND 900000",sol:"SELECT NOREP, NOMREP, PRNREP, VILREP, CAREP FROM representant\nWHERE VILREP IN ('PARIS', 'LILLE', 'VILLEURBANNE')\n  AND CAREP BETWEEN 800000 AND 900000;",check:r=>true},
     {n:19,cat:"IN NOT IN",q:"Articles des familles 46, 57, 58 SAUF les articles 26, 30 et 142.",
-     hint:"WHERE NOFAM IN (...) AND NOART NOT IN (...)",sol:"SELECT NOART, DESART FROM article
-WHERE NOFAM IN (46, 57, 58)
-  AND NOART NOT IN (26, 30, 142);",check:r=>r.length>0}
+     hint:"WHERE NOFAM IN (...) AND NOART NOT IN (...)",sol:"SELECT NOART, DESART FROM article\nWHERE NOFAM IN (46, 57, 58)\n  AND NOART NOT IN (26, 30, 142);",check:r=>r.length>0}
   ]
 },
 {
