@@ -208,7 +208,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 <script>
 // Simple password protection (sufficient for students, not for hackers)
-const HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // sha256 of 'mbi2025'
+const HASH = 'abde9287ed6b1d1dc6fd6c3db88ed7b7c728d1caa04b67daf7a9231b5f8c789d'; // sha256 of 'mbi2025' (verified)
 
 async function sha256(msg) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
