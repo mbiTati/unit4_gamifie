@@ -99,7 +99,7 @@ Exemple : <code>SELECT NOCLI, RSCLI, CPCLI FROM client;</code></div>
 <div class="step"><code>SELECT * FROM client;</code> → affiche TOUTES les colonnes.<br>
 <span class="tip">Astuce :</span> Evitez SELECT * en production : listez les colonnes necessaires. C'est plus lisible et performant.</div>`}],
   exercises:[
-    {n:1,cat:"SELECT FROM",q:"Lister le numero (<code>NOART</code>), la designation (<code>DESART</code>) et le numero de famille (<code>NOFAM</code>) de tous les articles.",
+    {n:1,cat:"SELECT FROM",q:"Lister le numero (<code>NOART</code>), la designation (<code>DESART</code>) et le numero de famille (<code>NOFAM</code>) de tous les articles.<br><small style=\"color:var(--muted)\">Resultat attendu : 38 lignes. Premiers resultats :<br><code style=\"font-size:.7rem\">| NOART | DESART | NOFAM |<br>| 1 | VTT Le montagnard robuste | 41 |<br>| 2 | VTT La montagnarde elegante | 41 |<br>| ... | ... | ... |</code></small>",
      hint:"SELECT col1, col2, col3 FROM table;",
      sol:"SELECT NOART, DESART, NOFAM FROM article;",
      check:r=>r.length>0&&r[0].columns.length===3&&r[0].values.length>=30}
@@ -115,11 +115,11 @@ Exemple : <code>SELECT NOCLI, RSCLI, CPCLI FROM client;</code></div>
 <code>SELECT * FROM client ORDER BY NOCAT ASC, CACLIC DESC;</code> — Tri multi-colonnes</div>
 <div class="step"><span class="tip">Astuce :</span> Les colonnes de tri ne sont pas obligatoirement dans le SELECT. On peut trier par CACLIC sans l'afficher.</div>`}],
   exercises:[
-    {n:2,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par designation alphabetique.",
+    {n:2,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par designation alphabetique.<br><small style=\"color:var(--muted)\">Resultat attendu : 38 lignes, triees A→Z. Premiers resultats :<br><code style=\"font-size:.7rem\">| NOART | DESART | NOFAM |<br>| 162 | Compteur de vitesse | 51 |<br>| 123 | Casque route adulte | 51 |<br>| ... | ... | ... |</code></small>",
      hint:"Ajoutez ORDER BY DESART ASC a la fin",
      sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY DESART ASC;",
      check:r=>r.length>0&&r[0].values.length>=30},
-    {n:3,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par famille puis par designation.",
+    {n:3,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par famille puis par designation.<br><small style=\"color:var(--muted)\">Resultat attendu : 38 lignes triees par NOFAM puis DESART.</small>",
      hint:"ORDER BY NOFAM ASC, DESART ASC",
      sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY NOFAM ASC, DESART ASC;",
      check:r=>r.length>0}

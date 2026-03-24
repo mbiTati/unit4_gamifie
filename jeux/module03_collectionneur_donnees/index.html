@@ -89,7 +89,7 @@
         <h3 style="margin-bottom:1rem;">Glissez chaque élément dans la bonne zone :</h3>
         <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1.5rem;min-height:50px;" id="source">
           ${shuffled.map(i => `<div class="drag-item" draggable="true" data-text="${i.text}" data-zone="${i.zone}" 
-            ondragstart="event.dataTransfer.setData('text',JSON.stringify({text:'${i.text}',zone:'${i.zone}'}))">${i.text}</div>`).join('')}
+            ondragstart="dragStart(event,${items.indexOf(i)})">${i.text}</div>`).join('')}
         </div>
         <div style="display:grid;grid-template-columns:repeat(${Math.min(zones.length, 3)},1fr);gap:1rem;">
           ${zones.map(z => `
@@ -111,10 +111,16 @@
     `;
   }
 
+  function dragStart(event, idx) {
+    event.dataTransfer.setData('text/plain', String(idx));
+  }
+
   function dropItem(event, zoneId) {
     event.preventDefault();
     event.currentTarget.classList.remove('over');
-    const data = JSON.parse(event.dataTransfer.getData('text'));
+    const idx = parseInt(event.dataTransfer.getData('text/plain'));
+    const data = items[idx];
+    if(!data) return;
     placed[zoneId].push(data.text);
     document.getElementById('qNum').textContent = Object.values(placed).flat().length;
     render();
