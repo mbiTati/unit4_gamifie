@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Exercices SQL — Cas GESCOM</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--lo2:#2563eb;--accent:#ea580c;--success:#059669;--error:#dc2626;--code-bg:#1e293b}
+[data-theme="dark"]{--bg:#090c14;--surface:#111827;--card:#1a2236;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,.06);--code-bg:#0d1117}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+.header{background:var(--surface);padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.header h1{font-size:1.05rem;font-weight:800}.sub{font-size:.7rem;color:var(--muted)}
+.toggle{width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:.3s}
+[data-theme="dark"] .toggle::after{left:18px}
+.main{max-width:900px;margin:0 auto;padding:1.2rem}
+.progress{display:flex;gap:.15rem;margin-bottom:1rem;flex-wrap:wrap}
+.prog-dot{width:20px;height:6px;border-radius:3px;background:var(--border);transition:.3s}
+.prog-dot.done{background:var(--success)}.prog-dot.fail{background:var(--error)}.prog-dot.cur{background:var(--lo2)}
+.ex{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:.8rem;transition:.2s}
+.ex-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;background:var(--lo2);color:#fff;padding:.15rem .45rem;border-radius:4px}
+.ex-cat{font-size:.65rem;font-weight:600;color:var(--muted);padding:.12rem .35rem;border:1px solid var(--border);border-radius:3px}
+.ex-q{font-size:.88rem;font-weight:600;margin-bottom:.5rem;line-height:1.5}
+.ex-q code{background:var(--code-bg);color:#93c5fd;padding:.1rem .3rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.editor{width:100%;min-height:70px;background:var(--code-bg);color:#d4d4d4;border:1px solid var(--border);border-radius:6px;padding:.6rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;resize:vertical;line-height:1.5}
+.editor:focus{outline:none;border-color:var(--lo2)}
+.actions{display:flex;gap:.3rem;margin:.5rem 0}
+.btn{padding:.35rem .8rem;border:none;border-radius:5px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-run{background:var(--lo2);color:#fff}.btn-run:hover{background:#1d4ed8}
+.btn-hint{background:var(--surface);color:var(--muted);border:1px solid var(--border)}.btn-hint:hover{color:var(--lo2)}
+.btn-sol{background:var(--surface);color:var(--accent);border:1px solid var(--border)}
+.result{overflow-x:auto;margin-top:.4rem}
+.sql-table{border-collapse:collapse;width:100%;font-size:.72rem;font-family:'JetBrains Mono',monospace}
+.sql-table th{background:var(--surface);color:var(--lo2);padding:.3rem .4rem;text-align:left;border:1px solid var(--border);font-weight:600;white-space:nowrap}
+.sql-table td{padding:.25rem .4rem;border:1px solid var(--border);white-space:nowrap}
+.sql-table tr:nth-child(even){background:rgba(0,0,0,.02)}
+[data-theme="dark"] .sql-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+.err{color:var(--error);font-size:.78rem;padding:.4rem;background:rgba(220,38,38,.05);border-radius:5px;margin-top:.3rem;font-family:'JetBrains Mono',monospace}
+.ok-msg{color:var(--success);font-size:.78rem;padding:.4rem}
+.row-count{font-size:.68rem;color:var(--muted);margin-top:.2rem}
+.hint-box{font-size:.78rem;color:var(--lo2);background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.1);border-radius:5px;padding:.4rem .6rem;margin-top:.3rem;display:none}
+.hint-box.show{display:block}
+.sol-box{font-size:.78rem;color:var(--accent);background:rgba(234,88,12,.05);border:1px solid rgba(234,88,12,.1);border-radius:5px;padding:.4rem .6rem;margin-top:.3rem;display:none;font-family:'JetBrains Mono',monospace;white-space:pre-wrap}
+.sol-box.show{display:block}
+.score-bar{display:flex;gap:.5rem;align-items:center}
+.score-bar .v{font-size:1rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.back{display:inline-block;margin-top:.8rem;color:var(--muted);font-size:.75rem;font-weight:600;text-decoration:none}
+#loading{text-align:center;padding:3rem;color:var(--muted)}
+</style></head><body>
+<div class="header">
+  <div><h1>Exercices SQL — Cas GESCOM</h1><div class="sub">29 exercices progressifs — SELECT, WHERE, ORDER BY, AND/OR, BETWEEN, IN, LIKE, DISTINCT, Agregation</div></div>
+  <div class="score-bar"><span class="v" id="score">0/29</span><div class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"></div></div>
+</div>
+<div class="main">
+<div class="progress" id="progress"></div>
+<div id="loading">Chargement de la base GESCOM (17 tables)...</div>
+<div id="exercises"></div>
+</div>
+<a class="back" href="index.html">&larr; Retour au hub</a>
+<script>
+let db=null;let solved=0;
+
+const EX=[
+{n:1,cat:"SELECT FROM",q:"Lister le numero (<code>NOART</code>), la designation (<code>DESART</code>) et le numero de famille (<code>NOFAM</code>) de tous les articles.",hint:"SELECT col1, col2, col3 FROM table;",sol:"SELECT NOART, DESART, NOFAM FROM article;",check:r=>r.length>0&&r[0].columns.length===3&&r[0].values.length>=30},
+{n:2,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par designation alphabetique.",hint:"Ajoutez ORDER BY colonne ASC a la fin",sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY DESART ASC;",check:r=>r.length>0&&r[0].values.length>=30},
+{n:3,cat:"ORDER BY",q:"Lister les articles (<code>NOART, DESART, NOFAM</code>) tries par famille puis par designation.",hint:"ORDER BY col1 ASC, col2 ASC",sol:"SELECT NOART, DESART, NOFAM FROM article ORDER BY NOFAM ASC, DESART ASC;",check:r=>r.length>0},
+{n:4,cat:"WHERE",q:"Articles (<code>NOART, DESART, QTESTO</code>) ayant un stock inferieur a 100.",hint:"WHERE QTESTO < 100",sol:"SELECT NOART, DESART, QTESTO FROM article WHERE QTESTO < 100;",check:r=>r.length>0&&r[0].values.length>=3},
+{n:5,cat:"WHERE",q:"Articles dont le stock (<code>QTESTO</code>) est inferieur au stock minimum (<code>QTEMIN</code>).",hint:"WHERE QTESTO < QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO < QTEMIN;",check:r=>true},
+{n:6,cat:"WHERE",q:"Articles dont le stock est inferieur a 2 fois le stock minimum.",hint:"WHERE QTESTO < 2 * QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN FROM article WHERE QTESTO < 2 * QTEMIN;",check:r=>r.length>0},
+{n:7,cat:"WHERE NOT",q:"Representants qui ne travaillent PAS sur le secteur 5.",hint:"WHERE NOSECT != 5 ou WHERE NOSECT <> 5",sol:"SELECT NOREP, NOMREP, PRNREP, NOSECT FROM representant WHERE NOSECT <> 5;",check:r=>r.length>0&&r[0].values.every(v=>v[3]!==5)},
+{n:8,cat:"AND",q:"Articles (<code>NOART, DESART, NOFOUR, NOFAM</code>) de la famille 51 ET du fournisseur 111.",hint:"WHERE NOFAM = 51 AND NOFOUR = 111",sol:"SELECT NOART, DESART, NOFOUR, NOFAM FROM article WHERE NOFAM = 51 AND NOFOUR = 111;",check:r=>r.length>0&&r[0].values.every(v=>v[3]===51&&v[2]===111)},
+{n:9,cat:"AND",q:"Articles de la famille 27 dont le stock est inferieur a 2 fois le minimum.",hint:"WHERE NOFAM = 27 AND QTESTO < 2 * QTEMIN",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFAM FROM article WHERE NOFAM = 27 AND QTESTO < 2 * QTEMIN;",check:r=>true},
+{n:10,cat:"OR",q:"Articles dont le stock est inferieur au minimum OU dont le fournisseur est 100.",hint:"WHERE QTESTO < QTEMIN OR NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFOUR FROM article WHERE QTESTO < QTEMIN OR NOFOUR = 100;",check:r=>r.length>0},
+{n:11,cat:"AND",q:"Articles dont le stock est inferieur au minimum ET dont le fournisseur est 100.",hint:"WHERE QTESTO < QTEMIN AND NOFOUR = 100",sol:"SELECT NOART, DESART, QTESTO, QTEMIN, NOFOUR FROM article WHERE QTESTO < QTEMIN AND NOFOUR = 100;",check:r=>true},
+{n:12,cat:"AND OR",q:"Articles avec CA > 1 000 000, du fournisseur 103 OU de la famille 46.",hint:"Attention aux parentheses ! CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46)",sol:"SELECT NOART, DESART, CAART, NOFOUR, NOFAM FROM article WHERE CAART > 1000000 AND (NOFOUR = 103 OR NOFAM = 46);",check:r=>true},
+{n:13,cat:"AND OR",q:"Clients a PARIS avec CA courant > 170 000, ET clients a LYON avec CA > 60 000.",hint:"(VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000)",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client WHERE (VILCLI = 'PARIS' AND CACLIC > 170000) OR (VILCLI = 'LYON' AND CACLIC > 60000);",check:r=>r.length>0},
+{n:14,cat:"AND OR",q:"Clients de GRENOBLE avec CA > 100 000, et TOUS les clients de LYON.",hint:"(VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON'",sol:"SELECT NOCLI, RSCLI, VILCLI, CACLIC FROM client WHERE (VILCLI = 'GRENOBLE' AND CACLIC > 100000) OR VILCLI = 'LYON';",check:r=>r.length>0},
+{n:15,cat:"BETWEEN",q:"Clients dont le CA courant est entre 30 000 et 50 000 (tries par CA).",hint:"WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC",sol:"SELECT NOCLI, RSCLI, CACLIC FROM client WHERE CACLIC BETWEEN 30000 AND 50000 ORDER BY CACLIC;",check:r=>r.length>0},
+{n:16,cat:"IN",q:"Articles des familles 57, 58, 71 ou 25.",hint:"WHERE NOFAM IN (57, 58, 71, 25)",sol:"SELECT NOART, DESART, NOFAM FROM article WHERE NOFAM IN (57, 58, 71, 25);",check:r=>r.length>0},
+{n:17,cat:"IN",q:"Representants (<code>NOREP, NOMREP, PRNREP</code>) habitant PARIS, LYON ou MARSEILLE.",hint:"WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE')",sol:"SELECT NOREP, NOMREP, PRNREP FROM representant WHERE VILREP IN ('PARIS', 'LYON', 'MARSEILLE');",check:r=>r.length>0},
+{n:18,cat:"IN BETWEEN",q:"Representants a Paris, Lille ou Villeurbanne avec CA entre 800 000 et 900 000.",hint:"WHERE VILREP IN (...) AND CAREP BETWEEN 800000 AND 900000",sol:"SELECT NOREP, NOMREP, VILREP, CAREP FROM representant WHERE VILREP IN ('PARIS', 'LILLE', 'VILLEURBANNE') AND CAREP BETWEEN 800000 AND 900000;",check:r=>true},
+{n:19,cat:"IN NOT IN",q:"Articles des familles 46, 57, 58 SAUF les articles 26, 30 et 142.",hint:"WHERE NOFAM IN (...) AND NOART NOT IN (...)",sol:"SELECT NOART, DESART, NOFAM FROM article WHERE NOFAM IN (46, 57, 58) AND NOART NOT IN (26, 30, 142);",check:r=>r.length>0&&r[0].values.every(v=>![26,30,142].includes(v[0]))},
+{n:20,cat:"LIKE",q:"Articles dont la designation contient le mot 'ville'.",hint:"WHERE DESART LIKE '%ville%'",sol:"SELECT NOART, DESART FROM article WHERE DESART LIKE '%ville%';",check:r=>true},
+{n:21,cat:"LIKE",q:"Clients dont la raison sociale commence par 'BICYCLE'.",hint:"WHERE RSCLI LIKE 'BICYCLE%'",sol:"SELECT NOCLI, RSCLI FROM client WHERE RSCLI LIKE 'BICYCLE%';",check:r=>r.length>0},
+{n:22,cat:"DISTINCT",q:"Numeros de clients presents dans la table commande (sans doublons).",hint:"SELECT DISTINCT NOCLI FROM commande",sol:"SELECT DISTINCT NOCLI FROM commande;",check:r=>r.length>0},
+{n:23,cat:"DISTINCT",q:"Numeros de familles presentes dans la table article (sans doublons).",hint:"SELECT DISTINCT NOFAM FROM article",sol:"SELECT DISTINCT NOFAM FROM article ORDER BY NOFAM;",check:r=>r.length>0},
+{n:24,cat:"COUNT",q:"Nombre total d'articles dans la base.",hint:"SELECT COUNT(*) FROM article",sol:"SELECT COUNT(*) AS nb_articles FROM article;",check:r=>r.length>0&&r[0].values[0][0]>=30},
+{n:25,cat:"COUNT",q:"Nombre de clients en categorie 1.",hint:"SELECT COUNT(*) FROM client WHERE NOCAT = 1",sol:"SELECT COUNT(*) AS nb_clients_cat1 FROM client WHERE NOCAT = 1;",check:r=>r.length>0&&r[0].values[0][0]>0},
+{n:26,cat:"COUNT",q:"Nombre de commandes ayant un representant (NOREP non NULL).",hint:"COUNT(NOREP) ignore les NULL",sol:"SELECT COUNT(NOREP) AS cde_avec_rep FROM commande;",check:r=>r.length>0},
+{n:27,cat:"MIN MAX",q:"CA article minimum et maximum.",hint:"SELECT MIN(CAART), MAX(CAART) FROM article",sol:"SELECT MIN(CAART) AS ca_min, MAX(CAART) AS ca_max FROM article;",check:r=>r.length>0&&r[0].columns.length===2},
+{n:28,cat:"AVG",q:"CA article moyen (arrondi a 2 decimales).",hint:"ROUND(AVG(CAART), 2)",sol:"SELECT ROUND(AVG(CAART), 2) AS ca_moyen FROM article;",check:r=>r.length>0},
+{n:29,cat:"SUM",q:"Somme du CA des articles du fournisseur 45.",hint:"SUM(CAART) WHERE NOFOUR = 45",sol:"SELECT ROUND(SUM(CAART), 2) AS total_ca FROM article WHERE NOFOUR = 45;",check:r=>r.length>0},
+];
+
+async function init(){
+  const SQL=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/'+f});
+  db=new SQL.Database();
+  const resp=await fetch('../../sql/gescom_sqlite.sql');
+  const sql=await resp.text();
+  sql.split(';').filter(s=>s.trim()).forEach(s=>{try{db.run(s+';')}catch(e){}});
+  document.getElementById('loading').style.display='none';
+  renderAll();
+}
+
+function renderAll(){
+  document.getElementById('progress').innerHTML=EX.map((_,i)=>'<div class="prog-dot" id="pd'+i+'"></div>').join('');
+  document.getElementById('exercises').innerHTML=EX.map((ex,i)=>'<div class="ex" id="ex'+i+'"><div class="ex-head"><span class="ex-num">'+ex.n+'</span><span class="ex-cat">'+ex.cat+'</span></div><div class="ex-q">'+ex.q+'</div><textarea class="editor" id="ed'+i+'" placeholder="-- Votre requete SQL ici"></textarea><div class="actions"><button class="btn btn-run" onclick="run('+i+')">Executer</button><button class="btn btn-hint" onclick="hint('+i+')">Indice</button><button class="btn btn-sol" onclick="sol('+i+')">Solution</button></div><div class="hint-box" id="h'+i+'"></div><div class="sol-box" id="s'+i+'"></div><div class="result" id="r'+i+'"></div></div>').join('');
+}
+
+function run(i){
+  const sql=document.getElementById('ed'+i).value.trim();
+  const el=document.getElementById('r'+i);
+  if(!sql){el.innerHTML='';return}
+  try{
+    const results=db.exec(sql);
+    if(results.length===0){el.innerHTML='<div class="ok-msg">Requete executee (aucun resultat).</div>';return}
+    let html='';
+    results.forEach(r=>{
+      html+='<table class="sql-table"><tr>'+r.columns.map(c=>'<th>'+c+'</th>').join('')+'</tr>';
+      r.values.forEach(row=>{html+='<tr>'+row.map(v=>'<td>'+(v===null?'NULL':v)+'</td>').join('')+'</tr>'});
+      html+='</table><div class="row-count">'+r.values.length+' ligne(s)</div>';
+    });
+    el.innerHTML=html;
+    if(EX[i].check(results)){
+      const dot=document.getElementById('pd'+i);
+      if(!dot.classList.contains('done')){dot.classList.add('done');solved++;document.getElementById('score').textContent=solved+'/29'}
+    }
+  }catch(e){el.innerHTML='<div class="err">'+e.message+'</div>'}
+}
+
+function hint(i){const el=document.getElementById('h'+i);el.textContent=EX[i].hint;el.classList.toggle('show')}
+function sol(i){const el=document.getElementById('s'+i);el.textContent=EX[i].sol;el.classList.toggle('show')}
+
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){const a=document.activeElement;if(a&&a.classList.contains('editor')){const i=+a.id.replace('ed','');run(i)}}});
+
+init();
+</script></body></html>
