@@ -57,6 +57,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text)}
     <span class="tab active" onclick="showTab('free')">Editeur libre</span>
     <span class="tab" onclick="showTab('exercises')">Exercices guides</span>
     <span class="tab" onclick="showTab('schema')">Schema</span>
+    <span class="tab" onclick="loadGescom()" id="gescomBtn">Charger GESCOM</span>
   </div>
 </div>
 
@@ -244,6 +245,32 @@ document.addEventListener('keydown', e => {
     }
   }
 });
+
+
+// GESCOM loading
+async function loadGescom() {
+  try {
+    document.getElementById('gescomBtn').textContent = 'Chargement...';
+    const resp = await fetch('../../sql/gescom_sqlite.sql');
+    const sql = await resp.text();
+    
+    // Reset DB and load GESCOM
+    const SQL = db.constructor;
+    db = new SQL.Database();
+    sql.split(';').filter(s=>s.trim()).forEach(s=>{try{db.run(s+';')}catch(e){console.log(e.message)}});
+    
+    document.getElementById('gescomBtn').textContent = 'GESCOM charge';
+    document.getElementById('gescomBtn').style.background = 'var(--lo2)';
+    document.getElementById('gescomBtn').style.color = '#fff';
+    document.getElementById('freeResult').innerHTML = '<div class="ok">Base GESCOM chargee : 17 tables (article, client, commande, fournisseur, famille, etc.).<br>Essayez : SELECT * FROM article LIMIT 5;</div>';
+    
+    // Refresh schema tab
+    renderSchema();
+    showTab('free');
+  } catch(e) {
+    document.getElementById('freeResult').innerHTML = '<div class="err">Erreur chargement GESCOM: ' + e.message + '</div>';
+  }
+}
 
 initDB();
 </script>
