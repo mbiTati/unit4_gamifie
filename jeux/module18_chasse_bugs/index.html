@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 18
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>Exécution systématique dans HeidiSQL. Documenter chaque résultat. Corriger les KO. Re-tester. M4 : taux de couverture, pertinence des données (normales+limites+erronées), analyse des bugs trouvés, recommandations.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"Vous exécutez un test et le résultat diffère du résultat attendu. C'est :","opts":["Un test réussi","Un bug / défaut","Une erreur de test","Normal"],"correct":1,"expl":"Si résultat obtenu ≠ résultat attendu → c'est un bug à documenter et corriger."},{"q":"Le taux de couverture des tests mesure :","opts":["La vitesse d'exécution","Le % de fonctionnalités testées vs total","Le nombre de bugs trouvés","La satisfaction utilisateur"],"correct":1,"expl":"Couverture = nombre de cas testés / nombre total de cas à tester."},{"q":"Après avoir corrigé un bug, que faut-il faire ?","opts":["Passer au test suivant","Re-tester le cas qui a échoué (test de régression)","Supprimer le test","Ignorer"],"correct":1,"expl":"Toujours re-tester après correction pour vérifier que le fix fonctionne."},{"q":"Un INSERT qui viole une contrainte FK retourne :","opts":["Un message de succès","L'erreur 1452 (foreign key constraint fails)","NULL","Une ligne vide"],"correct":1,"expl":"MySQL erreur 1452 = la valeur FK référencée n'existe pas dans la table parente."},{"q":"Pour évaluer l'efficacité des tests (M4), il faut :","opts":["Juste lister les tests","Justifier le choix des données et analyser les résultats","Avoir 100% de réussite","Exécuter les tests une seule fois"],"correct":1,"expl":"M4 demande une analyse : pourquoi ces données ? Les tests couvrent-ils les cas limites ?"},{"q":"Une donnée de test 'limite' pour un champ VARCHAR(50) serait :","opts":["'abc'","Une chaîne de exactement 50 caractères","NULL","Un nombre"],"correct":1,"expl":"Test limite = tester la valeur maximale acceptée (ici 50 caractères)."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 13
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>Voir sql/02_queries.sql, requêtes 11-20 pour les corrections complètes.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"COUNT(*) vs COUNT(email) :","opts":["Aucune différence","COUNT(*) compte toutes les lignes, COUNT(email) ignore les NULL","COUNT(email) est plus rapide","COUNT(*) ignore les NULL"],"correct":1,"expl":"COUNT(*) = toutes les lignes. COUNT(colonne) = lignes où la colonne n'est pas NULL."},{"q":"GROUP BY artiste_id avec SELECT artiste_id, SUM(montant) :","opts":["Somme globale","Somme du montant PAR artiste","Erreur SQL","Moyenne par artiste"],"correct":1,"expl":"GROUP BY regroupe les lignes par artiste, et SUM calcule la somme pour chaque groupe."},{"q":"HAVING vs WHERE :","opts":["HAVING filtre AVANT agrégation, WHERE APRÈS","HAVING filtre APRÈS agrégation, WHERE AVANT","Aucune différence","HAVING remplace WHERE"],"correct":1,"expl":"WHERE filtre les lignes AVANT GROUP BY. HAVING filtre les groupes APRÈS agrégation."},{"q":"SELECT genre, COUNT(*) FROM artiste GROUP BY genre HAVING COUNT(*) > 5; retourne :","opts":["Tous les genres","Les genres avec plus de 5 artistes","Les 5 premiers genres","Erreur"],"correct":1,"expl":"HAVING COUNT(*) > 5 ne garde que les genres ayant plus de 5 artistes."},{"q":"AVG(tarif_horaire) calcule :","opts":["Le tarif maximum","La moyenne des tarifs horaires","Le nombre de tarifs","La somme des tarifs"],"correct":1,"expl":"AVG = average = moyenne. SUM/COUNT serait équivalent."},{"q":"YEAR('2025-04-15') retourne :","opts":["'2025-04-15'","2025","04","15"],"correct":1,"expl":"YEAR() extrait l'année d'une date. MONTH() → 4, DAY() → 15."},{"q":"ROUND(3.14159, 2) retourne :","opts":["3.14","3.15","3.1","3"],"correct":0,"expl":"ROUND(valeur, décimales) arrondit. 3.14159 arrondi à 2 décimales = 3.14."},{"q":"Une sous-requête dans WHERE :","opts":["Est interdite en MySQL","Permet de filtrer avec le résultat d'un autre SELECT","Crée une nouvelle table","Est plus rapide qu'un JOIN"],"correct":1,"expl":"Ex: WHERE prix > (SELECT AVG(prix) FROM album) → filtre les albums au-dessus du prix moyen."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

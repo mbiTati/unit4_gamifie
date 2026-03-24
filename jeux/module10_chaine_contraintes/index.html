@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 10
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>Erreur 1048 : Column &#x27;nom&#x27; cannot be null.</p><p>2.</p><p>Erreur 1062 : Duplicate entry &#x27;email@...&#x27; for key &#x27;email&#x27;.</p><p>3.</p><p>Erreur 1452 : Cannot add child row: foreign key constraint fails.</p><p>4.</p><p>Erreur 3819 : Check constraint &#x27;chk_album_prix&#x27; is violated.</p><p>5.</p><p>CASCADE sur genre_artiste : les associations sont supprimées. RESTRICT sur album : DELETE bloqué si artiste a des albums.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"NOT NULL signifie que la colonne :","opts":["Peut être vide","Ne peut jamais être vide (obligatoire)","Contient toujours 0","Est la clé primaire"],"correct":1,"expl":"NOT NULL = valeur obligatoire. Un INSERT sans cette colonne échouera."},{"q":"UNIQUE sur une colonne signifie :","opts":["Elle est la clé primaire","Aucune valeur en double dans cette colonne","Elle est auto-incrémentée","Elle est NOT NULL"],"correct":1,"expl":"UNIQUE = pas de doublons. Attention : UNIQUE autorise NULL (sauf si combiné avec NOT NULL), PK interdit NULL."},{"q":"ON DELETE CASCADE sur une FK signifie :","opts":["On ne peut pas supprimer le parent","Supprimer le parent supprime aussi les enfants","Les enfants deviennent NULL","Rien de spécial"],"correct":1,"expl":"CASCADE : supprimer un artiste supprime aussi tous ses albums. Pratique mais dangereux !"},{"q":"ON DELETE SET NULL signifie :","opts":["Supprime les enfants","Met la FK des enfants à NULL","Empêche la suppression","Rien"],"correct":1,"expl":"SET NULL : la FK des enfants orphelins devient NULL. La colonne doit accepter NULL."},{"q":"ON DELETE RESTRICT signifie :","opts":["Supprime tout","Empêche la suppression si des enfants existent","Met à NULL","Supprime seulement le parent"],"correct":1,"expl":"RESTRICT = blocage. On ne peut pas supprimer un parent tant qu'il a des enfants."},{"q":"CHECK (prix > 0) en MySQL :","opts":["Empêche les prix négatifs ou nuls","N'a aucun effet (MySQL l'ignore)","Crée un index","Trie les données"],"correct":0,"expl":"Depuis MySQL 8.0.16, CHECK est réellement appliqué. Les valeurs ≤ 0 sont rejetées."},{"q":"ALTER TABLE artiste ADD CONSTRAINT ... sert à :","opts":["Créer une table","Ajouter une contrainte à une table existante","Supprimer une colonne","Renommer la table"],"correct":1,"expl":"ALTER TABLE permet de modifier une table existante : ajouter/supprimer contraintes, colonnes, etc."},{"q":"La différence entre PK et UNIQUE :","opts":["Aucune différence","PK interdit NULL et il n'y en a qu'une par table, UNIQUE autorise NULL","UNIQUE est plus rapide","PK est pour les textes, UNIQUE pour les nombres"],"correct":1,"expl":"PK = NOT NULL + UNIQUE + une seule par table. UNIQUE peut être multiple et accepte NULL."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

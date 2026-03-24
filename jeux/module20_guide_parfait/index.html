@@ -378,6 +378,14 @@
     .header { flex-direction: column; text-align: center; }
     .rules-grid { grid-template-columns: 1fr; }
   }
+
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
 </style>
 </head>
 <body>
@@ -481,6 +489,14 @@
 
 </div>
 
+<div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 20
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>Procédures pas à pas avec captures HeidiSQL annotées. FAQ basée sur les vraies erreurs du semestre. D3 : migration cloud (AWS RDS/Supabase), API REST, dashboard BI (Metabase), app mobile, automatisation factures, backup multi-sites, monitoring performances.</p>
+</div>
+</div>
 <script>
 // === TASKS DATA ===
 const tasks = [
@@ -830,6 +846,16 @@ function showFinal() {
   showScreen('final');
   updateScoreBar();
 }
+
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
 </script>
 </body>
 </html>

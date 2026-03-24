@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 16
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>Voir sql/03_views_procedures_security.sql pour les commandes GRANT.</p><p>2.</p><p>Test : mysql -u ingenieur_son -p → USE swisssound → DELETE FROM artiste → ERROR 1142 (DELETE command denied).</p><p>3.</p><p>RGPD : consentement artistes, droit d&#x27;accès, droit suppression, minimisation données, chiffrement emails.</p><p>4.</p><p>D2 : Forces (3NF, FK, vues sécurité) + Faiblesses (pas audit, pas multi-sites) + Améliorations (cloud, API, BI, mobile, backup auto).</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"La commande pour donner le droit SELECT sur la table artiste à l'utilisateur 'comptable' :","opts":["GRANT SELECT ON swisssound.artiste TO 'comptable';","ALLOW SELECT ON artiste FOR comptable;","PERMIT comptable SELECT artiste;","SET RIGHTS comptable = SELECT;"],"correct":0,"expl":"GRANT privilege ON database.table TO 'user';"},{"q":"Le principe du 'moindre privilège' signifie :","opts":["Donner GRANT ALL à tout le monde","Donner uniquement les droits strictement nécessaires","Ne donner aucun droit","Donner les droits au cas par cas chaque jour"],"correct":1,"expl":"Moindre privilège : chaque utilisateur n'a que les droits dont il a besoin, rien de plus."},{"q":"REVOKE supprime :","opts":["Un utilisateur","Un ou plusieurs droits d'un utilisateur","Une table","Une base de données"],"correct":1,"expl":"REVOKE retire des privilèges précédemment accordés avec GRANT."},{"q":"Le RGPD donne aux individus le droit de :","opts":["Accéder à leurs données et demander leur suppression","Modifier les BDD de l'entreprise","Supprimer n'importe quelle donnée","Installer leurs propres logiciels"],"correct":0,"expl":"RGPD : droit d'accès, droit de rectification, droit à l'effacement ('droit à l'oubli')."},{"q":"Pour chiffrer un email en MySQL :","opts":["MD5(email)","AES_ENCRYPT(email, 'clé_secrète')","HASH(email)","ENCODE(email)"],"correct":1,"expl":"AES_ENCRYPT/DECRYPT pour le chiffrement réversible. MD5/SHA sont des hash (non réversibles)."},{"q":"Quel utilisateur SwissSound ne devrait PAS avoir le droit DELETE sur la table facture ?","opts":["admin_studio","comptable","ingenieur_son","Tous devraient l'avoir"],"correct":2,"expl":"L'ingénieur son gère les sessions, pas les factures. Moindre privilège !"},{"q":"CREATE USER 'nouveau'@'localhost' IDENTIFIED BY 'motdepasse'; — que fait cette commande ?","opts":["Crée une table","Crée un utilisateur MySQL avec mot de passe","Crée une base de données","Modifie un utilisateur existant"],"correct":1,"expl":"CREATE USER crée un compte MySQL. @'localhost' = connexion locale uniquement."},{"q":"Pour l'évaluation D2, il faut :","opts":["Juste lister les utilisateurs","Évaluer l'efficacité de la solution et suggérer des améliorations","Créer 10 utilisateurs","Supprimer toutes les données"],"correct":1,"expl":"D2 = évaluation critique : forces, faiblesses, améliorations concrètes de la solution BDD."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

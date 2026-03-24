@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 6
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>ALBUM(#id_album, titre, date_sortie, nb_pistes, prix, →id_artiste). La FK id_artiste migre dans Album (côté N / CIF côté 1,1).</p><p>2.</p><p>GENRE_ARTISTE(→#id_genre, →#id_artiste). Table associative avec PK composée. Pas de CIF → obligation de créer une table.</p><p>3.</p><p>GENRE(#id_genre, nom, description). ARTISTE(#id_artiste, nom, prenom, email, telephone, date_inscription, actif). GENRE_ARTISTE(→#id_genre, →#id_artiste). ALBUM(#id_album, titre, date_sortie, nb_pistes, prix, →id_artiste). SALLE(#id_salle, nom, capacite, tarif_horaire, equipee_isolation). INGENIEUR(#id_ingenieur, nom, prenom, specialite, tarif_horaire). EQUIPEMENT(#id_equipement, nom, categorie, marque, valeur, etat, →id_salle). SESSION(#id_session, date, heure_debut, heure_fin, statut, notes, →id_artiste, →id_salle, →id_ingenieur). FACTURE(#id_facture, date, montant_total, statut_paiement, →id_artiste, →id_session).</p><p>4.</p><p>→id_artiste : qui enregistre (CIF Session 1,1 → Artiste). →id_salle : où (CIF Session 1,1 → Salle). →id_ingenieur : avec qui (CIF Session 1,1 → Ingénieur).</p><p>5.</p><p>1) idx_artiste_nom sur artiste(nom) : recherche fréquente par nom. 2) idx_session_date sur session(date_session) : recherche par date. 3) idx_facture_statut sur facture(statut_paiement) : filtrer impayées. 4) idx_album_artiste sur album(id_artiste) : lister albums par artiste.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"Une association 1:N dans le MCD se transforme en MLD par :","opts":["Création d'une table associative","Migration de la FK du côté N","Suppression de l'association","Fusion des deux tables"],"correct":1,"expl":"1:N → la clé primaire du côté '1' migre comme clé étrangère du côté 'N'."},{"q":"Une association N:M se transforme en MLD par :","opts":["Migration d'une FK","Création d'une table associative avec les 2 FK","On ignore l'association","On fusionne les tables"],"correct":1,"expl":"N:M → nouvelle table associative contenant les 2 FK comme PK composée."},{"q":"Dans le MLD, la notation #id_artiste signifie :","opts":["Clé étrangère","Clé primaire","Index","Attribut calculé"],"correct":1,"expl":"# devant un attribut = clé primaire dans la notation MLD."},{"q":"Dans le MLD, →id_artiste signifie :","opts":["Clé primaire","Clé étrangère référençant la table Artiste","Attribut obligatoire","Index unique"],"correct":1,"expl":"→ devant un attribut = clé étrangère (foreign key) qui référence une autre table."},{"q":"Artiste --(1,N)-- Album : où migre la FK ?","opts":["Dans Artiste","Dans Album","Dans une table associative","Nulle part"],"correct":1,"expl":"L'artiste (côté 1) est référencé par l'album (côté N). La FK →id_artiste va dans Album."},{"q":"La CIF (Contrainte d'Intégrité Fonctionnelle) identifie :","opts":["Quel côté a la cardinalité maximale N","Quel côté d'une association recevra la FK (côté 1,1 ou 0,1)","Quelle table supprimer","L'ordre de création SQL"],"correct":1,"expl":"La CIF pointe le côté (0,1) ou (1,1) de l'association → c'est là que migrera la FK."},{"q":"Genre_Artiste(→id_genre, →id_artiste) est un exemple de :","opts":["Table d'entité","Table associative (clé composée)","Vue","Procédure stockée"],"correct":1,"expl":"C'est la table associative de la relation N:M entre Genre et Artiste, avec une PK composée des 2 FK."},{"q":"L'intégrité référentielle garantit que :","opts":["Toutes les données sont chiffrées","Chaque FK référence une PK existante dans la table parente","Les tables ont le même nombre de lignes","Les noms de colonnes sont uniques"],"correct":1,"expl":"Intégrité référentielle : impossible d'insérer une FK qui ne correspond à aucune PK existante."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

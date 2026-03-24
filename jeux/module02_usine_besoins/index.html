@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -66,7 +74,15 @@
   </div>
   <div id="game" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 2
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>1) Ajouter/modifier/supprimer un artiste. 2) Réserver une session d&#x27;enregistrement. 3) Consulter le planning des salles. 4) Générer une facture. 5) Rechercher un artiste par nom ou genre.</p><p>2.</p><p>1) Temps de réponse &lt; 2 secondes. 2) Backup automatique quotidien. 3) Support de 50 utilisateurs simultanés. 4) Chiffrement des données sensibles (RGPD). 5) Compatible Windows 10/11.</p><p>3.</p><p>Fiche artiste (nom, contact, genre), Bon de session (date, salle, ingénieur), Facture (montant, statut), Inventaire équipement (nom, état, salle), Planning hebdomadaire.</p><p>4.</p><p>1) Combien de salles avez-vous ? 2) Comment gérez-vous les réservations actuellement ? 3) Qui facture les sessions ? 4) Un artiste peut-il avoir plusieurs genres ? 5) Gardez-vous l&#x27;historique des artistes inactifs ? 6) Comment suivez-vous l&#x27;état du matériel ? 7) Qui sont les utilisateurs du système ? 8) Quelle est la durée type d&#x27;une session ? 9) Un ingénieur peut-il travailler dans plusieurs salles ? 10) Comment gérez-vous les annulations ?</p><p>5.</p><p>1) RGPD : consentement pour stocker les données personnelles des artistes. 2) Sauvegarde et récupération en cas de panne. 3) Historique des modifications (audit trail) pour traçabilité.</p>
+</div>
+</div>
+<script>
   const items = [{"text":"L'artiste doit pouvoir voir ses sessions","zone":"user"},{"text":"Temps de réponse < 2 secondes","zone":"system"},{"text":"Sauvegardes automatiques chaque nuit","zone":"system"},{"text":"Le comptable génère les factures en PDF","zone":"user"},{"text":"Base de données MySQL 8.x","zone":"system"},{"text":"L'ingénieur réserve une salle","zone":"user"},{"text":"Chiffrement des mots de passe","zone":"system"},{"text":"Rechercher un artiste par nom","zone":"user"},{"text":"Compatible avec Windows et Mac","zone":"system"},{"text":"Afficher le planning de la semaine","zone":"user"},{"text":"Supporter 50 utilisateurs simultanés","zone":"system"},{"text":"Modifier les coordonnées d'un artiste","zone":"user"}];
   const zones = [{"id":"user","label":"👤 Besoin UTILISATEUR"},{"id":"system","label":"⚙️ Besoin SYSTÈME"}];
   let placed = {};
@@ -155,7 +171,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

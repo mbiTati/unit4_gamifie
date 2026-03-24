@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -66,7 +74,15 @@
   </div>
   <div id="game" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 8
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>id_artiste INT AUTO_INCREMENT PRIMARY KEY, nom VARCHAR(100) NOT NULL, prenom VARCHAR(100) DEFAULT NULL, email VARCHAR(150) NOT NULL UNIQUE, telephone VARCHAR(20), date_inscription DATE NOT NULL DEFAULT (CURDATE()), actif BOOLEAN NOT NULL DEFAULT TRUE.</p><p>2.</p><p>id_session INT AUTO_INCREMENT PRIMARY KEY, date_session DATE NOT NULL, heure_debut TIME NOT NULL, heure_fin TIME NOT NULL, statut ENUM(&#x27;planifiee&#x27;,&#x27;confirmee&#x27;,&#x27;en_cours&#x27;,&#x27;terminee&#x27;,&#x27;annulee&#x27;) DEFAULT &#x27;planifiee&#x27;, notes TEXT, id_artiste INT NOT NULL FK→artiste ON DELETE RESTRICT, id_salle INT NOT NULL FK→salle ON DELETE RESTRICT, id_ingenieur INT NOT NULL FK→ingenieur ON DELETE RESTRICT, CHECK(heure_fin &gt; heure_debut).</p><p>3.</p><p>Champs : Nom* (texte, 100 car max), Prénom (texte, optionnel), Email* (format email, unique), Téléphone (format +41XXXXXXXXX), Genre (dropdown multi-sélection depuis table genre). Boutons : Sauvegarder, Annuler. Validations : * = obligatoire, email validé par regex, téléphone format suisse.</p><p>4.</p><p>admin: ALL sur toutes tables. ingenieur: SELECT+INSERT+UPDATE session, SELECT salle/artiste/equipement. comptable: SELECT+INSERT+UPDATE facture, SELECT artiste/session. reception: SELECT+INSERT+UPDATE artiste+genre_artiste, SELECT genre.</p><p>5.</p><p>Forces : 3NF respectée, 9 tables bien structurées, intégrité FK complète, ENUM pour les statuts, index stratégiques. Faiblesses : pas de gestion multi-sites, pas d&#x27;historique des prix/tarifs, pas d&#x27;audit trail, pas de soft delete (flag actif seulement sur artiste). Améliorations : table historique_tarifs, table log_actions, support multi-devises (CHF/EUR), API REST pour app mobile.</p>
+</div>
+</div>
+<script>
   const items = [{"text":"nom VARCHAR(100)","zone":"correct"},{"text":"prix DECIMAL(10,2)","zone":"correct"},{"text":"email TEXT","zone":"wrong"},{"text":"date_naissance DATE","zone":"correct"},{"text":"age INT","zone":"wrong"},{"text":"actif BOOLEAN","zone":"correct"},{"text":"telephone INT","zone":"wrong"},{"text":"statut ENUM('actif','inactif')","zone":"correct"},{"text":"description VARCHAR(10)","zone":"wrong"},{"text":"montant FLOAT","zone":"wrong"}];
   const zones = [{"id":"correct","label":"✅ Type CORRECT"},{"id":"wrong","label":"❌ Type MAL CHOISI"}];
   let placed = {};
@@ -155,7 +171,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

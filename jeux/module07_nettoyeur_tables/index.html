@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 7
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>genres contient plusieurs valeurs (rock,jazz) dans une cellule → violation 1NF. telephones contient plusieurs numéros → violation 1NF. Ces colonnes ne sont pas atomiques.</p><p>2.</p><p>Extraire genres dans une table associative GENRE_ARTISTE. Garder un seul téléphone par artiste (ou créer table TELEPHONE_ARTISTE si plusieurs nécessaires).</p><p>3.</p><p>Atomicité 1NF = chaque cellule contient UNE SEULE valeur indivisible. Atomicité ACID = une transaction est TOUT OU RIEN (réussit complètement ou échoue complètement). Deux concepts TOTALEMENT DIFFÉRENTS malgré le même mot.</p><p>4.</p><p>Violation 3NF : si SESSION avait (id_session, id_salle, nom_salle, tarif_salle). id_session → id_salle → nom_salle est transitive. Correction : garder seulement →id_salle dans SESSION, nom_salle et tarif restent dans SALLE.</p><p>5.</p><p>Stocker nom_artiste dans FACTURE pour éviter un JOIN lors de l&#x27;impression. Avantage : requête plus rapide. Inconvénient : si l&#x27;artiste change de nom, il faut mettre à jour toutes ses factures. Choix conscient et documenté.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"La 1NF (première forme normale) exige :","opts":["Pas de clé primaire","Des valeurs atomiques dans chaque cellule","Pas de clé étrangère","Au moins 3 colonnes"],"correct":1,"expl":"1NF : chaque cellule contient une seule valeur indivisible (atomique). Pas de listes ni de groupes."},{"q":"Une table avec la colonne 'genres: rock, jazz, blues' viole :","opts":["La 2NF","La 1NF (valeur non atomique)","La 3NF","Aucune forme normale"],"correct":1,"expl":"Plusieurs valeurs dans une seule cellule → violation de la 1NF (atomicité)."},{"q":"! L'atomicité en 1NF et l'atomicité dans ACID sont :","opts":["La même chose","Deux concepts DIFFÉRENTS","Liées mais identiques","L'un inclut l'autre"],"correct":1,"expl":"1NF atomicité = valeur indivisible dans une cellule. ACID atomicité = transaction tout-ou-rien. Deux sens différents !"},{"q":"La 2NF élimine les dépendances :","opts":["Transitives","Partielles (partie de la PK composée)","Fonctionnelles","Toutes les dépendances"],"correct":1,"expl":"2NF : chaque attribut non-clé dépend de la TOTALITÉ de la PK, pas d'une partie seulement."},{"q":"La 3NF élimine les dépendances :","opts":["Partielles","Transitives (A→B→C)","Directes","Toutes"],"correct":1,"expl":"3NF : pas de dépendance transitive. Si A→B→C, alors C ne doit pas être dans la même table que A."},{"q":"Si une table a une PK simple (non composée), la 2NF est :","opts":["Violée par défaut","Automatiquement respectée","Impossible à vérifier","Toujours violée"],"correct":1,"expl":"La 2NF ne concerne que les PK composées. Avec une PK simple, il n'y a pas de dépendance partielle possible."},{"q":"La dénormalisation consiste à :","opts":["Ajouter plus de tables","Volontairement violer une NF pour améliorer les performances","Supprimer la PK","Chiffrer les données"],"correct":1,"expl":"On peut dénormaliser (ex: dupliquer un nom) pour éviter des JOIN coûteux. C'est un choix conscient."},{"q":"Anomalie de mise à jour = :","opts":["Impossible de créer la table","Modifier une donnée à un endroit mais pas aux autres copies","Le serveur plante","La requête est lente"],"correct":1,"expl":"Si une donnée est dupliquée et qu'on ne met à jour qu'une copie → incohérence = anomalie de MAJ."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -66,7 +74,15 @@
   </div>
   <div id="game" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 3
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>id_album (Elem, Entier, PK auto), titre (Elem, Texte 200, Obligatoire), date_sortie (Elem, Date, Optionnel), nb_pistes (Elem, Entier, ≥0), prix (Elem, Décimal 8.2, ≥0), id_artiste (Elem, Entier, FK obligatoire).</p><p>2.</p><p>id_session (Elem, Entier, PK auto), date_session (Elem, Date, Obligatoire), heure_debut (Elem, Heure, Obligatoire), heure_fin (Elem, Heure, &gt; debut), statut (Elem, Enum, planifiee/confirmee/terminee/annulee), id_artiste (FK), id_salle (FK), id_ingenieur (FK).</p><p>3.</p><p>telephone = numero = portable → standardiser en &#x27;telephone&#x27;. salle = studio = room → standardiser en &#x27;salle&#x27;. prix_album = cout = montant → distinguer : prix_album (prix de vente), montant_facture (total facturé).</p><p>4.</p><p>1) age_artiste = DATEDIFF(NOW(), date_naissance) / 365. 2) duree_session = TIMEDIFF(heure_fin, heure_debut). 3) montant_facture = (tarif_salle + tarif_ingenieur) × durée_heures.</p><p>5.</p><p>1) Un artiste peut avoir plusieurs genres (N:M). 2) Une session utilise une seule salle (1:1). 3) Le tarif horaire doit être positif (CHECK &gt; 0). 4) L&#x27;email artiste doit être unique (UNIQUE). 5) Un artiste inactif garde son historique (flag booléen, pas de DELETE).</p>
+</div>
+</div>
+<script>
   const items = [{"text":"nom_artiste","zone":"elem"},{"text":"prenom_artiste","zone":"elem"},{"text":"âge_artiste","zone":"calc"},{"text":"date_naissance","zone":"elem"},{"text":"montant_total_facture","zone":"calc"},{"text":"tarif_horaire","zone":"elem"},{"text":"durée_session (fin - début)","zone":"calc"},{"text":"email_artiste","zone":"elem"},{"text":"nom_salle","zone":"elem"},{"text":"nombre_albums (COUNT)","zone":"calc"},{"text":"telephone","zone":"elem"},{"text":"id_artiste","zone":"elem"}];
   const zones = [{"id":"elem","label":"📦 Donnée ÉLÉMENTAIRE"},{"id":"calc","label":"🔧 Donnée CALCULÉE"}];
   let placed = {};
@@ -155,7 +171,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

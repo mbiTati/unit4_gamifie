@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 17
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>Template Excel : ID, Description, Type (normal/limite/erroné), Entrée, Résultat attendu, Résultat obtenu, Statut. 20 cas minimum couvrant toutes les fonctionnalités.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"Le test 'white box' signifie que le testeur :","opts":["Ne connaît pas le code","Connaît le code et la structure interne","Teste uniquement l'interface","Utilise des données aléatoires"],"correct":1,"expl":"White box = on voit le code. Black box = on ne teste que les entrées/sorties."},{"q":"Un cas de test contient au minimum :","opts":["Juste la requête SQL","Entrée, résultat attendu, résultat obtenu, statut","Le nom du testeur","Une capture d'écran"],"correct":1,"expl":"Un cas de test complet : ID, description, entrée, résultat attendu, résultat obtenu, statut (OK/KO)."},{"q":"Une donnée de test 'erronée' pour un champ email serait :","opts":["'test@email.ch'","'pasunemail'","NULL","'a@b.c'"],"correct":1,"expl":"Donnée erronée = volontairement invalide pour tester que le système la rejette."},{"q":"La matrice de traçabilité relie :","opts":["Les tables entre elles","Les tests aux besoins du cahier des charges","Les bugs aux développeurs","Les utilisateurs aux rôles"],"correct":1,"expl":"Traçabilité = chaque besoin du CdC est couvert par au moins un test."},{"q":"Pour tester la contrainte CHECK (prix > 0), quelle donnée utiliser ?","opts":["prix = 50","prix = 0 et prix = -1","prix = NULL","prix = 'abc'"],"correct":1,"expl":"On teste les limites : 0 (devrait échouer) et -1 (doit échouer). Tester aussi avec une valeur valide."},{"q":"Le test 'black box' se concentre sur :","opts":["Le code source","Les entrées et sorties sans connaître le code","La performance","La sécurité uniquement"],"correct":1,"expl":"Black box = on teste les fonctionnalités comme un utilisateur, sans voir le code."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

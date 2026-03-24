@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 4
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>id_artiste → nom. id_artiste → email. id_artiste → telephone. id_album → titre. id_album → prix. id_album → id_artiste. id_salle → nom_salle. id_session → date_session.</p><p>2.</p><p>Matrice 6×6 : id_artiste détermine nom et email (1). id_album détermine titre, prix et id_artiste (1). Les sources sont id_artiste et id_album (colonnes sans 1).</p><p>3.</p><p>Sources = id_artiste (détermine nom, email, tel) et id_album (détermine titre, prix). Ce sont les futures PK des entités ARTISTE et ALBUM.</p><p>4.</p><p>1) id_session → id_salle → nom_salle : transitive car nom_salle dépend de id_salle, pas de id_session. Anomalie : si on renomme une salle, il faut modifier toutes les sessions. 2) id_album → id_artiste → nom_artiste : transitive. Si on stocke nom_artiste dans album, modifier le nom = modifier tous les albums.</p><p>5.</p><p>Graphe : id_artiste (source) → nom, prenom, email, telephone. id_album (source) → titre, date_sortie, prix. id_album → id_artiste (relation). id_salle (source) → nom_salle, capacite, tarif.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"A → B signifie :","opts":["A dépend de B","Connaître A permet de déterminer B","A et B sont identiques","B est la clé primaire de A"],"correct":1,"expl":"A → B : A détermine fonctionnellement B. Connaître A suffit pour trouver B."},{"q":"id_artiste → nom_artiste est une DF car :","opts":["Chaque nom a un seul id","Chaque id correspond à un seul nom","Les deux sont dans la même table","Le nom est la clé primaire"],"correct":1,"expl":"Un id_artiste identifie UN artiste, donc détermine son nom. L'inverse n'est pas vrai (homonymes)."},{"q":"Dans la matrice des DF, une 'source' est :","opts":["Une donnée qui ne dépend d'aucune autre","Une donnée calculée","Un synonyme","Une table"],"correct":0,"expl":"Source = donnée qui détermine d'autres mais n'est déterminée par aucune. C'est une future clé primaire."},{"q":"Si A → B et B → C, alors A → C est une DF :","opts":["Directe","Élémentaire","Transitive","Partielle"],"correct":2,"expl":"DF transitive : A détermine C indirectement via B. En 3NF, on élimine les DF transitives."},{"q":"id_session → id_salle est une DF. Cela signifie :","opts":["Une salle a une seule session","Une session se déroule dans une seule salle","Les sessions et salles sont la même chose","Il n'y a pas de relation"],"correct":1,"expl":"Une session a lieu dans UNE salle (déterminée par l'id de la session)."},{"q":"Le graphe des DF sert à :","opts":["Dessiner des tables","Visualiser les dépendances pour identifier les futures entités","Exécuter des requêtes SQL","Tester la base de données"],"correct":1,"expl":"Le graphe permet de voir les sources (futurs identifiants) et de valider la structure avant le MCD."},{"q":"nom_artiste → id_artiste est-elle une DF valide ?","opts":["Oui toujours","Non, car deux artistes peuvent avoir le même nom","Oui si on le décide","Seulement en 3NF"],"correct":1,"expl":"Les homonymes sont possibles. Le nom ne détermine pas l'id de façon unique → pas une DF."},{"q":"Dans la matrice des DF, on met un '1' quand :","opts":["Les deux données sont dans la même table","La donnée en ligne détermine la donnée en colonne","La donnée est calculée","La donnée est une clé étrangère"],"correct":1,"expl":"On met 1 si la donnée de la ligne détermine celle de la colonne (DF existante)."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

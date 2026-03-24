@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 1
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>sakila contient 16 tables : actor, address, category, city, country, customer, film, film_actor, film_category, inventory, language, payment, rental, staff, store. Nombre de colonnes varie de 2 (film_actor) à 10+ (customer).</p><p>2.</p><p>PK = film_id (INT AUTO_INCREMENT). FK = language_id → language, original_language_id → language. Types : SMALLINT, VARCHAR, TEXT, DECIMAL, YEAR, TIMESTAMP.</p><p>3.</p><p>actor(actor_id PK) ←← film_actor(actor_id FK, film_id FK) →→ film(film_id PK). film_actor est la table associative N:M.</p><p>4.</p><p>1) Contacts téléphone = BDD de noms/numéros. 2) Bibliothèque = BDD de livres/emprunts. 3) Supermarché = BDD de produits/stocks/prix.</p><p>5.</p><p>Relationnel : structure fixe (fiabilité), SQL standardisé, intégrité référentielle (FK). NoSQL : schéma flexible, scalabilité horizontale, performance sur données non structurées.</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"Une base de données relationnelle organise les données en :","opts":["Documents JSON","Tables avec lignes et colonnes","Fichiers texte","Graphes de nœuds"],"correct":1,"expl":"Une BDD relationnelle stocke les données dans des tables (relations) composées de lignes (enregistrements) et colonnes (champs)."},{"q":"Que signifie SGBD ?","opts":["Système de Gestion de Bases de Données","Service Global de Bases Digitales","Serveur Graphique de Big Data","Structure Générale de Données Binaires"],"correct":0,"expl":"SGBD = Système de Gestion de Bases de Données (MySQL, PostgreSQL, Oracle...)."},{"q":"MySQL est un exemple de :","opts":["BDD non-relationnelle","SGBD relationnel","Langage de programmation","Système d'exploitation"],"correct":1,"expl":"MySQL est un SGBD relationnel open source, parmi les plus utilisés au monde."},{"q":"Dans une table, une LIGNE représente :","opts":["Un champ/attribut","Un enregistrement/tuple","Une base de données","Un index"],"correct":1,"expl":"Ligne = enregistrement = tuple. C'est une entrée complète dans la table."},{"q":"Dans une table, une COLONNE représente :","opts":["Un enregistrement","Un champ/attribut","Une relation","Un fichier"],"correct":1,"expl":"Colonne = champ = attribut. C'est une propriété commune à tous les enregistrements."},{"q":"MongoDB est un exemple de BDD :","opts":["Relationnelle","Non-relationnelle (NoSQL)","Tabulaire","Hiérarchique"],"correct":1,"expl":"MongoDB est NoSQL : elle stocke des documents JSON, pas des tables relationnelles."},{"q":"Le rôle principal d'une BDD dans un site e-commerce est :","opts":["Afficher des images","Stocker produits, commandes, clients (back-end)","Envoyer des emails","Créer le design du site"],"correct":1,"expl":"La BDD est le back-end : elle stocke et gère toutes les données métier."},{"q":"HeidiSQL est :","opts":["Un langage de programmation","Un client graphique pour MySQL","Un système d'exploitation","Un navigateur web"],"correct":1,"expl":"HeidiSQL est une interface graphique gratuite pour se connecter à MySQL et gérer les BDD."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>

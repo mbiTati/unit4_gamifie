@@ -43,7 +43,15 @@
   .result-bar { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; }
   .result-dot { width:10px; height:10px; border-radius:50%; }
   .final-score { font-size:3rem; font-weight:900; text-align:center; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  </style>
+  
+.correction-section{margin-top:1.5rem;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12);border-radius:10px;overflow:hidden}
+.correction-toggle{width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text,#e2e8f0);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;text-align:left}
+.correction-toggle:hover{background:rgba(220,38,38,.06)}
+.correction-toggle .badge{background:#dc2626;color:#fff;font-size:.65rem;padding:.1rem .4rem;border-radius:3px;font-weight:800}
+.correction-content{display:none;padding:0 1rem 1rem;font-size:.82rem;line-height:1.7}
+.correction-content.show{display:block}
+.correction-content p{margin:.3rem 0;padding:.2rem 0;border-bottom:1px solid rgba(220,38,38,.06)}
+</style>
 </head>
 <body>
 <div class="header">
@@ -65,14 +73,22 @@
   </div>
   <div id="quiz" class="hidden"></div>
   <div id="result" class="hidden"></div>
-  <script>
+  <div class="correction-section" id="correctionSection" style="display:none">
+<button class="correction-toggle" onclick="document.getElementById('corContent').classList.toggle('show');this.querySelector('.arrow').textContent=document.getElementById('corContent').classList.contains('show')?'▼':'▶'">
+<span class="badge">CORR</span> <span class="arrow">▶</span> Correction du module 11
+</button>
+<div class="correction-content" id="corContent">
+<p>1.</p><p>INSERT INTO artiste (nom, prenom, email) VALUES (&#x27;Testeur&#x27;, &#x27;Claude&#x27;, &#x27;claude@test.ch&#x27;);</p><p>2.</p><p>INSERT INTO album (titre, prix, id_artiste) VALUES (&#x27;Album1&#x27;, 19.90, 1), (&#x27;Album2&#x27;, 24.90, 1), ...;</p><p>3.</p><p>SELECT * FROM artiste WHERE id_artiste = 1; puis UPDATE artiste SET email = &#x27;new@mail.ch&#x27; WHERE id_artiste = 1;</p><p>4.</p><p>SELECT * FROM facture WHERE statut_paiement = &#x27;annulee&#x27;; puis DELETE FROM facture WHERE statut_paiement = &#x27;annulee&#x27;;</p><p>5.</p><p>START TRANSACTION; UPDATE artiste SET actif = FALSE WHERE id_artiste = 5; SELECT actif FROM artiste WHERE id_artiste = 5; -- FALSE. ROLLBACK; SELECT actif FROM artiste WHERE id_artiste = 5; -- TRUE (inchangé).</p>
+</div>
+</div>
+<script>
   const questions = [{"q":"DELETE FROM artiste; (sans WHERE) va :","opts":["Supprimer un artiste","Supprimer TOUS les artistes !","Ne rien faire","Supprimer la table"],"correct":1,"expl":"! DELETE sans WHERE supprime TOUTES les lignes ! Toujours vérifier le WHERE."},{"q":"UPDATE artiste SET email = 'new@mail.ch'; (sans WHERE) va :","opts":["Modifier un email","Modifier l'email de TOUS les artistes !","Ne rien faire","Créer un nouveau champ"],"correct":1,"expl":"! UPDATE sans WHERE modifie TOUTES les lignes ! Toujours ajouter WHERE."},{"q":"BEGIN; UPDATE ...; ROLLBACK; — que se passe-t-il ?","opts":["Les modifications sont sauvegardées","Les modifications sont annulées","La table est supprimée","Erreur"],"correct":1,"expl":"ROLLBACK annule toutes les modifications depuis le BEGIN. La BDD revient à l'état d'avant."},{"q":"COMMIT fait quoi dans une transaction ?","opts":["Annule les changements","Valide et enregistre définitivement les changements","Ferme la connexion","Affiche les données"],"correct":1,"expl":"COMMIT = valider. Après COMMIT, impossible de revenir en arrière avec ROLLBACK."},{"q":"L'Atomicité dans ACID signifie :","opts":["Valeurs indivisibles dans les cellules (1NF)","Une transaction est tout-ou-rien","Les données sont petites","Chaque opération est rapide"],"correct":1,"expl":"ACID Atomicité = la transaction entière réussit ou échoue complètement. ≠ atomicité 1NF !"},{"q":"INSERT INTO artiste VALUES (...) vs INSERT INTO artiste (nom, prenom) VALUES (...) :","opts":["Aucune différence","La 2e est plus sûre car elle nomme les colonnes","La 1ère est plus rapide","La 2e crée des erreurs"],"correct":1,"expl":"Nommer les colonnes est une bonne pratique : plus lisible, plus sûr si la structure change."},{"q":"Pour insérer 100 artistes d'un coup, utiliser :","opts":["100 requêtes INSERT séparées","INSERT INTO artiste VALUES (...), (...), (...);","UPDATE 100 fois","CREATE 100 tables"],"correct":1,"expl":"INSERT multiple = une seule requête avec plusieurs jeux de valeurs. Beaucoup plus rapide."},{"q":"La propriété 'Durabilité' dans ACID signifie :","opts":["La BDD est rapide","Une fois COMMIT, les données survivent même à un crash","Les données sont chiffrées","La BDD est portable"],"correct":1,"expl":"Durabilité : après COMMIT, les données sont écrites sur disque et survivent à un crash serveur."}];
   let current = 0, score = 0, answers = [];
   document.getElementById('qTotal').textContent = questions.length;
 
   function startQuiz() {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('quiz').classList.remove('hidden');if(document.getElementById('correctionSection'))document.getElementById('correctionSection').style.display='block';;
     showQuestion();
   }
 
@@ -147,7 +163,17 @@
       </div>
     `;
   }
-  </script>
+  
+// Show correction when quiz ends
+const _corrObs = setInterval(()=>{
+  const r = document.getElementById('result') || document.getElementById('fin');
+  if(r && !r.classList.contains('hidden') && r.innerHTML.length > 10){
+    const cs = document.getElementById('correctionSection');
+    if(cs) cs.style.display='block';
+    clearInterval(_corrObs);
+  }
+}, 500);
+</script>
 </div>
 </body>
 </html>
