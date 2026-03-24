@@ -310,6 +310,8 @@ Avec : <code>SELECT DISTINCT NOCAT FROM client;</code> → chaque categorie une 
 ];
 
 // Load GESCOM database
+window.EXPECTED = {"1": {"nb_rows": 38, "nb_cols": 3}, "2": {"nb_rows": 38, "nb_cols": 3}, "3": {"nb_rows": 38, "nb_cols": 3}, "4": {"nb_rows": 2, "nb_cols": 3}, "5": {"nb_rows": 1, "nb_cols": 4}, "6": {"nb_rows": 15, "nb_cols": 4}, "7": {"nb_rows": 12, "nb_cols": 4}, "8": {"nb_rows": 4, "nb_cols": 4}, "9": {"nb_rows": 2, "nb_cols": 5}, "10": {"nb_rows": 3, "nb_cols": 5}, "11": {"nb_rows": 1, "nb_cols": 4}, "12": {"nb_rows": 9, "nb_cols": 5}, "13": {"nb_rows": 5, "nb_cols": 4}, "14": {"nb_rows": 4, "nb_cols": 4}, "15": {"nb_rows": 4, "nb_cols": 3}, "16": {"nb_rows": 10, "nb_cols": 3}, "17": {"nb_rows": 6, "nb_cols": 4}, "18": {"nb_rows": 4, "nb_cols": 5}, "19": {"nb_rows": 5, "nb_cols": 2}, "20": {"nb_rows": 4, "nb_cols": 2}, "21": {"nb_rows": 4, "nb_cols": 2}, "22": {"nb_rows": 18, "nb_cols": 1}, "23": {"nb_rows": 17, "nb_cols": 1}, "24": {"nb_rows": 1, "nb_cols": 1}, "25": {"nb_rows": 1, "nb_cols": 1}, "26": {"nb_rows": 1, "nb_cols": 1}, "27": {"nb_rows": 1, "nb_cols": 2}, "28": {"nb_rows": 1, "nb_cols": 1}, "29": {"nb_rows": 1, "nb_cols": 1}};
+
 async function initDB(){
   // Render exercises immediately (even before DB loads)
   renderAll();
@@ -402,9 +404,23 @@ function runEx(n){
       r[0].values.forEach(row=>{tbl+='<tr>';row.forEach(v=>tbl+=`<td>${v===null?'<em style="color:var(--muted)">NULL</em>':v}</td>`);tbl+='</tr>';});
       tbl+='</table>';
       resultDiv.innerHTML=tbl+`<div class="result-info">${r[0].values.length} ligne(s)</div>`;
-      const sec=SECTIONS.find(s=>s.exercises.some(e=>e.n===n));
-      const ex=sec?.exercises.find(e=>e.n===n);
-      if(ex&&ex.check(r)){const st=document.getElementById('status_'+n);if(st.textContent!=='✅ Correct'){st.textContent='✅ Correct';st.className='ex-status ok';solved++;updateProgress();}}
+      // VALIDATION: compare nb_rows and nb_cols against expected
+      if(lastR && lastR.length>0){
+        const got_rows = lastR[0].values.length;
+        const got_cols = lastR[0].columns.length;
+        const st = document.getElementById('status_'+n);
+        if(window.EXPECTED && window.EXPECTED[n]){
+          const exp = window.EXPECTED[n];
+          if(exp.nb_rows === -1){
+            if(st.textContent!=='✅ Exécuté'){st.textContent='✅ Exécuté';st.className='ex-status ok';solved++;updateProgress();}
+          } else if(got_rows === exp.nb_rows && got_cols === exp.nb_cols){
+            if(st.textContent!=='✅ Correct'){st.textContent='✅ Correct';st.className='ex-status ok';solved++;updateProgress();}
+          } else {
+            st.textContent='❌ '+got_rows+' lignes/'+got_cols+' cols (attendu: '+exp.nb_rows+'/'+exp.nb_cols+')';
+            st.className='ex-status';st.style.color='var(--error)';
+          }
+        }
+      }
     }else{resultDiv.innerHTML='<div class="result-info">Aucun resultat.</div>';}
   }catch(e){errDiv.textContent='❌ Erreur SQL : '+e.message;}
 }

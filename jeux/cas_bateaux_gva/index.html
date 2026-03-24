@@ -85,6 +85,8 @@ const EX = [
   {n:11,cat:'Dashboard',q:'Dashboard : nb bateaux disponibles, nb réservations actives, CA total, réservation moyenne.',hint:'UNION ALL avec 4 SELECT',sol:'SELECT \'Bateaux disponibles\' AS kpi, COUNT(*) AS valeur FROM bateau WHERE etat = \'Disponible\'\nUNION ALL\nSELECT \'Réservations (hors annulées)\', COUNT(*) FROM reservation WHERE statut != \'Annulee\'\nUNION ALL\nSELECT \'CA Total (CHF)\', ROUND(SUM(montant_total),2) FROM reservation WHERE statut != \'Annulee\'\nUNION ALL\nSELECT \'Réservation moyenne (CHF)\', ROUND(AVG(montant_total),2) FROM reservation WHERE statut != \'Annulee\';',preview:'<small style=\'color:var(--muted)\'>Résultat attendu : 4 ligne(s)<br><table style=\'font-size:.68rem;margin-top:.3rem;border-collapse:collapse\'><tr><th style=\'background:rgba(59,130,246,.15);padding:.15rem .3rem;font-size:.62rem\'>kpi</th><th style=\'background:rgba(59,130,246,.15);padding:.15rem .3rem;font-size:.62rem\'>valeur</th></tr><tr><td style=\'padding:.12rem .3rem;border-bottom:1px solid rgba(255,255,255,.05);font-family:monospace;font-size:.65rem\'>Bateaux disponibles</td><td style=\'padding:.12rem .3rem;border-bottom:1px solid rgba(255,255,255,.05);font-family:monospace;font-size:.65rem\'>11</td></tr><tr><td style=\'padding:.12rem .3rem;border-bottom:1px solid rgba(255,255,255,.05);font-family:monospace;font-size:.65rem\'>Réservations (hors annulées)</td><td style=\'padding:.12rem .3rem;border-bottom:1px solid rgba(255,255,255,.05);font-family:monospace;font-size:.65rem\'>16</td></tr><tr><td style=\'padding:.12rem .3rem;border-bottom:1px solid rgba(255,255,255,.05);font-family:monospace;font-size:.65rem\'>CA Total (CHF)</td><td style=\'padding:.12rem .3rem;border-bottom:1px solid rgba(255,255,255,.05);font-family:monospace;font-size:.65rem\'>3801.0</td></tr><tr><td colspan=\'2\' style=\'color:var(--muted);font-size:.6rem\'>... 1 de plus</td></tr></table></small>'},
 ];
 
+window.EXPECTED = {"1": {"nb_rows": 5, "nb_cols": 3}, "2": {"nb_rows": 4, "nb_cols": 3}, "3": {"nb_rows": 11, "nb_cols": 2}, "4": {"nb_rows": 14, "nb_cols": 4}, "5": {"nb_rows": 17, "nb_cols": 7}, "6": {"nb_rows": 6, "nb_cols": 3}, "7": {"nb_rows": 8, "nb_cols": 4}, "8": {"nb_rows": 3, "nb_cols": 3}, "9": {"nb_rows": 1, "nb_cols": 2}, "10": {"nb_rows": 3, "nb_cols": 3}, "11": {"nb_rows": 4, "nb_cols": 2}};
+
 async function initDB(){
   renderAll();
   try {
@@ -160,9 +162,22 @@ function runEx(n){
       lastR[0].values.forEach(row=>{tbl+='<tr>';row.forEach(v=>tbl+='<td>'+(v===null?'<em style="color:var(--muted)">NULL</em>':v)+'</td>');tbl+='</tr>';});
       tbl+='</table>';
       resultDiv.innerHTML=tbl+'<div class="result-info">'+lastR[0].values.length+' ligne(s)</div>';
-      if(lastR[0].values.length>0){
-        const st=document.getElementById('status_'+n);
-        if(st.textContent!=='✅'){st.textContent='✅';st.className='ex-status ok';solved++;updateProgress();}
+      // VALIDATION: compare nb_rows and nb_cols against expected
+      if(lastR && lastR.length>0){
+        const got_rows = lastR[0].values.length;
+        const got_cols = lastR[0].columns.length;
+        const st = document.getElementById('status_'+n);
+        if(window.EXPECTED && window.EXPECTED[n]){
+          const exp = window.EXPECTED[n];
+          if(exp.nb_rows === -1){
+            if(st.textContent!=='✅ Exécuté'){st.textContent='✅ Exécuté';st.className='ex-status ok';solved++;updateProgress();}
+          } else if(got_rows === exp.nb_rows && got_cols === exp.nb_cols){
+            if(st.textContent!=='✅ Correct'){st.textContent='✅ Correct';st.className='ex-status ok';solved++;updateProgress();}
+          } else {
+            st.textContent='❌ '+got_rows+' lignes/'+got_cols+' cols (attendu: '+exp.nb_rows+'/'+exp.nb_cols+')';
+            st.className='ex-status';st.style.color='var(--error)';
+          }
+        }
       }
     }
   }catch(e){errDiv.textContent='❌ '+e.message;}
