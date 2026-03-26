@@ -631,9 +631,9 @@ function runEx(n){
       const sec = SECTIONS.find(s => s.exercises.some(e => e.n === n));
       const ex = sec?.exercises.find(e => e.n === n);
       // VALIDATION: compare nb_rows and nb_cols against expected
-      if(r && r.length>0){
-        const got_rows = r[0].values.length;
-        const got_cols = r[0].columns.length;
+      if(lastResult && lastResult.length>0){
+        const got_rows = lastResult[0].values.length;
+        const got_cols = lastResult[0].columns.length;
         const st = document.getElementById('status_'+n);
         if(window.EXPECTED && window.EXPECTED[n]){
           const exp = window.EXPECTED[n];
