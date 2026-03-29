@@ -29,6 +29,25 @@ function getLevel(xp) {
 
 // Supabase client (using fetch, no SDK needed)
 const supabase = {
+  async refreshToken() {
+    const refresh = localStorage.getItem('cq_refresh');
+    if (!refresh) return false;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refresh }),
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem('cq_token', data.access_token);
+        localStorage.setItem('cq_refresh', data.refresh_token);
+        return true;
+      }
+    } catch(e) { console.error('Token refresh failed:', e); }
+    return false;
+  },
+
   async query(table, options = {}) {
     let url = `${SUPABASE_URL}/rest/v1/${table}`;
     const params = new URLSearchParams();
@@ -50,7 +69,17 @@ const supabase = {
     const token = localStorage.getItem('cq_token');
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(url, { headers });
+    let res = await fetch(url, { headers });
+    
+    // If 401/403, try refreshing token
+    if (res.status === 401 || res.status === 403) {
+      const refreshed = await this.refreshToken();
+      if (refreshed) {
+        headers['Authorization'] = `Bearer ${localStorage.getItem('cq_token')}`;
+        res = await fetch(url, { headers });
+      }
+    }
+    
     return res.json();
   },
 

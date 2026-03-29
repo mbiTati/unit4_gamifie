@@ -112,89 +112,62 @@ async function handleSubmit() {
   document.getElementById('loading').style.display = 'block';
   
   try {
-    {
-      // Try login first
+    // Step 1: Try to sign in
     let result = await supabase.signIn(email, pwd);
     
-    // If login fails, check if profile exists — maybe auth account doesn't exist yet
+    // Step 2: If login fails, check if profile exists (teacher-created student without auth)
     if (!result.access_token) {
-      const profiles = await supabase.query('cq_students', { select: 'id,email', filter: { 'email': 'eq.' + email } });
-      if (profiles && profiles.length > 0) {
-        // Profile exists but no auth — try to signup first (teacher created profile without auth)
-        const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+      // Check if email exists in cq_students (using anon key — SELECT is public)
+      const checkRes = await fetch(SUPABASE_URL + '/rest/v1/cq_students?email=eq.' + encodeURIComponent(email) + '&select=id', {
+        headers: { 'apikey': SUPABASE_ANON_KEY }
+      });
+      const profiles = await checkRes.json();
+      
+      if (Array.isArray(profiles) && profiles.length > 0) {
+        // Profile exists — try auto-signup then login
+        await fetch(SUPABASE_URL + '/auth/v1/signup', {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password: pwd })
-        }).then(r => r.json());
-        
-        // Now try login again
-        if (!signupRes.error) {
-          result = await supabase.signIn(email, pwd);
-        }
+        });
+        // Wait a moment then retry login
+        await new Promise(r => setTimeout(r, 500));
+        result = await supabase.signIn(email, pwd);
       }
     }
-      if (result.access_token) {
-        // Load or link student profile
-        const students = await supabase.query('cq_students', { select: '*', filter: { 'email': `eq.${email}` } });
-        if (students && students.length > 0) {
-          // Link auth_id if not already set
-          if (!students[0].auth_id && result.user) {
-            await supabase.update('cq_students', { auth_id: result.user.id }, { 'id': `eq.${students[0].id}` });
-          }
-          localStorage.setItem('cq_student', JSON.stringify(students[0]));
-          window.location.href = students[0].role === 'teacher' ? 'teacher.html' : 'home.html';
-        } else {
-          msgArea.innerHTML = '<div class="msg error">Profil non trouvé. Contactez votre enseignant ou inscrivez-vous.</div>';
-          showForm();
-        }
-      } else {
-        msgArea.innerHTML = `<div class="msg error">${result.error_description || 'Email ou mot de passe incorrect.'}</div>`;
-        showForm();
-      }
-    } else {
-      // SIGNUP
-      const firstName = document.getElementById('firstName').value.trim();
-      const lastName = document.getElementById('lastName').value.trim();
-      const className = document.getElementById('className').value;
-      const cohort = document.getElementById('cohort').value;
+    
+    // Step 3: If still no token, show error
+    if (!result.access_token) {
+      msgArea.innerHTML = '<div class="msg error">' + (result.error_description || result.msg || 'Email ou mot de passe incorrect.') + '</div>';
+      showForm();
+      return;
+    }
+    
+    // Step 4: Login successful — load student profile
+    const profileRes = await fetch(SUPABASE_URL + '/rest/v1/cq_students?email=eq.' + encodeURIComponent(email) + '&select=*', {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + result.access_token }
+    });
+    const studentProfiles = await profileRes.json();
+    
+    if (Array.isArray(studentProfiles) && studentProfiles.length > 0) {
+      const profile = studentProfiles[0];
       
-      if (!firstName || !lastName) {
-        msgArea.innerHTML = '<div class="msg error">Prénom et nom requis.</div>';
-        showForm(); return;
-      }
-      
-      const result = await supabase.signUp(email, pwd);
-      if (result.error) {
-        msgArea.innerHTML = `<div class="msg error">${result.error.message || result.error}</div>`;
-        showForm(); return;
-      }
-      
-      // Create or link student profile
-      const existing = await supabase.query('cq_students', { select: '*', filter: { 'email': `eq.${email}` } });
-      
-      if (existing && existing.length > 0) {
-        // Pre-created by teacher — link auth_id
-        if (result.user) {
-          await supabase.update('cq_students', { auth_id: result.user.id }, { 'id': `eq.${existing[0].id}` });
-        }
-      } else {
-        // Create new student profile
-        await supabase.insert('cq_students', {
-          email: email,
-          first_name: firstName,
-          last_name: lastName.toUpperCase(),
-          class_name: className,
-          cohort: cohort,
-          role: 'student',
-          auth_id: result.user?.id || null,
+      // Link auth_id if needed
+      if (!profile.auth_id && result.user) {
+        await fetch(SUPABASE_URL + '/rest/v1/cq_students?id=eq.' + profile.id, {
+          method: 'PATCH',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + result.access_token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ auth_id: result.user.id })
         });
       }
       
-      msgArea.innerHTML = '<div class="msg success">Compte créé ! Connectez-vous maintenant.</div>';
-      switchMode('login');
+      localStorage.setItem('cq_student', JSON.stringify(profile));
+      window.location.href = profile.role === 'teacher' ? 'teacher.html' : 'home.html';
+    } else {
+      msgArea.innerHTML = '<div class="msg error">Profil non trouvé. Contactez votre enseignant(e).</div>';
       showForm();
     }
-  } catch (e) {
+  } catch catch (e) {
     msgArea.innerHTML = `<div class="msg error">Erreur : ${e.message}</div>`;
     showForm();
   }

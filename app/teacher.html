@@ -90,7 +90,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
     <button class="tab active" onclick="showTab('progress',this)">Progression</button>
     <button class="tab" onclick="showTab('comments',this)">Questions <span class="badge" id="commentBadge" style="display:none">0</span></button>
     <button class="tab" onclick="showTab('manage',this)">Gérer les élèves</button>
-    <button class="tab" onclick="showTab('modules',this)">Par module</button>
+    
     <button class="tab" onclick="showTab('docs',this)">Mes Documents</button>
     <button class="tab" onclick="showTab('tools',this)">Outils & SQL</button>
   </div>
@@ -107,7 +107,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   <div id="tab-progress"><div style="overflow-x:auto"><table class="s-table"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div>
   <div id="tab-comments" style="display:none"><div id="commentsList"></div></div>
   <div id="tab-manage" style="display:none" id="manageTab"></div>
-  <div id="tab-modules" style="display:none"><div id="modulesList"></div></div>
+  </div>
   
   <div id="tab-docs" style="display:none">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
@@ -207,7 +207,7 @@ let allModules = [];
 function showTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  ['progress','comments','manage','modules','docs','tools'].forEach(t => {
+  ['progress','comments','manage','docs','tools'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
@@ -221,6 +221,9 @@ function logout() {
 
 async function loadData() {
   try {
+    // Auto-refresh token before loading data
+    await supabase.refreshToken();
+    
     allStudents = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
     allProgress = await supabase.query('cq_student_progress', { select: '*' }) || [];
     allComments = await supabase.query('cq_comments', { select: '*', order: 'created_at.desc', limit: 50 }) || [];
@@ -233,9 +236,20 @@ async function loadData() {
     if (allModules.message) { console.error('Modules error:', allModules.message); allModules = []; }
     
     console.log('Loaded:', allStudents.length, 'students,', allProgress.length, 'progress,', allComments.length, 'comments,', allModules.length, 'modules');
+    
+    // If no students loaded, show debug info
+    if (allStudents.length === 0) {
+      console.warn('No students loaded! Token:', localStorage.getItem('cq_token')?.substring(0,20) + '...');
+      // Try without filter to see if it's a permission issue
+      const test = await fetch(SUPABASE_URL + '/rest/v1/cq_students?select=id&limit=1', {
+        headers: { 'apikey': SUPABASE_ANON_KEY }
+      }).then(r => r.json());
+      console.log('Anon query test:', test);
+    }
   } catch(e) {
     console.error('loadData error:', e);
     allStudents = []; allProgress = []; allComments = []; allModules = [];
+    document.getElementById('alerts').innerHTML = '<div class="alert"><strong>Erreur de chargement</strong> — Vérifiez votre connexion ou <a href="login.html" style="color:var(--accent2)">reconnectez-vous</a>.</div>';
   }
   
   // Populate filters
@@ -250,6 +264,11 @@ async function loadData() {
   
   renderData();
   renderComments();
+  
+  // If still 0 students, show reconnect suggestion
+  if (allStudents.length === 0) {
+    document.getElementById('alerts').innerHTML += '<div class="alert" style="background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.15)"><strong style="color:var(--gold)">Aucune donnée</strong> — <a href="login.html" style="color:var(--accent2);font-weight:700">Reconnectez-vous</a> si le problème persiste. <button onclick="location.reload()" class="btn-sm btn-primary" style="margin-left:.5rem">Recharger</button></div>';
+  }
   renderManage();
   // Populate class filter from cq_classes
   const classesData = await supabase.query('cq_classes', { select: '*', order: 'name.asc' }) || [];
@@ -259,8 +278,7 @@ async function loadData() {
     fc2.innerHTML = '<option value="all">Toutes</option>' + classesData.map(cl => '<option value="' + cl.name + '">' + cl.name + '</option>').join('');
     fc2.value = current || 'all';
   }
-  renderModules();
-}
+  }
 
 function renderData() {
   const filterClass = document.getElementById('filterClass').value;
@@ -485,24 +503,7 @@ async function linkAuth(email) {
   }
 }
 
-function renderModules() {
-  const students = allStudents.filter(s => s.role !== 'teacher');
-  document.getElementById('modulesList').innerHTML = allModules.map(m => {
-    const mp = allProgress.filter(p => p.module_id === m.id);
-    const started = mp.length;
-    const completed = mp.filter(p => p.completed_at).length;
-    const avgScore = mp.length > 0 ? Math.round(mp.reduce((a,p) => a + (p.total_questions > 0 ? (p.quiz_score/p.total_questions)*100 : 0), 0) / mp.length) : 0;
-    const pct = students.length > 0 ? Math.round(completed / students.length * 100) : 0;
-    const barColor = pct < 30 ? 'var(--error)' : pct < 60 ? 'var(--gold)' : 'var(--lo1)';
-    return `<div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 0;border-bottom:1px solid var(--border)">
-      <span style="font-family:monospace;font-size:.7rem;font-weight:700;color:var(--accent2);min-width:50px">${m.code}</span>
-      <span style="flex:1;font-size:.78rem">${m.title}</span>
-      <div class="bar" style="width:80px"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-      <span style="font-size:.65rem;color:var(--muted);min-width:40px">${completed}/${students.length}</span>
-      <span style="font-size:.65rem;color:var(--muted);min-width:30px">${avgScore}%</span>
-    </div>`;
-  }).join('');
-}
+
 
 async function resetStudent(id) {
   if (!confirm('Remettre à zéro la progression de cet élève ?')) return;
