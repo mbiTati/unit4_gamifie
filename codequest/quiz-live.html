@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Quiz Live</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:800px;margin:0 auto;padding:1.5rem;flex:1;width:100%}
+.mode-select{display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:500px;margin:2rem auto}
+.mode-card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s}
+.mode-card:hover{border-color:var(--accent2);transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.mode-card .icon{font-size:2rem;margin-bottom:.5rem}
+.mode-card h3{font-size:1rem;font-weight:700}
+.mode-card p{font-size:.75rem;color:var(--muted);margin-top:.3rem}
+.bank-select{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem;margin:1rem 0}
+.bank{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem;cursor:pointer;transition:all .2s}
+.bank:hover,.bank.selected{border-color:var(--accent2)}
+.bank.selected{background:rgba(50,224,196,.05)}
+.bank h4{font-size:.85rem;font-weight:700}
+.bank p{font-size:.7rem;color:var(--muted)}
+.quiz-area{text-align:center}
+.question-text{font-size:1.1rem;font-weight:700;margin:1.5rem 0;line-height:1.5}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1rem 0}
+.answer{padding:1rem;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:.9rem;font-weight:600;transition:all .2s;min-height:60px;display:flex;align-items:center;justify-content:center}
+.answer:hover{transform:scale(1.02)}
+.a0{border-color:#ef4444;background:rgba(239,68,68,.08)}.a0:hover{background:rgba(239,68,68,.15)}
+.a1{border-color:#3b82f6;background:rgba(59,130,246,.08)}.a1:hover{background:rgba(59,130,246,.15)}
+.a2{border-color:#f59e0b;background:rgba(245,158,11,.08)}.a2:hover{background:rgba(245,158,11,.15)}
+.a3{border-color:#10b981;background:rgba(16,185,129,.08)}.a3:hover{background:rgba(16,185,129,.15)}
+.answer.correct{background:rgba(16,185,129,.25) !important;border-color:var(--lo1) !important;font-weight:800}
+.answer.wrong{background:rgba(239,68,68,.2) !important;opacity:.5}
+.answer.disabled{pointer-events:none}
+.timer-bar{height:6px;background:var(--surface);border-radius:3px;margin:1rem 0}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--lo1),var(--gold),var(--error));border-radius:3px;transition:width .5s linear}
+.score-display{font-size:1.5rem;font-weight:900;color:var(--accent2);margin:1rem 0}
+.q-counter{font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
+.btn{padding:.5rem 1.2rem;border:none;border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
+.btn-start{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:1rem;padding:.7rem 2rem}
+.final-score{padding:2rem;text-align:center}
+.final-score .big{font-size:3rem;font-weight:900;color:var(--accent2)}
+.leaderboard-mini{max-width:400px;margin:1rem auto}
+.leaderboard-mini .row{display:flex;justify-content:space-between;padding:.4rem .6rem;border-bottom:1px solid var(--border);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Quiz Live</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main" id="mainArea">
+  <div style="text-align:center;margin-bottom:2rem">
+    <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:.3rem">Quiz Live — Kahoot Style</h2>
+    <p style="color:var(--muted)">Testez vos connaissances en SQL et conception BDD</p>
+  </div>
+  
+  <div style="font-size:.9rem;font-weight:700;margin-bottom:.8rem">Choisissez une banque de questions :</div>
+  <div class="bank-select" id="bankSelect"></div>
+  <div style="text-align:center;margin-top:1.5rem">
+    <button class="btn btn-start" id="btnStart" onclick="startQuiz()" disabled>Lancer le Quiz</button>
+  </div>
+</div>
+
+<script>
+const BANKS = {
+  "SQL Basics": [
+    {q:"Quel mot-clé permet de filtrer les résultats d'un SELECT ?",a:["WHERE","FILTER","HAVING","LIMIT"],c:0},
+    {q:"Comment trier les résultats par ordre décroissant ?",a:["ORDER BY ... DESC","SORT BY ... DESC","ORDER BY ... REVERSE","GROUP BY ... DESC"],c:0},
+    {q:"Quel opérateur vérifie si une valeur est dans une liste ?",a:["IN","BETWEEN","LIKE","EXISTS"],c:0},
+    {q:"SELECT DISTINCT sert à :",a:["Éliminer les doublons","Sélectionner une seule ligne","Trier les résultats","Compter les valeurs"],c:0},
+    {q:"Quelle fonction compte le nombre de lignes ?",a:["COUNT()","SUM()","TOTAL()","NUMBER()"],c:0},
+    {q:"LIKE '%ville%' recherche :",a:["Les valeurs contenant 'ville'","Les valeurs commençant par 'ville'","Les valeurs égales à 'ville'","Les valeurs finissant par 'ville'"],c:0},
+    {q:"NULL signifie :",a:["Valeur inconnue/absente","Zéro","Chaîne vide","Faux"],c:0},
+    {q:"BETWEEN 10 AND 20 inclut-il 10 et 20 ?",a:["Oui, les deux bornes","Non, aucune","Seulement 10","Seulement 20"],c:0},
+  ],
+  "Jointures": [
+    {q:"INNER JOIN retourne :",a:["Les lignes avec correspondance dans les 2 tables","Toutes les lignes des 2 tables","Seulement la table gauche","La différence entre 2 tables"],c:0},
+    {q:"LEFT JOIN affiche :",a:["Toutes les lignes de gauche + correspondances droite","Seulement les correspondances","Toutes les lignes de droite","Les lignes sans correspondance"],c:0},
+    {q:"Une clé étrangère (FK) sert à :",a:["Référencer une PK d'une autre table","Identifier de manière unique","Chiffrer les données","Trier automatiquement"],c:0},
+    {q:"ON a.id = b.id dans un JOIN définit :",a:["La condition de jointure","Le tri des résultats","Le filtre WHERE","L'alias de la table"],c:0},
+    {q:"Combien de tables peut-on joindre dans une requête ?",a:["Autant que nécessaire","Maximum 2","Maximum 5","Maximum 10"],c:0},
+    {q:"Si LEFT JOIN ne trouve pas de correspondance, les colonnes de droite sont :",a:["NULL","Vides","0","Supprimées"],c:0},
+  ],
+  "Conception MCD": [
+    {q:"Dans un MCD Merise, une entité est représentée par :",a:["Un rectangle","Un losange","Un ovale","Un cercle"],c:0},
+    {q:"La cardinalité (0,N) signifie :",a:["0 ou plusieurs occurrences","Exactement N","Au moins 1","0 ou 1"],c:0},
+    {q:"Une relation N:M nécessite :",a:["Une table de liaison/association","Rien de spécial","Une vue SQL","Un trigger"],c:0},
+    {q:"Un identifiant (clé primaire) doit être :",a:["Unique et non nul","Unique mais nullable","Numérique obligatoirement","Composé de 2 colonnes minimum"],c:0},
+    {q:"CIF signifie :",a:["Contrainte d'Intégrité Fonctionnelle","Clé Interne Fonctionnelle","Contrainte d'Identification Forte","Code d'Intégrité des FK"],c:0},
+    {q:"Un attribut multivalué viole quelle forme normale ?",a:["1NF","2NF","3NF","BCNF"],c:0},
+  ],
+  "Normalisation": [
+    {q:"La 1NF exige :",a:["Des valeurs atomiques (pas de groupes répétitifs)","Pas de dépendances partielles","Pas de dépendances transitives","Des clés primaires composites"],c:0},
+    {q:"La 2NF élimine :",a:["Les dépendances partielles","Les groupes répétitifs","Les dépendances transitives","Les valeurs NULL"],c:0},
+    {q:"La 3NF élimine :",a:["Les dépendances transitives","Les dépendances partielles","Les doublons","Les clés étrangères"],c:0},
+    {q:"A → B → C est une dépendance :",a:["Transitive","Partielle","Fonctionnelle directe","Multivaluée"],c:0},
+    {q:"Si NOART → NOFAM et NOFAM → LIBFAM, que faut-il faire en 3NF ?",a:["Créer une table FAMILLE séparée","Supprimer LIBFAM","Fusionner les tables","Ajouter un index"],c:0},
+    {q:"Une clé primaire composite existe quand :",a:["La clé est formée de plusieurs colonnes","Il y a plusieurs PK","La table a plus de 5 colonnes","C'est une relation N:M"],c:0},
+  ],
+};
+
+let selectedBank = null;
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let timerInterval = null;
+let timeLeft = 15;
+
+// Render bank selection
+const bankSelect = document.getElementById('bankSelect');
+Object.entries(BANKS).forEach(([name, qs]) => {
+  const div = document.createElement('div');
+  div.className = 'bank';
+  div.innerHTML = `<h4>${name}</h4><p>${qs.length} questions</p>`;
+  div.onclick = () => {
+    document.querySelectorAll('.bank').forEach(b => b.classList.remove('selected'));
+    div.classList.add('selected');
+    selectedBank = name;
+    document.getElementById('btnStart').disabled = false;
+  };
+  bankSelect.appendChild(div);
+});
+
+function startQuiz() {
+  if (!selectedBank) return;
+  questions = [...BANKS[selectedBank]].sort(() => Math.random() - 0.5);
+  currentQ = 0;
+  score = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  if (currentQ >= questions.length) { showFinal(); return; }
+  const q = questions[currentQ];
+  timeLeft = 15;
+  
+  document.getElementById('mainArea').innerHTML = `
+    <div class="quiz-area">
+      <div class="q-counter">Question ${currentQ+1}/${questions.length}</div>
+      <div class="score-display">${score} pts</div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+      <div class="question-text">${q.q}</div>
+      <div class="answers" id="answers">
+        ${q.a.map((a, i) => `<div class="answer a${i}" data-idx="${i}" onclick="answer(${i})">${a}</div>`).join('')}
+      </div>
+    </div>
+  `;
+  
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft -= 0.5;
+    document.getElementById('timerFill').style.width = (timeLeft/15*100) + '%';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      revealAnswer(-1);
+    }
+  }, 500);
+}
+
+function answer(idx) {
+  clearInterval(timerInterval);
+  revealAnswer(idx);
+}
+
+function revealAnswer(idx) {
+  const q = questions[currentQ];
+  const answers = document.querySelectorAll('.answer');
+  answers.forEach(a => {
+    a.classList.add('disabled');
+    const ai = parseInt(a.dataset.idx);
+    if (ai === q.c) a.classList.add('correct');
+    else if (ai === idx) a.classList.add('wrong');
+  });
+  
+  if (idx === q.c) {
+    const bonus = Math.max(0, Math.round(timeLeft));
+    score += 100 + bonus * 10;
+  }
+  
+  setTimeout(() => {
+    currentQ++;
+    showQuestion();
+  }, 2000);
+}
+
+function showFinal() {
+  const maxScore = questions.length * 250;
+  const pct = Math.round(score / maxScore * 100);
+  
+  document.getElementById('mainArea').innerHTML = `
+    <div class="final-score">
+      <div style="font-size:3rem;margin-bottom:1rem">${pct >= 80 ? '🏆' : pct >= 50 ? '⭐' : '💪'}</div>
+      <h2>Quiz terminé !</h2>
+      <div class="big">${score} pts</div>
+      <p style="color:var(--muted);margin:1rem 0">${pct}% — ${selectedBank}</p>
+      <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem">
+        <button class="btn" style="background:var(--surface);color:var(--accent2);border:1px solid var(--border)" onclick="location.reload()">Nouveau quiz</button>
+        <a href="home.html" class="btn btn-start" style="text-decoration:none;display:inline-block">← Accueil</a>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

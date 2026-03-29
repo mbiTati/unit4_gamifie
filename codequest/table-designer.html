@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Table Designer</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:950px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:700px){.main{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem}
+.panel h2{font-size:.9rem;font-weight:700;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.panel h2 .badge{font-size:.6rem;font-weight:800;padding:.1rem .4rem;border-radius:3px}
+.form-row{display:flex;gap:.4rem;margin-bottom:.4rem;align-items:center}
+input,select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.35rem .5rem;font-family:inherit;font-size:.78rem}
+input:focus,select:focus{outline:none;border-color:var(--accent2)}
+input[type="text"]{flex:1;min-width:0}
+select{min-width:90px}
+.table-name-input{width:100%;padding:.5rem;font-size:.9rem;font-weight:700;margin-bottom:.8rem;text-transform:uppercase}
+.col-row{display:flex;gap:.3rem;align-items:center;padding:.3rem .4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:.3rem;flex-wrap:wrap}
+.col-row input[type="text"]{width:110px;font-family:monospace;font-weight:600}
+.col-row select{width:95px}
+.col-row label{font-size:.65rem;color:var(--muted);display:flex;align-items:center;gap:.2rem;cursor:pointer}
+.col-row label input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent2)}
+.col-row .del{background:none;border:none;color:var(--error);cursor:pointer;font-size:.8rem;padding:.2rem;opacity:.5}
+.col-row .del:hover{opacity:1}
+.btn{padding:.35rem .8rem;border:none;border-radius:5px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer}
+.btn-add{background:rgba(50,224,196,.08);color:var(--accent2);border:1px solid rgba(50,224,196,.2);width:100%;margin-top:.3rem}
+.sql-output{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;white-space:pre-wrap;max-height:400px;overflow:auto;color:var(--text)}
+.sql-output .kw{color:#c084fc;font-weight:700}
+.sql-output .tp{color:#60a5fa}
+.sql-output .tn{color:var(--accent2);font-weight:700}
+.sql-output .cn{color:var(--gold)}
+.btn-copy{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.2);margin-top:.5rem}
+.challenges{margin-top:1rem}
+.challenge{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;margin-bottom:.5rem;cursor:pointer;transition:all .2s;font-size:.78rem}
+.challenge:hover{border-color:var(--accent2)}
+.challenge .title{font-weight:700;margin-bottom:.2rem}
+.challenge .desc{color:var(--muted);font-size:.7rem}
+.challenge.done{border-color:var(--lo1);opacity:.7}
+.check-result{margin-top:.5rem;font-size:.82rem;font-weight:600;min-height:1.5rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Table Designer</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="panel">
+    <h2><span class="badge" style="background:rgba(50,224,196,.1);color:var(--accent2)">DESIGN</span> Concepteur visuel</h2>
+    <input type="text" class="table-name-input" id="tableName" placeholder="NOM_TABLE" value="PRODUIT" oninput="generateSQL()">
+    <div id="columns"></div>
+    <button class="btn btn-add" onclick="addColumn()">+ Ajouter une colonne</button>
+    
+    <div class="challenges" style="margin-top:1.5rem">
+      <h2><span class="badge" style="background:rgba(245,158,11,.1);color:var(--gold)">DÉFI</span> Défis</h2>
+      <div class="challenge" onclick="loadChallenge(0)" id="ch0">
+        <div class="title">Défi 1 : Table CLIENT</div>
+        <div class="desc">id_client PK, nom NN, email UNIQUE, ville, date_inscription</div>
+      </div>
+      <div class="challenge" onclick="loadChallenge(1)" id="ch1">
+        <div class="title">Défi 2 : Table RESERVATION</div>
+        <div class="desc">id_resa PK, id_client FK, date_debut NN, date_fin NN, montant CHECK>0, statut DEFAULT</div>
+      </div>
+      <div class="challenge" onclick="loadChallenge(2)" id="ch2">
+        <div class="title">Défi 3 : Table PRODUIT_INGREDIENT (N:M)</div>
+        <div class="desc">id_produit FK, id_ingredient FK, quantite NN, PK composite</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="panel">
+    <h2><span class="badge" style="background:rgba(139,92,246,.1);color:#8b5cf6">SQL</span> Code généré en temps réel</h2>
+    <div class="sql-output" id="sqlOutput"></div>
+    <div style="display:flex;gap:.3rem;margin-top:.5rem">
+      <button class="btn btn-copy" onclick="copySQL()">Copier le SQL</button>
+      <button class="btn" style="background:rgba(16,185,129,.08);color:var(--lo1);border:1px solid rgba(16,185,129,.2)" onclick="checkChallenge()">Vérifier le défi</button>
+    </div>
+    <div class="check-result" id="checkResult"></div>
+  </div>
+</div>
+
+<script>
+let colCount = 0;
+let currentChallenge = -1;
+
+const CHALLENGES = [
+  {
+    table: "CLIENT",
+    cols: [
+      { name: "id_client", type: "INT", pk: true, nn: true, ai: true },
+      { name: "nom", type: "VARCHAR(80)", nn: true },
+      { name: "email", type: "VARCHAR(150)", unique: true },
+      { name: "ville", type: "VARCHAR(80)" },
+      { name: "date_inscription", type: "DATE" },
+    ],
+    check: (sql) => {
+      const upper = sql.toUpperCase();
+      const checks = [
+        [upper.includes('CLIENT'), 'Nom de table CLIENT'],
+        [upper.includes('ID_CLIENT') && upper.includes('PRIMARY KEY'), 'PK sur id_client'],
+        [upper.includes('NOM') && upper.includes('NOT NULL'), 'NOT NULL sur nom'],
+        [upper.includes('EMAIL') && upper.includes('UNIQUE'), 'UNIQUE sur email'],
+        [upper.includes('VARCHAR'), 'Types VARCHAR'],
+        [upper.includes('DATE'), 'Type DATE pour date_inscription'],
+      ];
+      return checks;
+    }
+  },
+  {
+    table: "RESERVATION",
+    cols: [
+      { name: "id_resa", type: "INT", pk: true, nn: true, ai: true },
+      { name: "id_client", type: "INT", nn: true, fk: "client(id_client)" },
+      { name: "date_debut", type: "DATE", nn: true },
+      { name: "date_fin", type: "DATE", nn: true },
+      { name: "montant", type: "DECIMAL(8,2)", nn: true, check: "> 0" },
+      { name: "statut", type: "VARCHAR(20)", def: "'En attente'" },
+    ],
+    check: (sql) => {
+      const upper = sql.toUpperCase();
+      return [
+        [upper.includes('RESERVATION'), 'Nom RESERVATION'],
+        [upper.includes('PRIMARY KEY'), 'PK présente'],
+        [upper.includes('REFERENCES') || upper.includes('FOREIGN KEY'), 'FK vers client'],
+        [upper.includes('CHECK'), 'CHECK sur montant'],
+        [upper.includes('DEFAULT'), 'DEFAULT sur statut'],
+        [(upper.match(/NOT NULL/g) || []).length >= 3, 'Au moins 3 NOT NULL'],
+      ];
+    }
+  },
+  {
+    table: "PRODUIT_INGREDIENT",
+    cols: [
+      { name: "id_produit", type: "INT", nn: true, fk: "produit(id_produit)" },
+      { name: "id_ingredient", type: "INT", nn: true, fk: "ingredient(id_ingredient)" },
+      { name: "quantite", type: "DECIMAL(8,2)", nn: true },
+    ],
+    check: (sql) => {
+      const upper = sql.toUpperCase();
+      return [
+        [upper.includes('PRODUIT_INGREDIENT'), 'Nom table N:M'],
+        [(upper.match(/REFERENCES/g) || []).length >= 2, 'Deux FK (REFERENCES)'],
+        [upper.includes('PRIMARY KEY') && upper.includes('ID_PRODUIT') && upper.includes('ID_INGREDIENT'), 'PK composite'],
+        [upper.includes('QUANTITE') && upper.includes('NOT NULL'), 'quantite NOT NULL'],
+      ];
+    }
+  }
+];
+
+function addColumn(name='', type='INT', pk=false, nn=false, unique=false, ai=false) {
+  colCount++;
+  const id = 'col_' + colCount;
+  const div = document.createElement('div');
+  div.className = 'col-row';
+  div.id = id;
+  div.innerHTML = `
+    <input type="text" value="${name}" placeholder="nom_colonne" oninput="generateSQL()">
+    <select onchange="generateSQL()">
+      <option ${type==='INT'?'selected':''}>INT</option>
+      <option ${type==='VARCHAR(80)'?'selected':''}>VARCHAR(80)</option>
+      <option ${type==='VARCHAR(150)'?'selected':''}>VARCHAR(150)</option>
+      <option ${type==='VARCHAR(20)'?'selected':''}>VARCHAR(20)</option>
+      <option ${type==='DECIMAL(8,2)'?'selected':''}>DECIMAL(8,2)</option>
+      <option ${type==='DECIMAL(10,2)'?'selected':''}>DECIMAL(10,2)</option>
+      <option ${type==='DATE'?'selected':''}>DATE</option>
+      <option ${type==='TEXT'?'selected':''}>TEXT</option>
+      <option ${type==='BOOLEAN'?'selected':''}>BOOLEAN</option>
+    </select>
+    <label><input type="checkbox" ${pk?'checked':''} onchange="generateSQL()"> PK</label>
+    <label><input type="checkbox" ${nn?'checked':''} onchange="generateSQL()"> NN</label>
+    <label><input type="checkbox" ${unique?'checked':''} onchange="generateSQL()"> UQ</label>
+    <label><input type="checkbox" ${ai?'checked':''} onchange="generateSQL()"> AI</label>
+    <button class="del" onclick="this.parentElement.remove();generateSQL()">✕</button>
+  `;
+  document.getElementById('columns').appendChild(div);
+  generateSQL();
+}
+
+function generateSQL() {
+  const tableName = document.getElementById('tableName').value.trim() || 'MA_TABLE';
+  const rows = document.querySelectorAll('.col-row');
+  const cols = [];
+  const pks = [];
+  
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input[type="text"]');
+    const selects = row.querySelectorAll('select');
+    const checks = row.querySelectorAll('input[type="checkbox"]');
+    
+    const name = inputs[0]?.value.trim();
+    const type = selects[0]?.value;
+    const isPK = checks[0]?.checked;
+    const isNN = checks[1]?.checked;
+    const isUQ = checks[2]?.checked;
+    const isAI = checks[3]?.checked;
+    
+    if (!name) return;
+    
+    let line = `  ${name} ${type}`;
+    if (isAI) line += ' AUTO_INCREMENT';
+    if (isNN || isPK) line += ' NOT NULL';
+    if (isUQ) line += ' UNIQUE';
+    if (isPK) pks.push(name);
+    
+    cols.push(line);
+  });
+  
+  if (pks.length > 0) {
+    cols.push(`  PRIMARY KEY (${pks.join(', ')})`);
+  }
+  
+  const sql = `CREATE TABLE ${tableName} (\n${cols.join(',\n')}\n);`;
+  
+  // Syntax highlight
+  const highlighted = sql
+    .replace(/\b(CREATE TABLE|PRIMARY KEY|NOT NULL|UNIQUE|AUTO_INCREMENT|REFERENCES|FOREIGN KEY|DEFAULT|CHECK)\b/g, '<span class="kw">$1</span>')
+    .replace(/\b(INT|VARCHAR\(\d+\)|DECIMAL\(\d+,\d+\)|DATE|TEXT|BOOLEAN)\b/g, '<span class="tp">$1</span>')
+    .replace(new RegExp(`\\b${tableName}\\b`), `<span class="tn">${tableName}</span>`);
+  
+  document.getElementById('sqlOutput').innerHTML = highlighted;
+}
+
+function copySQL() {
+  const text = document.getElementById('sqlOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'Copié !';
+    setTimeout(() => btn.textContent = 'Copier le SQL', 1500);
+  });
+}
+
+function loadChallenge(idx) {
+  currentChallenge = idx;
+  const ch = CHALLENGES[idx];
+  document.getElementById('tableName').value = ch.table;
+  document.getElementById('columns').innerHTML = '';
+  colCount = 0;
+  document.getElementById('checkResult').textContent = '';
+  
+  // Add empty columns for the student to fill
+  for (let i = 0; i < ch.cols.length; i++) addColumn();
+  generateSQL();
+}
+
+function checkChallenge() {
+  if (currentChallenge < 0) {
+    document.getElementById('checkResult').innerHTML = '<span style="color:var(--muted)">Sélectionnez un défi d\'abord.</span>';
+    return;
+  }
+  
+  const sql = document.getElementById('sqlOutput').textContent;
+  const ch = CHALLENGES[currentChallenge];
+  const results = ch.check(sql);
+  
+  let html = '<div style="font-size:.78rem;line-height:1.8">';
+  let allOk = true;
+  for (const [ok, label] of results) {
+    if (!ok) allOk = false;
+    html += `<div>${ok ? '✅' : '❌'} ${label}</div>`;
+  }
+  html += '</div>';
+  
+  if (allOk) {
+    document.getElementById('ch' + currentChallenge).classList.add('done');
+    html = '<div style="color:var(--lo1);font-weight:700;margin-bottom:.3rem">✅ Défi réussi !</div>' + html;
+  }
+  
+  document.getElementById('checkResult').innerHTML = html;
+}
+
+// Initialize with 3 sample columns
+addColumn('id_produit', 'INT', true, false, false, true);
+addColumn('nom', 'VARCHAR(80)', false, true);
+addColumn('prix', 'DECIMAL(8,2)');
+</script>
+</body>
+</html>

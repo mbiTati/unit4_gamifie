@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — DF Explorer</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.exercise{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.exercise h2{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.exercise p{font-size:.8rem;color:var(--muted);margin-bottom:.8rem}
+.data-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:1rem}
+.data-table th{background:rgba(59,130,246,.1);color:#3b82f6;padding:.35rem .5rem;font-size:.68rem;text-align:left}
+.data-table td{padding:.3rem .5rem;border-bottom:1px solid rgba(255,255,255,.03);font-family:monospace;font-size:.72rem}
+.df-builder{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.df-builder h3{font-size:.82rem;font-weight:700;margin-bottom:.5rem;color:var(--accent2)}
+.df-row{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap}
+.attr-btn{padding:.3rem .6rem;background:var(--card);border:1px solid var(--border);border-radius:5px;font-family:monospace;font-size:.75rem;cursor:pointer;transition:all .2s;font-weight:600}
+.attr-btn:hover{border-color:var(--accent2)}
+.attr-btn.src{border-color:var(--gold);color:var(--gold);background:rgba(245,158,11,.08)}
+.attr-btn.dst{border-color:var(--accent2);color:var(--accent2);background:rgba(50,224,196,.08)}
+.arrow{font-size:1.2rem;color:var(--accent2);font-weight:800;margin:0 .3rem}
+.df-list{margin-top:.8rem}
+.df-item{display:flex;align-items:center;gap:.3rem;padding:.3rem .5rem;background:var(--card);border:1px solid var(--border);border-radius:5px;margin-bottom:.3rem;font-size:.78rem;font-family:monospace}
+.df-item .del{margin-left:auto;background:none;border:none;color:var(--error);cursor:pointer;font-size:.7rem;opacity:.5}
+.df-item .del:hover{opacity:1}
+.btn{padding:.4rem 1rem;border:none;border-radius:6px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
+.btn-add{background:rgba(50,224,196,.08);color:var(--accent2);border:1px solid rgba(50,224,196,.2)}
+.btn-check{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-reset{background:rgba(239,68,68,.08);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+.controls{display:flex;gap:.4rem;margin-top:.5rem;flex-wrap:wrap}
+.feedback{margin-top:.8rem;font-size:.82rem;font-weight:600;line-height:1.6}
+.progress{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem}
+.progress .dot{width:30px;height:30px;border-radius:50%;background:var(--surface);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
+.progress .dot.done{border-color:var(--lo1);background:rgba(16,185,129,.1);color:var(--lo1)}
+.progress .dot.current{border-color:var(--accent2);background:rgba(50,224,196,.1);color:var(--accent2)}
+.svg-area{margin:1rem 0;min-height:150px}
+.svg-area svg{width:100%;height:auto}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>DF Explorer</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="progress" id="progressDots"></div>
+  <div id="gameArea"></div>
+</div>
+
+<script>
+const EXERCISES = [
+  {
+    title: "CLIENT — Dépendances fonctionnelles élémentaires",
+    desc: "Observez les données et identifiez les DF. Quels attributs dépendent de NOCLI ?",
+    attrs: ["NOCLI","NOM","VILLE","CPCLI","NOCAT"],
+    data: [
+      ["100","VELOCIP 33","BORDEAUX","33000","1"],
+      ["101","VELOCIP COLMAR","COLMAR","68000","1"],
+      ["200","BICYCLE 06","NICE","06000","1"],
+      ["502","VELO PLUS","ANNECY","74000","9"],
+    ],
+    expected: [
+      {src:["NOCLI"], dst:["NOM"]},
+      {src:["NOCLI"], dst:["VILLE"]},
+      {src:["NOCLI"], dst:["CPCLI"]},
+      {src:["NOCLI"], dst:["NOCAT"]},
+    ],
+    minCorrect: 3,
+  },
+  {
+    title: "COMMANDE — DF et clé étrangère",
+    desc: "Une commande est passée par un client via un représentant. Identifiez toutes les DF depuis NOCDE.",
+    attrs: ["NOCDE","NOCLI","NOREP","DATCDE","ETACDE"],
+    data: [
+      ["1001","100","103","2024-01-15","N"],
+      ["1002","100","105","2024-03-10","O"],
+      ["1003","200","103","2024-02-20","N"],
+    ],
+    expected: [
+      {src:["NOCDE"], dst:["NOCLI"]},
+      {src:["NOCDE"], dst:["NOREP"]},
+      {src:["NOCDE"], dst:["DATCDE"]},
+      {src:["NOCDE"], dst:["ETACDE"]},
+    ],
+    minCorrect: 3,
+  },
+  {
+    title: "ARTICLE — DF transitive",
+    desc: "NOART → NOFAM et NOFAM → LIBFAM. C'est une DF transitive ! Identifiez toutes les DF.",
+    attrs: ["NOART","DESART","NOFAM","LIBFAM","CAART","NOFOUR"],
+    data: [
+      ["1","VTT Montagnard","46","VTT","1937250","80"],
+      ["27","VTC Escarpés","57","VTC","685430","80"],
+      ["101","Vélo ville-vite","57","VTC","475000","105"],
+    ],
+    expected: [
+      {src:["NOART"], dst:["DESART"]},
+      {src:["NOART"], dst:["NOFAM"]},
+      {src:["NOART"], dst:["CAART"]},
+      {src:["NOART"], dst:["NOFOUR"]},
+      {src:["NOFAM"], dst:["LIBFAM"]},
+    ],
+    minCorrect: 4,
+    hasTransitive: true,
+  },
+  {
+    title: "LIGNE_CDE — DF avec clé composite",
+    desc: "La clé est composite (NOCDE, NOART). QTECDE dépend du couple, pas d'un seul attribut.",
+    attrs: ["NOCDE","NOART","QTECDE","ETLCDE"],
+    data: [
+      ["1001","1","3","O"],
+      ["1001","27","1","N"],
+      ["1002","1","2","O"],
+    ],
+    expected: [
+      {src:["NOCDE","NOART"], dst:["QTECDE"]},
+      {src:["NOCDE","NOART"], dst:["ETLCDE"]},
+    ],
+    minCorrect: 2,
+  },
+];
+
+let current = 0;
+let userDFs = [];
+let srcSelected = [];
+let dstSelected = [];
+
+function renderProgress() {
+  document.getElementById('progressDots').innerHTML = EXERCISES.map((_, i) =>
+    `<div class="dot ${i < current ? 'done' : i === current ? 'current' : ''}">${i+1}</div>`
+  ).join('');
+}
+
+function renderExercise() {
+  if (current >= EXERCISES.length) { endGame(); return; }
+  const ex = EXERCISES[current];
+  userDFs = [];
+  srcSelected = [];
+  dstSelected = [];
+  renderProgress();
+  
+  const game = document.getElementById('gameArea');
+  game.innerHTML = `
+    <div class="exercise">
+      <h2>${ex.title}</h2>
+      <p>${ex.desc}</p>
+      <table class="data-table"><thead><tr>${ex.attrs.map(a => `<th>${a}</th>`).join('')}</tr></thead>
+      <tbody>${ex.data.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    </div>
+    
+    <div class="df-builder">
+      <h3>Construire une DF</h3>
+      <div class="df-row">
+        <span style="font-size:.7rem;color:var(--gold);font-weight:700;min-width:60px">Source :</span>
+        ${ex.attrs.map(a => `<div class="attr-btn" data-attr="${a}" onclick="toggleSrc(this,'${a}')">${a}</div>`).join('')}
+      </div>
+      <div style="text-align:center"><span class="arrow">→</span></div>
+      <div class="df-row">
+        <span style="font-size:.7rem;color:var(--accent2);font-weight:700;min-width:60px">Cible :</span>
+        ${ex.attrs.map(a => `<div class="attr-btn" data-attr="${a}" onclick="toggleDst(this,'${a}')">${a}</div>`).join('')}
+      </div>
+      <div class="controls">
+        <button class="btn btn-add" onclick="addDF()">Ajouter cette DF</button>
+        <button class="btn btn-check" onclick="checkDFs()">Vérifier</button>
+        <button class="btn btn-reset" onclick="renderExercise()">Reset</button>
+      </div>
+    </div>
+    
+    <div style="font-size:.8rem;font-weight:700;margin-bottom:.3rem">Vos DF :</div>
+    <div class="df-list" id="dfList"><div style="color:var(--muted);font-size:.75rem">Aucune DF ajoutée</div></div>
+    <div id="svgArea" class="svg-area"></div>
+    <div class="feedback" id="feedback"></div>
+  `;
+}
+
+function toggleSrc(el, attr) {
+  el.classList.toggle('src');
+  if (srcSelected.includes(attr)) {
+    srcSelected = srcSelected.filter(a => a !== attr);
+  } else {
+    srcSelected.push(attr);
+  }
+}
+
+function toggleDst(el, attr) {
+  el.classList.toggle('dst');
+  if (dstSelected.includes(attr)) {
+    dstSelected = dstSelected.filter(a => a !== attr);
+  } else {
+    dstSelected.push(attr);
+  }
+}
+
+function addDF() {
+  if (srcSelected.length === 0 || dstSelected.length === 0) return;
+  
+  // Add one DF per destination
+  for (const dst of dstSelected) {
+    const exists = userDFs.some(d => 
+      JSON.stringify(d.src.sort()) === JSON.stringify([...srcSelected].sort()) && d.dst === dst
+    );
+    if (!exists) {
+      userDFs.push({ src: [...srcSelected], dst });
+    }
+  }
+  
+  renderDFList();
+  drawSVG();
+  
+  // Reset selection
+  srcSelected = [];
+  dstSelected = [];
+  document.querySelectorAll('.attr-btn').forEach(b => b.classList.remove('src', 'dst'));
+}
+
+function removeDF(idx) {
+  userDFs.splice(idx, 1);
+  renderDFList();
+  drawSVG();
+}
+
+function renderDFList() {
+  const list = document.getElementById('dfList');
+  if (userDFs.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:.75rem">Aucune DF ajoutée</div>';
+    return;
+  }
+  list.innerHTML = userDFs.map((d, i) =>
+    `<div class="df-item"><span style="color:var(--gold)">${d.src.join(', ')}</span> <span class="arrow" style="font-size:.9rem">→</span> <span style="color:var(--accent2)">${d.dst}</span><button class="del" onclick="removeDF(${i})">✕</button></div>`
+  ).join('');
+}
+
+function drawSVG() {
+  const ex = EXERCISES[current];
+  const area = document.getElementById('svgArea');
+  if (userDFs.length === 0) { area.innerHTML = ''; return; }
+  
+  const W = 700, H = 140;
+  const attrs = ex.attrs;
+  const gap = W / (attrs.length + 1);
+  
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += '<defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#32E0C4"/></marker></defs>';
+  
+  // Draw attribute nodes
+  attrs.forEach((a, i) => {
+    const x = gap * (i + 1);
+    const isSrc = userDFs.some(d => d.src.includes(a));
+    const isDst = userDFs.some(d => d.dst === a);
+    const fill = isSrc ? 'rgba(245,158,11,.15)' : isDst ? 'rgba(50,224,196,.15)' : 'rgba(255,255,255,.05)';
+    const stroke = isSrc ? '#f59e0b' : isDst ? '#32E0C4' : '#334155';
+    svg += `<rect x="${x-35}" y="50" width="70" height="30" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
+    svg += `<text x="${x}" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="${isSrc ? '#f59e0b' : isDst ? '#32E0C4' : '#e2e8f0'}" font-family="monospace">${a}</text>`;
+  });
+  
+  // Draw arrows
+  userDFs.forEach((d, di) => {
+    const srcX = d.src.map(s => gap * (attrs.indexOf(s) + 1));
+    const avgSrcX = srcX.reduce((a, b) => a + b, 0) / srcX.length;
+    const dstX = gap * (attrs.indexOf(d.dst) + 1);
+    const y1 = 48 - di * 4;
+    
+    svg += `<path d="M${avgSrcX},${y1} Q${(avgSrcX+dstX)/2},${y1-20} ${dstX},${y1}" fill="none" stroke="#32E0C4" stroke-width="1.5" marker-end="url(#arrowhead)" opacity=".7">`;
+    svg += `<animate attributeName="stroke-dasharray" from="0,200" to="200,0" dur="1s" fill="freeze"/>`;
+    svg += '</path>';
+  });
+  
+  svg += '</svg>';
+  area.innerHTML = svg;
+}
+
+function checkDFs() {
+  const ex = EXERCISES[current];
+  const feedback = document.getElementById('feedback');
+  
+  let matched = 0;
+  const results = [];
+  
+  for (const exp of ex.expected) {
+    const found = userDFs.some(d =>
+      JSON.stringify(d.src.sort()) === JSON.stringify([...exp.src].sort()) &&
+      exp.dst.includes(d.dst)
+    );
+    if (found) matched++;
+    results.push({ df: `${exp.src.join(',')} → ${exp.dst}`, ok: found });
+  }
+  
+  let html = results.map(r => `<div>${r.ok ? '✅' : '❌'} ${r.df}</div>`).join('');
+  
+  if (matched >= ex.minCorrect) {
+    html = `<div style="color:var(--lo1);font-weight:700;margin-bottom:.3rem">✅ Bravo ! ${matched}/${ex.expected.length} DF trouvées !</div>` + html;
+    if (ex.hasTransitive) {
+      html += '<div style="color:var(--gold);margin-top:.3rem">💡 NOFAM → LIBFAM est une <strong>DF transitive</strong> (NOART → NOFAM → LIBFAM) — à éliminer en 3NF !</div>';
+    }
+    setTimeout(() => {
+      feedback.innerHTML += `<br><button class="btn btn-check" onclick="current++;renderExercise()">Suivant →</button>`;
+    }, 500);
+  } else {
+    html = `<div style="color:var(--error);margin-bottom:.3rem">❌ ${matched}/${ex.minCorrect} minimum requis</div>` + html;
+  }
+  
+  feedback.innerHTML = html;
+}
+
+function endGame() {
+  document.getElementById('gameArea').innerHTML = `
+    <div style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🏆</div>
+      <h2 style="font-size:1.5rem;margin-bottom:.5rem">DF Explorer terminé !</h2>
+      <p style="color:var(--muted);margin-bottom:1.5rem">Tu maîtrises les dépendances fonctionnelles !</p>
+      <a href="home.html" style="padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;border-radius:8px;font-weight:700">← Accueil</a>
+    </div>`;
+  renderProgress();
+}
+
+renderExercise();
+</script>
+</body>
+</html>

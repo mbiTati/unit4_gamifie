@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Block Animations</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.tabs{display:flex;gap:.3rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem;flex-wrap:wrap}
+.tab{padding:.5rem 1rem;font-size:.8rem;font-weight:700;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;border-radius:6px 6px 0 0}
+.tab.active{color:var(--accent2);border-bottom:2px solid var(--accent2)}
+.anim-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;display:none}
+.anim-card.active{display:block}
+.anim-card h2{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.anim-card p{font-size:.8rem;color:var(--muted);margin-bottom:1rem}
+.anim-area{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;min-height:200px;margin-bottom:1rem;overflow:hidden}
+.anim-table{border-collapse:collapse;font-size:.75rem;margin:0 auto}
+.anim-table th{background:rgba(59,130,246,.15);color:#3b82f6;padding:.35rem .6rem;font-size:.68rem;text-align:left}
+.anim-table td{padding:.3rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);font-family:monospace;font-size:.72rem;transition:all .5s}
+.anim-table tr.highlight td{background:rgba(50,224,196,.15);color:var(--accent2);font-weight:700;transform:scale(1.02)}
+.anim-table tr.dim td{opacity:.2}
+.anim-table tr.new td{background:rgba(16,185,129,.15);color:var(--lo1);animation:slideIn .5s ease}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.anim-table tr.deleted td{background:rgba(239,68,68,.1);text-decoration:line-through;color:var(--error);animation:fadeOut 1s ease forwards}
+@keyframes fadeOut{to{opacity:0;transform:translateX(20px)}}
+.sql-display{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-bottom:1rem;color:var(--accent2)}
+.btn{padding:.4rem 1rem;border:none;border-radius:6px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.btn-play{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-reset{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.2)}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Block Animations</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showAnim('select',this)">SELECT + WHERE</button>
+    <button class="tab" onclick="showAnim('join',this)">JOIN</button>
+    <button class="tab" onclick="showAnim('insert',this)">INSERT</button>
+    <button class="tab" onclick="showAnim('delete',this)">DELETE</button>
+    <button class="tab" onclick="showAnim('groupby',this)">GROUP BY</button>
+  </div>
+  
+  <div class="anim-card active" id="anim-select">
+    <h2>Animation SELECT + WHERE</h2>
+    <p>Observez comment WHERE filtre les lignes une par une. Seules les lignes correspondantes s'allument.</p>
+    <div class="sql-display">SELECT nom_modele, prix_vente FROM modele WHERE categorie = 'Running';</div>
+    <div class="anim-area" id="selectArea"></div>
+    <div class="controls">
+      <button class="btn btn-play" onclick="playSelect()">▶ Animer</button>
+      <button class="btn btn-reset" onclick="resetSelect()">Reset</button>
+    </div>
+  </div>
+  
+  <div class="anim-card" id="anim-join">
+    <h2>Animation INNER JOIN</h2>
+    <p>Deux tables se rapprochent. Les lignes avec la même clé se connectent et fusionnent.</p>
+    <div class="sql-display">SELECT m.nom_modele, ma.nom_marque FROM modele m JOIN marque ma ON m.id_marque = ma.id_marque;</div>
+    <div class="anim-area" id="joinArea"></div>
+    <div class="controls">
+      <button class="btn btn-play" onclick="playJoin()">▶ Animer</button>
+      <button class="btn btn-reset" onclick="resetJoin()">Reset</button>
+    </div>
+  </div>
+  
+  <div class="anim-card" id="anim-insert">
+    <h2>Animation INSERT</h2>
+    <p>Une nouvelle ligne apparaît et glisse dans la table.</p>
+    <div class="sql-display">INSERT INTO client (nom, prenom, ville) VALUES ('Zeller', 'Marc', 'Berne');</div>
+    <div class="anim-area" id="insertArea"></div>
+    <div class="controls">
+      <button class="btn btn-play" onclick="playInsert()">▶ Animer</button>
+      <button class="btn btn-reset" onclick="resetInsert()">Reset</button>
+    </div>
+  </div>
+  
+  <div class="anim-card" id="anim-delete">
+    <h2>Animation DELETE</h2>
+    <p>Les lignes correspondant au WHERE disparaissent progressivement.</p>
+    <div class="sql-display">DELETE FROM client WHERE ville = 'Sion';</div>
+    <div class="anim-area" id="deleteArea"></div>
+    <div class="controls">
+      <button class="btn btn-play" onclick="playDelete()">▶ Animer</button>
+      <button class="btn btn-reset" onclick="resetDelete()">Reset</button>
+    </div>
+  </div>
+  
+  <div class="anim-card" id="anim-groupby">
+    <h2>Animation GROUP BY</h2>
+    <p>Les lignes se regroupent par catégorie, puis l'agrégation calcule le résultat.</p>
+    <div class="sql-display">SELECT categorie, COUNT(*), ROUND(AVG(prix_vente),2) FROM modele GROUP BY categorie;</div>
+    <div class="anim-area" id="groupbyArea"></div>
+    <div class="controls">
+      <button class="btn btn-play" onclick="playGroupBy()">▶ Animer</button>
+      <button class="btn btn-reset" onclick="resetGroupBy()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showAnim(id, btn) {
+  document.querySelectorAll('.anim-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('anim-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// === SELECT Animation ===
+const selectData = [
+  {nom:'Air Max 90', prix:169.90, cat:'Lifestyle'},
+  {nom:'Pegasus 41', prix:149.90, cat:'Running'},
+  {nom:'Ultraboost 24', prix:199.90, cat:'Running'},
+  {nom:'Samba OG', prix:119.90, cat:'Lifestyle'},
+  {nom:'Deviate Nitro 3', prix:179.90, cat:'Running'},
+  {nom:'Old Skool', prix:89.90, cat:'Skateboard'},
+  {nom:'Gel-Kayano 31', prix:189.90, cat:'Running'},
+  {nom:'FuelCell Elite', prix:229.90, cat:'Running'},
+];
+
+function resetSelect() {
+  const area = document.getElementById('selectArea');
+  area.innerHTML = `<table class="anim-table"><thead><tr><th>nom_modele</th><th>prix_vente</th><th>categorie</th></tr></thead><tbody>${selectData.map((r,i) => `<tr id="sr${i}"><td>${r.nom}</td><td>${r.prix}</td><td>${r.cat}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function playSelect() {
+  resetSelect();
+  selectData.forEach((r, i) => {
+    setTimeout(() => {
+      const row = document.getElementById('sr' + i);
+      if (!row) return;
+      if (r.cat === 'Running') {
+        row.classList.add('highlight');
+      } else {
+        row.classList.add('dim');
+      }
+    }, 400 * (i + 1));
+  });
+}
+
+// === JOIN Animation ===
+function resetJoin() {
+  document.getElementById('joinArea').innerHTML = `<div style="display:flex;gap:2rem;justify-content:center;flex-wrap:wrap">
+    <div><div style="font-size:.7rem;font-weight:700;color:#3b82f6;margin-bottom:.3rem">modele</div>
+    <table class="anim-table"><tr><th>id_marque</th><th>nom_modele</th></tr>
+    <tr id="jm1"><td>1</td><td>Air Max</td></tr><tr id="jm2"><td>2</td><td>Ultraboost</td></tr><tr id="jm3"><td>3</td><td>574 Classic</td></tr></table></div>
+    <div style="display:flex;align-items:center;font-size:2rem;color:var(--border)" id="joinArrow">⟷</div>
+    <div><div style="font-size:.7rem;font-weight:700;color:var(--gold);margin-bottom:.3rem">marque</div>
+    <table class="anim-table"><tr><th>id_marque</th><th>nom_marque</th></tr>
+    <tr id="jk1"><td>1</td><td>Nike</td></tr><tr id="jk2"><td>2</td><td>Adidas</td></tr><tr id="jk3"><td>3</td><td>New Balance</td></tr></table></div>
+  </div><div id="joinResult" style="margin-top:1rem"></div>`;
+}
+
+function playJoin() {
+  resetJoin();
+  const pairs = [[1,1],[2,2],[3,3]];
+  pairs.forEach(([m, k], i) => {
+    setTimeout(() => {
+      const mr = document.getElementById('jm' + m);
+      const kr = document.getElementById('jk' + k);
+      if (mr) mr.classList.add('highlight');
+      if (kr) kr.classList.add('highlight');
+      document.getElementById('joinArrow').style.color = 'var(--accent2)';
+    }, 800 * (i + 1));
+  });
+  setTimeout(() => {
+    document.getElementById('joinResult').innerHTML = `<div style="font-size:.7rem;font-weight:700;color:var(--lo1);margin-bottom:.3rem">Résultat JOIN :</div>
+    <table class="anim-table"><tr><th>nom_modele</th><th>nom_marque</th></tr>
+    <tr class="new"><td>Air Max</td><td>Nike</td></tr>
+    <tr class="new" style="animation-delay:.2s"><td>Ultraboost</td><td>Adidas</td></tr>
+    <tr class="new" style="animation-delay:.4s"><td>574 Classic</td><td>New Balance</td></tr></table>`;
+  }, 3000);
+}
+
+// === INSERT Animation ===
+function resetInsert() {
+  document.getElementById('insertArea').innerHTML = `<table class="anim-table" id="insertTable"><thead><tr><th>id</th><th>nom</th><th>prenom</th><th>ville</th></tr></thead><tbody>
+  <tr><td>1</td><td>Mueller</td><td>Thomas</td><td>Geneve</td></tr>
+  <tr><td>2</td><td>Rochat</td><td>Julie</td><td>Lausanne</td></tr>
+  </tbody></table>`;
+}
+
+function playInsert() {
+  resetInsert();
+  setTimeout(() => {
+    const tbody = document.querySelector('#insertTable tbody');
+    const tr = document.createElement('tr');
+    tr.className = 'new';
+    tr.innerHTML = '<td>3</td><td>Zeller</td><td>Marc</td><td>Berne</td>';
+    tbody.appendChild(tr);
+  }, 800);
+}
+
+// === DELETE Animation ===
+function resetDelete() {
+  document.getElementById('deleteArea').innerHTML = `<table class="anim-table"><tbody>
+  <tr id="dr1"><td>1</td><td>Mueller</td><td>Geneve</td></tr>
+  <tr id="dr2"><td>5</td><td>Bonvin</td><td>Sion</td></tr>
+  <tr id="dr3"><td>6</td><td>Keller</td><td>Fribourg</td></tr>
+  </tbody></table>`;
+}
+
+function playDelete() {
+  resetDelete();
+  setTimeout(() => {
+    const row = document.getElementById('dr2');
+    if (row) row.classList.add('deleted');
+  }, 800);
+}
+
+// === GROUP BY Animation ===
+const gbData = [
+  {cat:'Lifestyle',prix:169.90},{cat:'Running',prix:149.90},{cat:'Running',prix:199.90},
+  {cat:'Lifestyle',prix:119.90},{cat:'Running',prix:179.90},{cat:'Skateboard',prix:89.90},
+];
+
+function resetGroupBy() {
+  document.getElementById('groupbyArea').innerHTML = `<table class="anim-table" id="gbTable"><thead><tr><th>categorie</th><th>prix_vente</th></tr></thead><tbody>${gbData.map((r,i) => `<tr id="gb${i}"><td>${r.cat}</td><td>${r.prix}</td></tr>`).join('')}</tbody></table><div id="gbResult" style="margin-top:1rem"></div>`;
+}
+
+function playGroupBy() {
+  resetGroupBy();
+  const groups = {Lifestyle: [], Running: [], Skateboard: []};
+  const colors = {Lifestyle:'rgba(59,130,246,.15)', Running:'rgba(50,224,196,.15)', Skateboard:'rgba(245,158,11,.15)'};
+  
+  gbData.forEach((r, i) => {
+    groups[r.cat].push(i);
+    setTimeout(() => {
+      const row = document.getElementById('gb' + i);
+      if (row) {
+        row.querySelectorAll('td').forEach(td => td.style.background = colors[r.cat]);
+        row.classList.add('highlight');
+      }
+    }, 400 * (i + 1));
+  });
+  
+  setTimeout(() => {
+    const result = Object.entries(groups).map(([cat, ids]) => {
+      const prices = ids.map(i => gbData[i].prix);
+      return { cat, count: ids.length, avg: (prices.reduce((a,b)=>a+b,0)/prices.length).toFixed(2) };
+    });
+    document.getElementById('gbResult').innerHTML = `<div style="font-size:.7rem;font-weight:700;color:var(--lo1);margin-bottom:.3rem">Résultat GROUP BY :</div>
+    <table class="anim-table"><tr><th>categorie</th><th>COUNT(*)</th><th>AVG(prix)</th></tr>${result.map(r => `<tr class="new"><td>${r.cat}</td><td>${r.count}</td><td>${r.avg}</td></tr>`).join('')}</table>`;
+  }, 3500);
+}
+
+// Init
+resetSelect();
+resetJoin();
+resetInsert();
+resetDelete();
+resetGroupBy();
+</script>
+</body>
+</html>
