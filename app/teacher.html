@@ -495,8 +495,8 @@ async function linkAuth(email) {
     const signupData = await signupRes.json();
     
     if (signupData.id) {
-      // Link auth_id to cq_students
-      await supabase.rpc('create_student_account', { student_email: email });
+      // Confirm email + link auth_id
+      await supabase.rpc('confirm_student_email', { student_email: email });
       msg.innerHTML = '<span style="color:var(--lo1)">\u2705 Compte créé pour ' + email + '</span>';
       loadData();
     } else {
@@ -618,10 +618,8 @@ async function addStudent() {
       return;
     }
     
-    // Step 3: If auth_id wasn't set (signup didn't return id), try linking via RPC
-    if (!authId) {
-      await supabase.rpc('create_student_account', { student_email: email });
-    }
+    // Step 3: Confirm email + link auth_id (signup requires email confirmation by default)
+    await supabase.rpc('confirm_student_email', { student_email: email });
     
     msg.innerHTML = '<span style="color:var(--lo1)">\u2705 <strong>' + first + ' ' + last.toUpperCase() + '</strong> ajouté(e) !<br><span style="font-size:.7rem">Email: ' + email + ' — Mot de passe: ' + defaultPwd + '</span></span>';
     
