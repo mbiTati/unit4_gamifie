@@ -4,318 +4,299 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DataQuest — Accueil</title>
 <style>
-:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo3:#f59e0b;--lo4:#8b5cf6}
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse at 20% 50%,rgba(13,115,119,.1) 0%,transparent 50%)}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.topbar-right{display:flex;gap:.8rem;align-items:center}
-.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;cursor:pointer;font-family:inherit}
+.topbar-right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;cursor:pointer;font-family:inherit}
 .topbar-right a:hover,.topbar-right button:hover{color:var(--accent2);border-color:var(--accent)}
-.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.main{max-width:950px;margin:0 auto;padding:1.5rem}
 
-/* Level Badge */
-.level-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}
-.level-badge{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;border:3px solid;animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(50,224,196,.3)}50%{box-shadow:0 0 20px 5px rgba(50,224,196,.15)}}
-.level-info{flex:1;min-width:200px}
-.level-name{font-size:1.3rem;font-weight:800;margin-bottom:.2rem}
-.level-xp{font-size:.8rem;color:var(--muted)}
-.xp-bar{height:10px;background:var(--surface);border-radius:5px;margin-top:.5rem;overflow:hidden;position:relative}
-.xp-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));position:relative;transition:width 1s ease}
-.xp-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:shimmer 2s infinite}
+/* WELCOME CARD */
+.welcome{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;position:relative;overflow:hidden}
+.welcome::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.avatar{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;border:3px solid;flex-shrink:0;position:relative}
+.avatar-glow{animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(50,224,196,.2)}50%{box-shadow:0 0 25px rgba(50,224,196,.4)}}
+.welcome-info{flex:1;min-width:180px}
+.welcome-name{font-size:1.1rem;font-weight:800}
+.welcome-level{font-size:.82rem;margin-top:.2rem}
+.welcome-xp{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.xp-bar{height:8px;background:var(--surface);border-radius:4px;margin-top:.4rem;overflow:hidden}
+.xp-fill{height:100%;border-radius:4px;transition:width 1.5s ease;position:relative}
+.xp-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:shimmer 2s infinite linear}
 @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
-/* Stats */
-.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;margin-bottom:1.5rem}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
-.stat .n{font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace}
-.stat .l{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem}
+/* LEVELS MAP */
+.levels-section{margin-bottom:1.5rem}
+.levels-title{font-size:.85rem;font-weight:700;margin-bottom:.8rem;color:var(--muted)}
+.levels-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:.5rem 0;position:relative}
+.level-node{display:flex;flex-direction:column;align-items:center;min-width:85px;position:relative;z-index:1}
+.level-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;border:2px solid;transition:all .5s;position:relative}
+.level-dot.locked{background:var(--surface);border-color:var(--border);color:var(--muted);opacity:.4}
+.level-dot.reached{border-width:3px}
+.level-dot.current{animation:currentPulse 1.5s ease-in-out infinite}
+@keyframes currentPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(50,224,196,.3)}50%{transform:scale(1.08);box-shadow:0 0 20px 4px rgba(50,224,196,.2)}}
+.level-name{font-size:.58rem;font-weight:600;margin-top:.3rem;text-align:center;max-width:80px;line-height:1.2}
+.level-xp{font-size:.5rem;color:var(--muted)}
+.level-connector{width:20px;height:3px;background:var(--border);flex-shrink:0;margin-top:-18px}
+.level-connector.active{background:linear-gradient(90deg,var(--accent2),var(--accent))}
 
-/* Modules Grid */
-.section-title{font-size:1rem;font-weight:700;margin:1.5rem 0 .8rem;display:flex;align-items:center;gap:.5rem}
-.section-title .lo-badge{font-size:.6rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;color:#fff}
-.modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem}
-.module{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden}
-.module:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
-.module .code{font-size:.6rem;font-weight:800;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase}
-.module .title{font-size:.85rem;font-weight:700;margin-top:.2rem}
-.module .progress-mini{height:4px;background:var(--surface);border-radius:2px;margin-top:.5rem;overflow:hidden}
-.module .progress-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .5s}
-.module .score{font-size:.65rem;color:var(--muted);margin-top:.3rem}
-.module.completed{border-color:var(--lo1)}
-.module.completed::after{content:'✅';position:absolute;top:.5rem;right:.5rem;font-size:.8rem}
+/* DANCING CHARACTER */
+.dancer{position:absolute;top:-32px;left:50%;transform:translateX(-50%);font-size:1.3rem;animation:dance 1s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(50,224,196,.4))}
+@keyframes dance{0%,100%{transform:translateX(-50%) translateY(0) rotate(0deg)}25%{transform:translateX(-50%) translateY(-6px) rotate(-10deg)}50%{transform:translateX(-50%) translateY(-2px) rotate(0deg)}75%{transform:translateX(-50%) translateY(-6px) rotate(10deg)}}
 
-/* Quick Actions */
-.actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.8rem;margin-top:1.5rem}
-.action{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block}
-.action:hover{border-color:var(--accent2);transform:translateY(-2px)}
-.action .ic{font-size:.7rem;font-weight:800;padding:.2rem .5rem;border-radius:4px;display:inline-block;margin-bottom:.4rem}
-.action h3{font-size:.85rem;font-weight:700}
-.action p{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+/* LEVEL UP CELEBRATION */
+.celebration{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;flex-direction:column}
+.celebration.active{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.celebration .big-char{font-size:5rem;animation:bounce 1s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.1)}}
+.celebration .level-up-text{font-size:1.5rem;font-weight:900;margin-top:1rem;animation:glow2 1.5s ease-in-out infinite}
+@keyframes glow2{0%,100%{text-shadow:0 0 10px rgba(50,224,196,.5)}50%{text-shadow:0 0 30px rgba(50,224,196,.8)}}
+.celebration .confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall 2s ease-in forwards}
+@keyframes fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.celebration .close-btn{margin-top:1.5rem;padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-bottom:1.5rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem;text-align:center}
+.stat .n{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;margin-top:.1rem}
+
+/* SECTIONS */
+.section-title{font-size:.85rem;font-weight:700;margin:1.5rem 0 .8rem;display:flex;align-items:center;gap:.5rem}
+.lo-badge{font-size:.55rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;color:#fff}
+.actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;margin-bottom:1rem}
+.action{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-decoration:none;color:inherit;transition:all .2s;display:block}
+.action:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.2)}
+.action .ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;margin-bottom:.5rem}
+.action h3{font-size:.82rem;font-weight:700;margin-bottom:.2rem}
+.action p{font-size:.68rem;color:var(--muted);line-height:1.3}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <h1>DataQuest — Unit 4</h1>
-  <div class="topbar-right"><a href="../index.html">Hub Cours</a>
+  <h1>DataQuest</h1>
+  <div class="topbar-right">
+    <a href="../index.html">Hub Cours</a>
     <a href="teacher.html" id="teacherLink" style="display:none">Mon Espace</a>
     <a href="teacher.html?tab=docs" style="color:var(--gold)">Documents</a>
     <a href="scores.html">Classement</a>
     <a href="settings.html">Paramètres</a>
-    <button onclick="doLogout()">Déconnexion</button></div>
+    <button onclick="doLogout()">Déconnexion</button>
+  </div>
 </div>
 
 <div class="main">
-  <div class="level-card" id="levelCard">
-    <div class="level-badge" id="levelBadge" style="border-color:var(--accent2);background:rgba(50,224,196,.08)">
-      <span id="levelIdx">0</span>
-    </div>
-    <div class="level-info">
-      <div class="level-name" id="levelName">Chargement...</div>
-      <div class="level-xp" id="levelXP"></div>
+  <!-- WELCOME CARD -->
+  <div class="welcome" id="welcomeCard">
+    <div class="avatar avatar-glow" id="avatar">?</div>
+    <div class="welcome-info">
+      <div class="welcome-name" id="wName">Chargement...</div>
+      <div class="welcome-level" id="wLevel"></div>
+      <div class="welcome-xp" id="wXP"></div>
       <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
     </div>
   </div>
   
-  <div class="stats" id="statsGrid">
-    <div class="stat"><div class="n" id="statModules">-</div><div class="l">Modules complétés</div></div>
-    <div class="stat"><div class="n" id="statXP">-</div><div class="l">XP Total</div></div>
-    <div class="stat"><div class="n" id="statQuiz">-</div><div class="l">Score Quiz Moyen</div></div>
-    <div class="stat"><div class="n" id="statRank">-</div><div class="l">Classement</div></div>
+  <!-- LEVELS MAP -->
+  <div class="levels-section">
+    <div class="levels-title">Parcours des niveaux</div>
+    <div class="levels-track" id="levelsTrack"></div>
   </div>
   
-  <div id="modulesContainer"></div>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="n" id="statXP" style="color:var(--accent2)">0</div><div class="l">XP total</div></div>
+    <div class="stat"><div class="n" id="statModules" style="color:var(--lo1)">0/20</div><div class="l">Modules</div></div>
+    <div class="stat"><div class="n" id="statGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div>
+    <div class="stat"><div class="n" id="statStreak" style="color:var(--gold)">0</div><div class="l">Série (jours)</div></div>
+  </div>
   
+  <!-- GAMES -->
   <div class="section-title"><span class="lo-badge" style="background:var(--accent2)">JEUX</span> Jeux pédagogiques</div>
   <div class="actions">
-    <a class="action" href="join-master.html">
-      <div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">JOIN</div>
-      <h3>Join Master</h3>
-      <p>Visualisez les jointures : INNER, LEFT, RIGHT, FULL</p>
-    </a>
-    <a class="action" href="normalisation-puzzle.html">
-      <div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">NF</div>
-      <h3>Normalisation Puzzle</h3>
-      <p>Découpez en 1NF → 2NF → 3NF par drag & drop</p>
-    </a>
-    <a class="action" href="query-racer.html">
-      <div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">RACE</div>
-      <h3>Query Racer</h3>
-      <p>Course SQL : écrivez la requête le plus vite !</p>
-    </a>
-    <a class="action" href="constraint-catcher.html">
-      <div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">CHECK</div>
-      <h3>Constraint Catcher</h3>
-      <p>Identifiez les contraintes manquantes dans les schémas</p>
-    </a>
-    <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">ERD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p></a>
-    <a class="action" href="sql-editor.html">
-      <div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div>
-      <h3>SQL Editor Live</h3>
-      <p>Requêtes en temps réel sur Supabase</p>
-    </a>
+    <a class="action" href="join-master.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">JOIN</div><h3>Join Master</h3><p>Visualisez les jointures SQL</p></a>
+    <a class="action" href="normalisation-puzzle.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">NF</div><h3>Normalisation Puzzle</h3><p>1NF → 2NF → 3NF drag & drop</p></a>
+    <a class="action" href="query-racer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">SQL</div><h3>Query Racer</h3><p>Course SQL chronométrée</p></a>
+    <a class="action" href="constraint-catcher.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">PK</div><h3>Constraint Catcher</h3><p>Trouvez les contraintes manquantes</p></a>
+    <a class="action" href="table-designer.html"><div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">DDL</div><h3>Table Designer</h3><p>Créez des tables visuellement</p></a>
+    <a class="action" href="df-explorer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">DF</div><h3>DF Explorer</h3><p>Dépendances fonctionnelles</p></a>
+    <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">MCD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p></a>
+    <a class="action" href="block-animations.html"><div class="ic" style="background:rgba(99,102,241,.1);color:#6366f1">VIS</div><h3>Block Animations</h3><p>SELECT, JOIN, INSERT animés</p></a>
+    <a class="action" href="quiz-live.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">QUIZ</div><h3>Quiz Live</h3><p>Kahoot — 4 banques de questions</p></a>
+    <a class="action" href="sql-editor.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div><h3>SQL Editor Live</h3><p>Requêtes sur Supabase</p></a>
+  </div>
   
-    <a class="action" href="table-designer.html">
-      <div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">TABLE</div>
-      <h3>Table Designer</h3>
-      <p>Créez une table visuellement, SQL généré en temps réel</p>
-    </a>
-    <a class="action" href="df-explorer.html">
-      <div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">DF</div>
-      <h3>DF Explorer</h3>
-      <p>Dépendances fonctionnelles avec flèches animées</p>
-    </a>
-    <a class="action" href="block-animations.html">
-      <div class="ic" style="background:rgba(99,102,241,.1);color:#6366f1">ANIM</div>
-      <h3>Block Animations</h3>
-      <p>SELECT, JOIN, INSERT, DELETE, GROUP BY animés</p>
-    </a>
-    <a class="action" href="quiz-live.html">
-      <div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">LIVE</div>
-      <h3>Quiz Live</h3>
-      <p>Kahoot — 4 banques : SQL, JOIN, MCD, Normalisation</p>
-    </a>
-  </div>
-
-  <div class="section-title">Accès rapide</div>
+  <!-- QUICK ACCESS -->
+  <div class="section-title"><span class="lo-badge" style="background:var(--lo2)">COURS</span> Accès rapide</div>
   <div class="actions">
-    <a class="action" href="../jeux/exercices_gescom/index.html">
-      <div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">SQL 1</div>
-      <h3>Exercices SQL — Partie 1</h3>
-      <p>29 exercices SELECT, WHERE, ORDER BY</p>
-    </a>
-    <a class="action" href="../jeux/exercices_gescom_avances/index.html">
-      <div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">SQL 2</div>
-      <h3>Exercices SQL — Partie 2</h3>
-      <p>28 exercices JOIN, GROUP BY, sous-requêtes</p>
-    </a>
-    <a class="action" href="../jeux/sql_sandbox/index.html">
-      <div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">SAND</div>
-      <h3>Bac à sable SQL</h3>
-      <p>Requêtes libres sur GESCOM + SwissSound</p>
-    </a>
-    <a class="action" href="../jeux/cas_footlocker/index.html">
-      <div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">PRO</div>
-      <h3>Cas Professionnels</h3>
-      <p>4 cas réels : FootLocker, Bateaux, Boulangerie, Assurance</p>
-    </a>
-  <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">ERD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p></a>
-    <a class="action" href="sql-editor.html">
-      <div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div>
-      <h3>SQL Editor — Supabase Live</h3>
-      <p>Requêtes en temps réel sur les vraies BDD GESCOM + SwissSound</p>
-    </a>
+    <a class="action" href="../jeux/exercices_gescom/index.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">P1</div><h3>Exercices GESCOM P1</h3><p>29 exercices SQL basiques</p></a>
+    <a class="action" href="../jeux/exercices_gescom_avances/index.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">P2</div><h3>Exercices GESCOM P2</h3><p>28 exercices avancés</p></a>
+    <a class="action" href="../jeux/cas_footlocker/index.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">PRO</div><h3>Cas FootLocker</h3><p>Cas professionnel complet</p></a>
+    <a class="action" href="../index.html"><div class="ic" style="background:rgba(148,163,184,.1);color:#94a3b8">HUB</div><h3>Hub principal</h3><p>Tous les modules et boss fights</p></a>
   </div>
+</div>
+
+<!-- LEVEL UP CELEBRATION MODAL -->
+<div class="celebration" id="celebration">
+  <div class="big-char" id="celebChar"></div>
+  <div class="level-up-text" id="celebText" style="color:var(--accent2)">LEVEL UP!</div>
+  <div id="celebLevel" style="font-size:1.1rem;color:var(--muted);margin-top:.5rem"></div>
+  <button class="close-btn" onclick="closeCelebration()">Continuer</button>
 </div>
 
 <script src="supabase-config.js"></script>
 <script>
 const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
-if (!student) {
-  // Not logged in — allow guest mode but show limited info
-  document.getElementById('levelName').textContent = 'Mode invité';
-  document.getElementById('levelXP').textContent = 'Connectez-vous pour sauvegarder votre progression';
-}
+if (!student) window.location.href = 'login.html';
 
-const LO_CONFIG = [
-  { phase: 1, name: 'LO1 — Conception', color: 'var(--lo1)', modules: [401,402,403,404,405,406,407,408] },
-  { phase: 2, name: 'LO2 — Développement', color: 'var(--lo2)', modules: [409,410,411,412,413,414,415,416] },
-  { phase: 3, name: 'LO3 — Tests', color: 'var(--lo3)', modules: [417,418] },
-  { phase: 4, name: 'LO4 — Documentation', color: 'var(--lo4)', modules: [419,420] },
-];
+const CHARACTERS = ['🧙‍♂️','🧑‍💻','🦸','🧑‍🔬','🎓','🏆','⚡','🔥','👑'];
 
-// Module page mapping
-const MODULE_PAGES = {
-  401: '../jeux/module01_serpent_donnees/index.html',
-  402: '../jeux/module02_usine_besoins/index.html',
-  403: '../jeux/module03_collectionneur_donnees/index.html',
-  404: '../jeux/module04_detective_dependances/index.html',
-  405: '../jeux/module05_constructeur_mcd/index.html',
-  406: '../jeux/module06_transformateur_mld/index.html',
-  407: '../jeux/module07_nettoyeur_tables/index.html',
-  408: '../jeux/module08_bouclier_validation/index.html',
-  409: '../jeux/module09_architecte_sql/index.html',
-  410: '../jeux/module10_chaine_contraintes/index.html',
-  411: '../jeux/module11_demineur_sql/index.html',
-  412: '../jeux/module12_detective_donnees/index.html',
-  413: '../jeux/module13_comptable_fou/index.html',
-  414: '../jeux/module14_puzzle_tables/index.html',
-  415: '../jeux/module15_masque_vue/index.html',
-  416: '../jeux/module16_coffre_fort/index.html',
-  417: '../jeux/module17_testeur_fou/index.html',
-  418: '../jeux/module18_chasse_bugs/index.html',
-  419: '../jeux/module19_cartographe/index.html',
-  420: '../jeux/module20_guide_parfait/index.html',
-};
-
-async function loadDashboard() {
-  try {
-    // Load modules
-    const modules = await supabase.query('cq_modules', {
-      select: '*',
-      filter: { 'unit_id': 'eq.4' },
-      order: 'order_index.asc'
-    });
-    
-    // Load progress
-    let progress = [];
-    if (student) {
-      progress = await supabase.query('cq_student_progress', {
-        select: '*',
-        filter: { 'student_id': `eq.${student.id}` }
-      }) || [];
-    }
-    
-    const progressMap = {};
-    let totalXP = 0;
-    let completedCount = 0;
-    let quizScores = [];
-    
-    for (const p of progress) {
-      progressMap[p.module_id] = p;
-      totalXP += (p.credits_earned || 0) + (p.game_score || 0);
-      if (p.completed_at) completedCount++;
-      if (p.quiz_score !== null && p.total_questions > 0) {
-        quizScores.push(Math.round(p.quiz_score / p.total_questions * 100));
-      }
-    }
-    
-    // Update level display
-    const level = getLevel(totalXP);
-    document.getElementById('levelBadge').style.borderColor = level.color;
-    document.getElementById('levelBadge').style.background = level.color + '15';
-    document.getElementById('levelBadge').querySelector('span').textContent = level.index;
-    if (student && student.role === 'teacher') {
-      document.getElementById('levelBadge').style.borderColor = '#F59E0B';
-      document.getElementById('levelBadge').style.background = 'rgba(245,158,11,.1)';
-      document.getElementById('levelBadge').querySelector('span').textContent = 'PROF';
-      document.getElementById('levelName').textContent = student.first_name + ' — Enseignant(e)';
-      document.getElementById('levelXP').textContent = 'Dashboard enseignant disponible dans la navigation';
-      document.getElementById('xpFill').style.width = '100%';
-      document.getElementById('xpFill').style.background = 'linear-gradient(90deg, #F59E0B, #EF4444)';
-    } else {
-      document.getElementById('levelName').textContent = student ? `${student.first_name} — ${level.name}` : level.name;
-    }
-    document.getElementById('levelXP').textContent = `${totalXP} XP — prochain niveau à ${level.nextMin} XP`;
-    document.getElementById('xpFill').style.width = (level.progress * 100) + '%';
-    
-    // Stats
-    document.getElementById('statModules').textContent = `${completedCount}/20`;
-    document.getElementById('statXP').textContent = totalXP;
-    document.getElementById('statQuiz').textContent = quizScores.length > 0 ? Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) + '%' : '-';
-    
-    // Render modules by LO
-    const container = document.getElementById('modulesContainer');
-    container.innerHTML = '';
-    
-    for (const lo of LO_CONFIG) {
-      const loModules = modules.filter(m => lo.modules.includes(m.id));
-      if (loModules.length === 0) continue;
-      
-      container.innerHTML += `<div class="section-title">
-        <span class="lo-badge" style="background:${lo.color}">${lo.name.split('—')[0].trim()}</span>
-        ${lo.name.split('—')[1]?.trim() || ''}
-      </div>
-      <div class="modules">
-        ${loModules.map(m => {
-          const p = progressMap[m.id];
-          const completed = p?.completed_at;
-          const score = p?.quiz_score;
-          const total = p?.total_questions;
-          const pct = total > 0 ? Math.round(score/total*100) : 0;
-          const href = MODULE_PAGES[m.id] || '#';
-          return `<a class="module ${completed ? 'completed' : ''}" href="${href}">
-            <div class="code">${m.code}</div>
-            <div class="title">${m.title}</div>
-            ${p ? `<div class="progress-mini"><div class="progress-fill" style="width:${completed ? 100 : 50}%"></div></div>
-            <div class="score">${completed ? '✅ Terminé' : 'En cours'} ${total > 0 ? '— Quiz: '+pct+'%' : ''}</div>` : 
-            '<div class="score" style="color:var(--muted)">Pas commencé</div>'}
-          </a>`;
-        }).join('')}
-      </div>`;
-    }
-    
-  } catch (e) {
-    console.error('Dashboard error:', e);
-  }
+// Show teacher link if applicable
+if (student && student.role === 'teacher') {
+  document.getElementById('teacherLink').style.display = '';
 }
 
 function doLogout() {
   supabase.signOut();
-  localStorage.removeItem('cq_student');
   window.location.href = 'login.html';
 }
 
-// Show teacher link if teacher
-if (student && student.role === 'teacher') {
-  const tl = document.getElementById('teacherLink');
-  if (tl) tl.style.display = '';
+async function loadDashboard() {
+  if (!student) return;
+  
+  const isTeacher = student.role === 'teacher';
+  
+  // Calculate XP from progress
+  const progress = await supabase.query('cq_student_progress', { 
+    select: '*', 
+    filter: { 'student_id': 'eq.' + student.id }
+  }) || [];
+  
+  const progressList = Array.isArray(progress) ? progress : [];
+  let totalXP = 0;
+  let modulesCompleted = 0;
+  for (const p of progressList) {
+    totalXP += (p.credits_earned || 0) + (p.game_score || 0);
+    if (p.completed_at) modulesCompleted++;
+  }
+  
+  // Game scores
+  const gameScores = await supabase.query('cq_game_scores', {
+    select: 'id',
+    filter: { 'student_id': 'eq.' + student.id }
+  }) || [];
+  const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
+  
+  // Level
+  const level = getLevel(totalXP);
+  const prevLevelStored = localStorage.getItem('cq_prev_level_' + student.id);
+  
+  // WELCOME CARD
+  if (isTeacher) {
+    document.getElementById('avatar').style.borderColor = '#F59E0B';
+    document.getElementById('avatar').style.background = 'rgba(245,158,11,.12)';
+    document.getElementById('avatar').innerHTML = '👑';
+    document.getElementById('wName').textContent = student.first_name + ' — Enseignant(e)';
+    document.getElementById('wLevel').innerHTML = '<span style="color:#F59E0B;font-weight:700">PROF</span>';
+    document.getElementById('wXP').textContent = 'Accédez à votre espace via "Mon Espace" dans la navigation';
+    document.getElementById('xpFill').style.width = '100%';
+    document.getElementById('xpFill').style.background = 'linear-gradient(90deg, #F59E0B, #EF4444)';
+    document.querySelector('.welcome').style.borderColor = 'rgba(245,158,11,.3)';
+    document.querySelector('.welcome::before')
+  } else {
+    const charIdx = level.index;
+    document.getElementById('avatar').style.borderColor = level.color;
+    document.getElementById('avatar').style.background = level.color + '15';
+    document.getElementById('avatar').style.color = level.color;
+    document.getElementById('avatar').innerHTML = CHARACTERS[charIdx] || '🧑‍💻';
+    document.getElementById('wName').textContent = student.first_name + ' ' + student.last_name;
+    document.getElementById('wLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:700">' + level.name + '</span> <span style="font-size:.7rem;color:var(--muted)">(Nv. ' + (level.index + 1) + '/9)</span>';
+    document.getElementById('wXP').textContent = totalXP + ' XP' + (level.nextMin > level.xp ? ' — prochain niveau à ' + level.nextMin + ' XP' : ' — NIVEAU MAX!');
+    document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';
+    document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';
+    document.querySelector('.welcome').style.borderColor = level.color + '30';
+  }
+  
+  // STATS
+  document.getElementById('statXP').textContent = totalXP;
+  document.getElementById('statModules').textContent = modulesCompleted + '/20';
+  document.getElementById('statGames').textContent = gamesPlayed;
+  document.getElementById('statStreak').textContent = student.streak_days || 0;
+  
+  // LEVELS MAP
+  renderLevelsTrack(totalXP, level, isTeacher);
+  
+  // CHECK LEVEL UP
+  if (!isTeacher && prevLevelStored && parseInt(prevLevelStored) < level.index) {
+    showCelebration(level);
+  }
+  localStorage.setItem('cq_prev_level_' + student.id, level.index);
 }
-// Auto-redirect teacher to teacher dashboard
-if (student && student.role === 'teacher') {
-  // Teacher can stay on home but has link to dashboard
+
+function renderLevelsTrack(xp, currentLevel, isTeacher) {
+  const track = document.getElementById('levelsTrack');
+  let html = '';
+  
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    const lvl = XP_LEVELS[i];
+    const reached = xp >= lvl.min;
+    const isCurrent = i === currentLevel.index && !isTeacher;
+    const isLocked = !reached && !isTeacher;
+    
+    // Connector (except before first)
+    if (i > 0) {
+      html += '<div class="level-connector ' + (reached ? 'active' : '') + '"></div>';
+    }
+    
+    html += '<div class="level-node">';
+    html += '<div class="level-dot ' + (isLocked ? 'locked' : 'reached') + (isCurrent ? ' current' : '') + '" style="' +
+      (reached ? 'background:' + lvl.color + '18;border-color:' + lvl.color + ';color:' + lvl.color : '') + '">';
+    
+    // Dancing character on current level
+    if (isCurrent) {
+      html += '<div class="dancer">' + (CHARACTERS[i] || '🧑‍💻') + '</div>';
+    }
+    
+    html += (i + 1);
+    html += '</div>';
+    html += '<div class="level-name" style="color:' + (reached ? lvl.color : 'var(--muted)') + '">' + lvl.name + '</div>';
+    html += '<div class="level-xp">' + lvl.min + ' XP</div>';
+    html += '</div>';
+  }
+  
+  track.innerHTML = html;
 }
+
+function showCelebration(level) {
+  const cel = document.getElementById('celebration');
+  const charIdx = level.index;
+  
+  // Add confetti
+  let confettiHtml = '';
+  const colors = ['#32E0C4', '#F59E0B', '#3b82f6', '#ef4444', '#8b5cf6', '#10b981', '#ec4899'];
+  for (let i = 0; i < 30; i++) {
+    const x = Math.random() * 100;
+    const delay = Math.random() * 1.5;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    confettiHtml += '<div class="confetti" style="left:' + x + '%;background:' + color + ';animation-delay:' + delay + 's"></div>';
+  }
+  cel.innerHTML = confettiHtml + 
+    '<div class="big-char">' + (CHARACTERS[charIdx] || '🎓') + '</div>' +
+    '<div class="level-up-text" style="color:' + level.color + '">LEVEL UP!</div>' +
+    '<div style="font-size:1.1rem;color:var(--muted);margin-top:.5rem">' + level.name + '</div>' +
+    '<button class="close-btn" onclick="closeCelebration()">Continuer</button>';
+  cel.classList.add('active');
+}
+
+function closeCelebration() {
+  document.getElementById('celebration').classList.remove('active');
+}
+
 loadDashboard();
 </script>
 </body>
