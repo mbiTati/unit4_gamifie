@@ -2,7 +2,7 @@
 <html lang="fr" data-theme="dark">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CodeQuest — Accueil</title>
+<title>DataQuest — Accueil</title>
 <style>
 :root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo3:#f59e0b;--lo4:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -57,7 +57,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 </head>
 <body>
 <div class="topbar">
-  <h1>CodeQuest — Unit 4</h1>
+  <h1>DataQuest — Unit 4</h1>
   <div class="topbar-right">
     <a href="../index.html">Hub Cours</a>
     <a href="teacher.html" id="teacherLink" style="display:none">Dashboard Prof</a>
@@ -303,6 +303,10 @@ function doLogout() {
 if (student && student.role === 'teacher') {
   const tl = document.getElementById('teacherLink');
   if (tl) tl.style.display = '';
+}
+// Auto-redirect teacher to teacher dashboard
+if (student && student.role === 'teacher') {
+  // Teacher can stay on home but has link to dashboard
 }
 loadDashboard();
 </script>

@@ -2,192 +2,377 @@
 <html lang="fr" data-theme="dark">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CodeQuest — Dashboard Enseignant</title>
+<title>DataQuest — Dashboard Enseignant</title>
 <style>
 :root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo3:#f59e0b;--lo4:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.topbar-right{display:flex;gap:.8rem;align-items:center}
-.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;cursor:pointer;font-family:inherit}
-.main{max-width:1100px;margin:0 auto;padding:1.5rem}
-.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem;margin-bottom:1.5rem}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center}
-.kpi .n{font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace}
-.kpi .l{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.3rem}
-.alert{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem;font-size:.82rem}
+.topbar-right{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .5rem;border-radius:5px;cursor:pointer;font-family:inherit}
+.topbar-right a:hover,.topbar-right button:hover{color:var(--accent2);border-color:var(--accent)}
+.main{max-width:1100px;margin:0 auto;padding:1rem 1.5rem}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;margin-bottom:1rem}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
+.kpi .n{font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.kpi .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+
+/* Alerts */
+.alert{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:.5rem .8rem;margin-bottom:.5rem;font-size:.78rem;display:flex;align-items:center;gap:.5rem}
 .alert strong{color:var(--error)}
-.section-title{font-size:1.1rem;font-weight:700;margin:1.5rem 0 .8rem}
-.students-table{width:100%;border-collapse:collapse;font-size:.8rem}
-.students-table th{background:var(--surface);color:var(--accent2);font-weight:700;padding:.6rem .8rem;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;position:sticky;top:0}
-.students-table td{padding:.5rem .8rem;border-bottom:1px solid var(--border)}
-.students-table tr:hover{background:rgba(50,224,196,.03)}
-.bar{height:8px;background:var(--surface);border-radius:4px;min-width:80px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width .5s}
-.danger{color:var(--error);font-weight:700}
-.comments-section{margin-top:1.5rem}
-.comment-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.5rem}
-.comment-card .meta{font-size:.7rem;color:var(--muted);margin-bottom:.3rem}
-.comment-card .msg{font-size:.82rem}
-.tab-bar{display:flex;gap:.3rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
-.tab{padding:.4rem .8rem;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted);border-radius:6px 6px 0 0;border:none;background:none;font-family:inherit}
+
+/* Tabs */
+.tabs{display:flex;gap:.2rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.2rem;flex-wrap:wrap}
+.tab{padding:.4rem .8rem;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;border-radius:6px 6px 0 0;position:relative}
 .tab.active{color:var(--accent2);border-bottom:2px solid var(--accent2)}
+.tab .badge{background:var(--error);color:#fff;font-size:.55rem;font-weight:700;padding:1px 4px;border-radius:8px;margin-left:3px}
+
+/* Filters */
+.filters{display:flex;gap:.5rem;margin-bottom:.8rem;align-items:center;flex-wrap:wrap}
+.filters select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.3rem .5rem;font-family:inherit;font-size:.75rem}
+.filters label{font-size:.7rem;color:var(--muted);font-weight:600}
+
+/* Table */
+.s-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.s-table th{background:var(--surface);color:var(--accent2);font-weight:700;padding:.5rem .6rem;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0}
+.s-table td{padding:.4rem .6rem;border-bottom:1px solid var(--border)}
+.s-table tr:hover{background:rgba(50,224,196,.02)}
+.bar{height:6px;background:var(--surface);border-radius:3px;min-width:60px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.danger-text{color:var(--error);font-weight:700}
+.level-chip{font-size:.6rem;font-weight:700;padding:.1rem .3rem;border-radius:3px}
+
+/* Actions */
+.btn-sm{padding:.25rem .5rem;border-radius:4px;font-family:inherit;font-size:.65rem;font-weight:600;cursor:pointer;border:1px solid}
+.btn-danger{background:rgba(239,68,68,.08);color:var(--error);border-color:rgba(239,68,68,.2)}
+.btn-primary{background:rgba(50,224,196,.08);color:var(--accent2);border-color:rgba(50,224,196,.2)}
+
+/* Comments */
+.comment{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.5rem}
+.comment .meta{font-size:.68rem;color:var(--muted);margin-bottom:.2rem}
+.comment .msg{font-size:.8rem;margin-bottom:.3rem}
+.comment .reply{background:var(--surface);border-left:3px solid var(--accent2);padding:.4rem .6rem;margin-top:.3rem;font-size:.75rem;border-radius:0 4px 4px 0}
+.comment textarea{width:100%;min-height:40px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.3rem .5rem;font-family:inherit;font-size:.75rem;resize:vertical;margin-top:.3rem}
+.comment .unread{border-left:3px solid var(--gold)}
+
+/* Add student */
+.add-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.add-form h3{font-size:.85rem;font-weight:700;margin-bottom:.6rem;color:var(--accent2)}
+.add-form .row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem}
+.add-form input,.add-form select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.35rem .5rem;font-family:inherit;font-size:.78rem;flex:1;min-width:100px}
+.add-form input:focus{outline:none;border-color:var(--accent2)}
+.btn-add{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:6px;padding:.4rem 1rem;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <h1>CodeQuest — Dashboard Enseignant</h1>
+  <h1>DataQuest — Enseignant</h1>
   <div class="topbar-right">
     <a href="home.html">Accueil</a>
     <a href="../index.html">Hub Cours</a>
-    <a href="../enseignant.html">Espace Documents</a>
-    <button onclick="supabase.signOut();localStorage.removeItem('cq_student');location.href='login.html'">Déconnexion</button>
+    <a href="../enseignant.html">Documents</a>
+    <button onclick="logout()">Déconnexion</button>
   </div>
 </div>
 
-<div class="main">
-  <div class="kpis" id="kpis">
-    <div class="kpi"><div class="n" id="kpiStudents">-</div><div class="l">Élèves</div></div>
-    <div class="kpi"><div class="n" id="kpiAvgProgress">-</div><div class="l">Progression moyenne</div></div>
-    <div class="kpi"><div class="n" id="kpiAvgQuiz">-</div><div class="l">Score Quiz moyen</div></div>
-    <div class="kpi"><div class="n" id="kpiComments">-</div><div class="l">Questions en attente</div></div>
+<div class="main" id="mainArea">
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="kN">-</div><div class="l">Élèves</div></div>
+    <div class="kpi"><div class="n" id="kP">-</div><div class="l">Progression moy.</div></div>
+    <div class="kpi"><div class="n" id="kQ">-</div><div class="l">Quiz moyen</div></div>
+    <div class="kpi"><div class="n" id="kC" style="color:var(--gold)">-</div><div class="l">Questions</div></div>
+    <div class="kpi"><div class="n" id="kA" style="color:var(--error)">-</div><div class="l">En difficulté</div></div>
   </div>
   
   <div id="alerts"></div>
   
-  <div class="tab-bar">
+  <div class="tabs">
     <button class="tab active" onclick="showTab('progress',this)">Progression</button>
-    <button class="tab" onclick="showTab('comments',this)">Questions élèves</button>
+    <button class="tab" onclick="showTab('comments',this)">Questions <span class="badge" id="commentBadge" style="display:none">0</span></button>
+    <button class="tab" onclick="showTab('manage',this)">Gérer les élèves</button>
+    <button class="tab" onclick="showTab('modules',this)">Par module</button>
   </div>
   
-  <div id="progressTab">
-    <div style="overflow-x:auto">
-      <table class="students-table" id="studentsTable">
-        <thead><tr>
-          <th>Élève</th>
-          <th>Niveau</th>
-          <th>XP</th>
-          <th>Modules</th>
-          <th>Progression</th>
-          <th>Quiz moyen</th>
-        </tr></thead>
-        <tbody id="studentsBody"></tbody>
-      </table>
-    </div>
+  <!-- FILTERS -->
+  <div class="filters">
+    <label>Classe :</label>
+    <select id="filterClass" onchange="renderData()"><option value="all">Toutes</option></select>
+    <label>Cohorte :</label>
+    <select id="filterCohort" onchange="renderData()"><option value="all">Toutes</option></select>
   </div>
   
-  <div id="commentsTab" style="display:none">
-    <div id="commentsList"><div style="color:var(--muted);font-size:.85rem">Chargement...</div></div>
-  </div>
+  <!-- TABS CONTENT -->
+  <div id="tab-progress"><div style="overflow-x:auto"><table class="s-table"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div>
+  <div id="tab-comments" style="display:none"><div id="commentsList"></div></div>
+  <div id="tab-manage" style="display:none" id="manageTab"></div>
+  <div id="tab-modules" style="display:none"><div id="modulesList"></div></div>
 </div>
 
 <script src="supabase-config.js"></script>
 <script>
-function showTab(tab, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('progressTab').style.display = tab === 'progress' ? 'block' : 'none';
-  document.getElementById('commentsTab').style.display = tab === 'comments' ? 'block' : 'none';
+const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+if (!student || student.role !== 'teacher') {
+  document.getElementById('mainArea').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--error)">Accès réservé aux enseignants.<br><a href="login.html" style="color:var(--accent2)">Se connecter</a></div>';
 }
 
-async function loadTeacherDashboard() {
-  const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
-  if (!student || student.role !== 'teacher') {
-    document.querySelector('.main').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--error)">Accès réservé aux enseignants.<br><a href="login.html" style="color:var(--accent2)">Se connecter</a></div>';
-    return;
-  }
-  
-  // Load all students
-  const students = await supabase.query('cq_students', {
-    select: '*',
-    filter: { 'role': 'eq.student', 'class_name': 'eq.BI1' },
-    order: 'last_name.asc'
+let allStudents = [];
+let allProgress = [];
+let allComments = [];
+let allModules = [];
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  ['progress','comments','manage','modules'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
   });
+}
+
+function logout() {
+  supabase.signOut();
+  localStorage.removeItem('cq_student');
+  location.href = 'login.html';
+}
+
+async function loadData() {
+  allStudents = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
+  allProgress = await supabase.query('cq_student_progress', { select: '*' }) || [];
+  allComments = await supabase.query('cq_comments', { select: '*', order: 'created_at.desc', limit: 50 }) || [];
+  allModules = await supabase.query('cq_modules', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'order_index.asc' }) || [];
   
-  // Load all progress for Unit 4 modules (401-420)
-  const allProgress = await supabase.query('cq_student_progress', {
-    select: '*',
-    filter: { 'module_id': 'gte.401' }
-  }) || [];
+  // Populate filters
+  const students = allStudents.filter(s => s.role !== 'teacher');
+  const classes = [...new Set(students.map(s => s.class_name).filter(Boolean))];
+  const cohorts = [...new Set(students.map(s => s.cohort).filter(Boolean))];
   
-  // Load comments
-  const comments = await supabase.query('cq_comments', {
-    select: '*',
-    order: 'created_at.desc',
-    limit: 20
-  }) || [];
+  const fc = document.getElementById('filterClass');
+  const fco = document.getElementById('filterCohort');
+  fc.innerHTML = '<option value="all">Toutes</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+  fco.innerHTML = '<option value="all">Toutes</option>' + cohorts.map(c => `<option value="${c}">${c}</option>`).join('');
   
-  // KPIs
-  document.getElementById('kpiStudents').textContent = students.length;
+  renderData();
+  renderComments();
+  renderManage();
+  renderModules();
+}
+
+function renderData() {
+  const filterClass = document.getElementById('filterClass').value;
+  const filterCohort = document.getElementById('filterCohort').value;
   
-  // Build student data
-  const tbody = document.getElementById('studentsBody');
-  let totalProgress = 0;
-  let totalQuiz = 0;
-  let quizCount = 0;
-  const alertsHTML = [];
+  const students = allStudents.filter(s => s.role !== 'teacher' 
+    && (filterClass === 'all' || s.class_name === filterClass)
+    && (filterCohort === 'all' || s.cohort === filterCohort)
+  );
   
-  tbody.innerHTML = '';
-  for (const s of students) {
+  // Calculate stats per student
+  const stats = students.map(s => {
     const sp = allProgress.filter(p => p.student_id === s.id && p.module_id >= 401 && p.module_id <= 420);
     const completed = sp.filter(p => p.completed_at).length;
-    const pct = Math.round(completed / 20 * 100);
-    totalProgress += pct;
-    
-    let xp = 0;
-    let quizAvg = '-';
-    const quizScores = [];
+    let xp = 0, quizScores = [];
     for (const p of sp) {
       xp += (p.credits_earned || 0) + (p.game_score || 0);
       if (p.quiz_score !== null && p.total_questions > 0) {
         quizScores.push(Math.round(p.quiz_score / p.total_questions * 100));
       }
     }
-    if (quizScores.length > 0) {
-      quizAvg = Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) + '%';
-      totalQuiz += parseInt(quizAvg);
-      quizCount++;
-    }
-    
+    const quizAvg = quizScores.length > 0 ? Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) : -1;
     const level = getLevel(xp);
-    const barColor = pct < 30 ? 'var(--error)' : pct < 60 ? 'var(--gold)' : 'var(--lo1)';
-    
-    if (pct < 20 && sp.length > 0) {
-      alertsHTML.push(`<div class="alert"><strong>⚠ ${s.first_name} ${s.last_name}</strong> — progression très faible (${pct}%). Intervention recommandée.</div>`);
-    }
-    
-    tbody.innerHTML += `<tr>
+    const pct = Math.round(completed / 20 * 100);
+    return { ...s, completed, xp, quizAvg, level, pct, atRisk: pct < 20 && sp.length > 0 };
+  }).sort((a, b) => b.xp - a.xp);
+  
+  // KPIs
+  document.getElementById('kN').textContent = students.length;
+  const avgPct = stats.length > 0 ? Math.round(stats.reduce((a, s) => a + s.pct, 0) / stats.length) : 0;
+  document.getElementById('kP').textContent = avgPct + '%';
+  const quizAvgs = stats.filter(s => s.quizAvg >= 0);
+  document.getElementById('kQ').textContent = quizAvgs.length > 0 ? Math.round(quizAvgs.reduce((a, s) => a + s.quizAvg, 0) / quizAvgs.length) + '%' : '-';
+  const unread = allComments.filter(c => !c.is_read).length;
+  document.getElementById('kC').textContent = unread;
+  const atRisk = stats.filter(s => s.atRisk || s.quizAvg < 40 && s.quizAvg >= 0);
+  document.getElementById('kA').textContent = atRisk.length;
+  
+  // Alerts
+  document.getElementById('alerts').innerHTML = atRisk.map(s =>
+    `<div class="alert"><strong>⚠ ${s.first_name} ${s.last_name}</strong> — progression ${s.pct}%${s.quizAvg >= 0 && s.quizAvg < 40 ? ', quiz ' + s.quizAvg + '%' : ''}</div>`
+  ).join('');
+  
+  // Comment badge
+  const badge = document.getElementById('commentBadge');
+  if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
+  else badge.style.display = 'none';
+  
+  // Table
+  document.getElementById('thead').innerHTML = `<tr><th>Élève</th><th>Classe</th><th>Niveau</th><th>XP</th><th>Modules</th><th>Progression</th><th>Quiz</th><th>Actions</th></tr>`;
+  document.getElementById('tbody').innerHTML = stats.map(s => {
+    const barColor = s.pct < 30 ? 'var(--error)' : s.pct < 60 ? 'var(--gold)' : 'var(--lo1)';
+    return `<tr>
       <td><strong>${s.first_name} ${s.last_name}</strong></td>
-      <td><span style="color:${level.color};font-weight:700;font-size:.75rem">${level.name}</span></td>
-      <td style="font-family:monospace;font-weight:600">${xp}</td>
-      <td>${completed}/20</td>
-      <td><div class="bar"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div><span style="font-size:.65rem;color:var(--muted)">${pct}%</span></td>
-      <td class="${parseInt(quizAvg) < 40 ? 'danger' : ''}">${quizAvg}</td>
+      <td style="font-size:.7rem;color:var(--muted)">${s.class_name || '-'} · ${s.cohort || '-'}</td>
+      <td><span class="level-chip" style="background:${s.level.color}15;color:${s.level.color}">${s.level.name}</span></td>
+      <td style="font-family:monospace;font-weight:600">${s.xp}</td>
+      <td>${s.completed}/20</td>
+      <td><div class="bar"><div class="bar-fill" style="width:${s.pct}%;background:${barColor}"></div></div><span style="font-size:.6rem;color:var(--muted)">${s.pct}%</span></td>
+      <td class="${s.quizAvg >= 0 && s.quizAvg < 40 ? 'danger-text' : ''}">${s.quizAvg >= 0 ? s.quizAvg + '%' : '-'}</td>
+      <td><button class="btn-sm btn-danger" onclick="resetStudent('${s.id}')">Reset</button></td>
     </tr>`;
+  }).join('');
+}
+
+function renderComments() {
+  const list = document.getElementById('commentsList');
+  if (allComments.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:2rem">Aucune question.</div>';
+    return;
   }
+  list.innerHTML = allComments.map(c => {
+    const s = allStudents.find(st => st.id === c.student_id);
+    const name = s ? `${s.first_name} ${s.last_name}` : 'Anonyme';
+    const dt = new Date(c.created_at);
+    const isUnread = !c.is_read;
+    return `<div class="comment ${isUnread ? 'unread' : ''}">
+      <div class="meta"><strong>${name}</strong> · ${dt.toLocaleDateString('fr-CH')} ${dt.toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'})} · ${c.page_context || ''}</div>
+      <div class="msg">${c.content || c.message || ''}</div>
+      ${c.teacher_reply ? `<div class="reply"><strong>Réponse :</strong> ${c.teacher_reply}</div>` : `
+        <textarea id="reply_${c.id}" placeholder="Répondre..."></textarea>
+        <div style="display:flex;gap:.3rem;margin-top:.2rem">
+          <button class="btn-sm btn-primary" onclick="replyComment('${c.id}')">Répondre</button>
+          ${isUnread ? `<button class="btn-sm btn-primary" onclick="markRead('${c.id}')">Marquer lu</button>` : ''}
+        </div>
+      `}
+    </div>`;
+  }).join('');
+}
+
+function renderManage() {
+  document.getElementById('tab-manage').innerHTML = `
+    <div class="add-form">
+      <h3>Ajouter un élève</h3>
+      <div class="row">
+        <input id="addFirst" placeholder="Prénom">
+        <input id="addLast" placeholder="Nom">
+        <input id="addEmail" placeholder="Email">
+        <select id="addClass"><option value="BI1">BI1</option><option value="BI2">BI2</option><option value="ID1">ID1</option><option value="ID2">ID2</option></select>
+        <select id="addCohort"><option value="2025">2025</option><option value="2026">2026</option></select>
+        <button class="btn-add" onclick="addStudent()">Ajouter</button>
+      </div>
+      <div id="addMsg" style="font-size:.78rem;margin-top:.3rem;min-height:1rem"></div>
+    </div>
+    <div style="font-size:.85rem;font-weight:700;margin-bottom:.5rem">Tous les élèves (${allStudents.filter(s=>s.role!=='teacher').length})</div>
+    <div style="overflow-x:auto"><table class="s-table">
+      <thead><tr><th>Nom</th><th>Email</th><th>Classe</th><th>Cohorte</th><th>Rôle</th><th>Actions</th></tr></thead>
+      <tbody>${allStudents.filter(s => s.role !== 'teacher').map(s => `<tr>
+        <td><strong>${s.first_name} ${s.last_name}</strong></td>
+        <td style="font-size:.7rem;color:var(--muted)">${s.email}</td>
+        <td>${s.class_name || '-'}</td>
+        <td>${s.cohort || '-'}</td>
+        <td style="font-size:.65rem">${s.role}</td>
+        <td>
+          <button class="btn-sm btn-danger" onclick="resetStudent('${s.id}')">Reset</button>
+          <button class="btn-sm btn-danger" onclick="deleteStudent('${s.id}','${s.first_name} ${s.last_name}')">Supprimer</button>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  `;
+}
+
+function renderModules() {
+  const students = allStudents.filter(s => s.role !== 'teacher');
+  document.getElementById('modulesList').innerHTML = allModules.map(m => {
+    const mp = allProgress.filter(p => p.module_id === m.id);
+    const started = mp.length;
+    const completed = mp.filter(p => p.completed_at).length;
+    const avgScore = mp.length > 0 ? Math.round(mp.reduce((a,p) => a + (p.total_questions > 0 ? (p.quiz_score/p.total_questions)*100 : 0), 0) / mp.length) : 0;
+    const pct = students.length > 0 ? Math.round(completed / students.length * 100) : 0;
+    const barColor = pct < 30 ? 'var(--error)' : pct < 60 ? 'var(--gold)' : 'var(--lo1)';
+    return `<div style="display:flex;align-items:center;gap:.8rem;padding:.4rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:monospace;font-size:.7rem;font-weight:700;color:var(--accent2);min-width:50px">${m.code}</span>
+      <span style="flex:1;font-size:.78rem">${m.title}</span>
+      <div class="bar" style="width:80px"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <span style="font-size:.65rem;color:var(--muted);min-width:40px">${completed}/${students.length}</span>
+      <span style="font-size:.65rem;color:var(--muted);min-width:30px">${avgScore}%</span>
+    </div>`;
+  }).join('');
+}
+
+async function resetStudent(id) {
+  if (!confirm('Remettre à zéro la progression de cet élève ?')) return;
+  await supabase.update('cq_student_progress', {}, { 'student_id': `eq.${id}` }); // This won't work with REST — need delete
+  // Actually delete progress
+  const token = localStorage.getItem('cq_token');
+  await fetch(`${SUPABASE_URL}/rest/v1/cq_student_progress?student_id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  loadData();
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`Supprimer ${name} ? Cette action est irréversible.`)) return;
+  const token = localStorage.getItem('cq_token');
+  await fetch(`${SUPABASE_URL}/rest/v1/cq_student_progress?student_id=eq.${id}`, {
+    method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  await fetch(`${SUPABASE_URL}/rest/v1/cq_students?id=eq.${id}`, {
+    method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  loadData();
+}
+
+async function addStudent() {
+  const first = document.getElementById('addFirst').value.trim();
+  const last = document.getElementById('addLast').value.trim();
+  const email = document.getElementById('addEmail').value.trim().toLowerCase();
+  const cls = document.getElementById('addClass').value;
+  const cohort = document.getElementById('addCohort').value;
+  const msg = document.getElementById('addMsg');
   
-  document.getElementById('kpiAvgProgress').textContent = students.length > 0 ? Math.round(totalProgress / students.length) + '%' : '-';
-  document.getElementById('kpiAvgQuiz').textContent = quizCount > 0 ? Math.round(totalQuiz / quizCount) + '%' : '-';
-  document.getElementById('kpiComments').textContent = comments.filter(c => !c.resolved).length || 0;
-  document.getElementById('alerts').innerHTML = alertsHTML.join('');
+  if (!first || !last || !email) { msg.innerHTML = '<span style="color:var(--error)">Tous les champs sont requis.</span>'; return; }
   
-  // Comments
-  const commentsList = document.getElementById('commentsList');
-  if (comments.length === 0) {
-    commentsList.innerHTML = '<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">Aucune question pour le moment.</div>';
+  const result = await supabase.insert('cq_students', {
+    first_name: first, last_name: last.toUpperCase(), email: email,
+    class_name: cls, cohort: cohort, role: 'student',
+  });
+  
+  if (result && !result.error) {
+    msg.innerHTML = '<span style="color:var(--lo1)">✅ Élève ajouté !</span>';
+    document.getElementById('addFirst').value = '';
+    document.getElementById('addLast').value = '';
+    document.getElementById('addEmail').value = '';
+    loadData();
   } else {
-    commentsList.innerHTML = comments.map(c => {
-      const s = students.find(st => st.id === c.student_id);
-      return `<div class="comment-card">
-        <div class="meta">${s ? s.first_name + ' ' + s.last_name : 'Anonyme'} — ${new Date(c.created_at).toLocaleDateString('fr-CH')} ${new Date(c.created_at).toLocaleTimeString('fr-CH', {hour:'2-digit',minute:'2-digit'})}</div>
-        <div class="msg">${c.content || c.message || ''}</div>
-      </div>`;
-    }).join('');
+    msg.innerHTML = `<span style="color:var(--error)">Erreur : ${JSON.stringify(result?.error || result?.message || 'inconnue')}</span>`;
   }
 }
 
-loadTeacherDashboard();
+async function replyComment(id) {
+  const text = document.getElementById('reply_' + id).value.trim();
+  if (!text) return;
+  const token = localStorage.getItem('cq_token');
+  await fetch(`${SUPABASE_URL}/rest/v1/cq_comments?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ teacher_reply: text, replied_at: new Date().toISOString(), is_read: true })
+  });
+  loadData();
+}
+
+async function markRead(id) {
+  const token = localStorage.getItem('cq_token');
+  await fetch(`${SUPABASE_URL}/rest/v1/cq_comments?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ is_read: true })
+  });
+  loadData();
+}
+
+loadData();
 </script>
 </body>
 </html>
