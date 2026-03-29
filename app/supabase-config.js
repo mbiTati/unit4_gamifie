@@ -1,9 +1,9 @@
-// Supabase client for CodeQuest - Unit 4
+// DataQuest — Supabase client for Unit 4
 const SUPABASE_URL = 'https://jslbfkaujahihvjdxcjg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
 const UNIT_ID = 4;
 
-// XP Levels (shared across all 3 apps)
+// 9 Niveaux BDD
 const XP_LEVELS = [
   { name: 'Data Padawan', min: 0, color: '#94a3b8' },
   { name: 'Query Rookie', min: 50, color: '#a78bfa' },
@@ -18,122 +18,80 @@ const XP_LEVELS = [
 
 function getLevel(xp) {
   let lvl = XP_LEVELS[0];
-  for (const l of XP_LEVELS) {
-    if (xp >= l.min) lvl = l;
-  }
+  for (const l of XP_LEVELS) if (xp >= l.min) lvl = l;
   const idx = XP_LEVELS.indexOf(lvl);
   const next = XP_LEVELS[idx + 1];
   const progress = next ? (xp - lvl.min) / (next.min - lvl.min) : 1;
   return { ...lvl, index: idx, xp, nextMin: next?.min || lvl.min, progress: Math.min(progress, 1) };
 }
 
-// Supabase client (using fetch, no SDK needed)
-const supabase = {
-  async refreshToken() {
-    const refresh = localStorage.getItem('cq_refresh');
-    if (!refresh) return false;
-    try {
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refresh }),
-      });
-      const data = await res.json();
-      if (data.access_token) {
-        localStorage.setItem('cq_token', data.access_token);
-        localStorage.setItem('cq_refresh', data.refresh_token);
-        return true;
-      }
-    } catch(e) { console.error('Token refresh failed:', e); }
-    return false;
-  },
+// ===== SUPABASE CLIENT =====
+function _headers(needsAuth) {
+  const h = { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+  if (needsAuth) {
+    const token = localStorage.getItem('cq_token');
+    if (token) h['Authorization'] = 'Bearer ' + token;
+  }
+  return h;
+}
 
+const supabase = {
+  // READ — no auth needed (RLS SELECT USING(true))
   async query(table, options = {}) {
-    let url = `${SUPABASE_URL}/rest/v1/${table}`;
+    let url = SUPABASE_URL + '/rest/v1/' + table;
     const params = new URLSearchParams();
     if (options.select) params.set('select', options.select);
-    if (options.filter) {
-      for (const [key, val] of Object.entries(options.filter)) {
-        params.set(key, val);
-      }
-    }
+    if (options.filter) for (const [k, v] of Object.entries(options.filter)) params.set(k, v);
     if (options.order) params.set('order', options.order);
     if (options.limit) params.set('limit', options.limit);
     const q = params.toString();
     if (q) url += '?' + q;
-
-    const headers = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-    };
-    const token = localStorage.getItem('cq_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    let res = await fetch(url, { headers });
-    
-    // If 401/403, try refreshing token
-    if (res.status === 401 || res.status === 403) {
-      const refreshed = await this.refreshToken();
-      if (refreshed) {
-        headers['Authorization'] = `Bearer ${localStorage.getItem('cq_token')}`;
-        res = await fetch(url, { headers });
-      }
-    }
-    
+    const res = await fetch(url, { headers: _headers(false) });
     return res.json();
   },
 
+  // WRITE — needs auth token
   async insert(table, data) {
-    const url = `${SUPABASE_URL}/rest/v1/${table}`;
-    const headers = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-    };
-    const token = localStorage.getItem('cq_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data) });
+    await this._ensureToken();
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+      method: 'POST', headers: { ..._headers(true), 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
     return res.json();
   },
 
   async update(table, data, filter) {
-    let url = `${SUPABASE_URL}/rest/v1/${table}`;
+    await this._ensureToken();
     const params = new URLSearchParams(filter);
-    url += '?' + params.toString();
-
-    const headers = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-    };
-    const token = localStorage.getItem('cq_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    const res = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify(data) });
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + params.toString(), {
+      method: 'PATCH', headers: { ..._headers(true), 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
     return res.json();
+  },
+
+  async delete(table, filter) {
+    await this._ensureToken();
+    const params = new URLSearchParams(filter);
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + params.toString(), {
+      method: 'DELETE', headers: _headers(true)
+    });
+    return res.ok;
   },
 
   async rpc(fn, params = {}) {
-    const url = `${SUPABASE_URL}/rest/v1/rpc/${fn}`;
-    const headers = {
-      'apikey': SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-    };
-    const token = localStorage.getItem('cq_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(params) });
+    await this._ensureToken();
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST', headers: _headers(true), body: JSON.stringify(params)
+    });
     return res.json();
   },
 
-  // Auth
+  // AUTH
   async signIn(email, password) {
-    const url = `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
     });
     const data = await res.json();
     if (data.access_token) {
@@ -144,34 +102,44 @@ const supabase = {
     return data;
   },
 
-  async signUp(email, password) {
-    const url = `${SUPABASE_URL}/auth/v1/signup`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    return res.json();
-  },
-
   async signOut() {
     localStorage.removeItem('cq_token');
     localStorage.removeItem('cq_refresh');
     localStorage.removeItem('cq_user');
+    localStorage.removeItem('cq_student');
   },
 
-  getUser() {
-    const u = localStorage.getItem('cq_user');
-    return u ? JSON.parse(u) : null;
+  getUser() { const u = localStorage.getItem('cq_user'); return u ? JSON.parse(u) : null; },
+  isLoggedIn() { return !!localStorage.getItem('cq_token'); },
+
+  // Token refresh
+  async _ensureToken() {
+    const token = localStorage.getItem('cq_token');
+    if (!token) return;
+    // Check if token is expired (JWT decode)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp * 1000 < Date.now() - 60000) { // expired or expiring in 1 min
+        await this.refreshToken();
+      }
+    } catch(e) {}
   },
 
-  isLoggedIn() {
-    return !!localStorage.getItem('cq_token');
+  async refreshToken() {
+    const refresh = localStorage.getItem('cq_refresh');
+    if (!refresh) return false;
+    try {
+      const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refresh })
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem('cq_token', data.access_token);
+        localStorage.setItem('cq_refresh', data.refresh_token);
+        return true;
+      }
+    } catch(e) {}
+    return false;
   },
-
-  // Execute SQL on gescom/swisssound (read-only via RPC)
-  async executeSQL(query) {
-    // This will use a Supabase RPC function for safe SQL execution
-    return this.rpc('execute_readonly_sql', { sql_query: query });
-  }
 };

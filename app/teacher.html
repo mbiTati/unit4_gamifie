@@ -221,9 +221,7 @@ function logout() {
 
 async function loadData() {
   try {
-    // Auto-refresh token before loading data
-    await supabase.refreshToken();
-    
+
     allStudents = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
     allProgress = await supabase.query('cq_student_progress', { select: '*' }) || [];
     allComments = await supabase.query('cq_comments', { select: '*', order: 'created_at.desc', limit: 50 }) || [];
@@ -478,11 +476,8 @@ async function addClass() {
 }
 
 async function deleteClass(id, name) {
-  if (!confirm(`Supprimer la classe ${name} ?`)) return;
-  const token = localStorage.getItem('cq_token');
-  await fetch(`${SUPABASE_URL}/rest/v1/cq_classes?id=eq.${id}`, {
-    method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
-  });
+  if (!confirm('Supprimer la classe ' + name + ' ?')) return;
+  await supabase.delete('cq_classes', { 'id': 'eq.' + id });
   loadClasses();
 }
 
