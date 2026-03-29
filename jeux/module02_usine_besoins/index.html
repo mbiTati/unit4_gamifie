@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏭 L'Usine à Besoins — Module 2</title>
+<title><span style="font-size:.65rem;font-weight:800;color:#3b82f6;background:rgba(59,130,246,.1);padding:.1rem .3rem;border-radius:3px">SPEC</span> L'Usine à Besoins — Module 2</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -57,7 +57,7 @@
 <div class="header">
 <a href="../../index.html" style="font-size:.78rem;color:var(--muted,#94a3b8);text-decoration:none;font-weight:600;padding:.3rem .6rem;border:1px solid rgba(148,163,184,.2);border-radius:5px;transition:.2s">← Hub</a>
 
-  <div><h1>🏭 L'Usine à Besoins</h1><div class="sub">Module 2 — Recueil des besoins</div></div>
+  <div><h1><span style="font-size:.65rem;font-weight:800;color:#3b82f6;background:rgba(59,130,246,.1);padding:.1rem .3rem;border-radius:3px">SPEC</span> L'Usine à Besoins</h1><div class="sub">Module 2 — Recueil des besoins</div></div>
   <div class="score-bar">
     <div class="score-box"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
     <div class="score-box"><div class="lbl">Question</div><div class="val"><span id="qNum">0</span>/<span id="qTotal">0</span></div></div>
@@ -66,7 +66,7 @@
 <div class="container">
 
   <div id="intro" class="card fade-in" style="text-align:center;">
-    <div style="font-size:3rem;margin-bottom:0.5rem;">🏭</div>
+    <div style="font-size:3rem;margin-bottom:0.5rem;"><span style="font-size:.65rem;font-weight:800;color:#3b82f6;background:rgba(59,130,246,.1);padding:.1rem .3rem;border-radius:3px">SPEC</span></div>
     <h2 style="font-size:1.5rem;margin-bottom:0.5rem;">L'Usine à Besoins</h2>
     <p style="color:var(--muted);margin-bottom:0.5rem;">Recueil des besoins</p>
     <p style="color:var(--muted);margin-bottom:1.5rem;font-size:0.9rem;">Triez chaque demande : besoin utilisateur ou besoin système ?</p>
@@ -84,7 +84,7 @@
 </div>
 <script>
   const items = [{"text":"L'artiste doit pouvoir voir ses sessions","zone":"user"},{"text":"Temps de réponse < 2 secondes","zone":"system"},{"text":"Sauvegardes automatiques chaque nuit","zone":"system"},{"text":"Le comptable génère les factures en PDF","zone":"user"},{"text":"Base de données MySQL 8.x","zone":"system"},{"text":"L'ingénieur réserve une salle","zone":"user"},{"text":"Chiffrement des mots de passe","zone":"system"},{"text":"Rechercher un artiste par nom","zone":"user"},{"text":"Compatible avec Windows et Mac","zone":"system"},{"text":"Afficher le planning de la semaine","zone":"user"},{"text":"Supporter 50 utilisateurs simultanés","zone":"system"},{"text":"Modifier les coordonnées d'un artiste","zone":"user"}];
-  const zones = [{"id":"user","label":"👤 Besoin UTILISATEUR"},{"id":"system","label":"⚙️ Besoin SYSTÈME"}];
+  const zones = [{"id":"user","label":"[USER] Besoin UTILISATEUR"},{"id":"system","label":"[SYS] Besoin SYSTÈME"}];
   let placed = {};
   let score = 0;
   document.getElementById('qTotal').textContent = items.length;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📖 Le Guide Parfait — Module 20</title>
+<title><span style="font-size:.65rem;font-weight:800;color:#10b981;background:rgba(16,185,129,.1);padding:.1rem .3rem;border-radius:3px">DOC</span> Le Guide Parfait — Module 20</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   
@@ -396,7 +396,7 @@
 
 
   <div>
-    <h1>📖 Le Guide Parfait</h1>
+    <h1><span style="font-size:.65rem;font-weight:800;color:#10b981;background:rgba(16,185,129,.1);padding:.1rem .3rem;border-radius:3px">DOC</span> Le Guide Parfait</h1>
     <div class="subtitle">Module 20 — Documentation utilisateur | SwissSound Studios</div>
   </div>
   <div class="score-bar">
@@ -420,7 +420,7 @@
   <!-- INTRO SCREEN -->
   <div class="screen active" id="screen-intro">
     <div class="intro-card">
-      <h2>📖 Bienvenue dans Le Guide Parfait !</h2>
+      <h2><span style="font-size:.65rem;font-weight:800;color:#10b981;background:rgba(16,185,129,.1);padding:.1rem .3rem;border-radius:3px">DOC</span> Bienvenue dans Le Guide Parfait !</h2>
       <p>Vous êtes rédacteur technique chez <strong>SwissSound Studios</strong>. Votre mission : écrire des guides utilisateur si clairs qu'un débutant peut suivre chaque étape sans aide.</p>
       <p>Un collègue testera vos instructions à l'aveugle. Chaque étape manquante ou imprécise = points perdus !</p>
       
@@ -733,7 +733,7 @@ function submitAnswer() {
 function showResult(result) {
   const { expected, studentResults, matchedExpected, rawScore, timeBonus, taskScore, fullMatches, totalExpected } = result;
   
-  const grade = rawScore >= 90 ? ' Excellent !' : rawScore >= 70 ? '👍 Bon travail !' : rawScore >= 50 ? ' Passable' : '! À améliorer';
+  const grade = rawScore >= 90 ? ' Excellent !' : rawScore >= 70 ? '<span style="font-size:.65rem;font-weight:800;color:#10b981;background:rgba(16,185,129,.1);padding:.1rem .3rem;border-radius:3px">OK</span> Bon travail !' : rawScore >= 50 ? ' Passable' : '! À améliorer';
   const circleColor = rawScore >= 70 ? '#2E7D32' : rawScore >= 50 ? '#FF6F00' : '#C62828';
 
   let html = `
@@ -767,12 +767,12 @@ function showResult(result) {
           `).join('')}
         </div>
         <div class="comparison-col">
-          <h4>✍️ Vos instructions</h4>
+          <h4><span style="font-size:.65rem;font-weight:800;color:#6366f1;background:rgba(99,102,241,.1);padding:.1rem .3rem;border-radius:3px">EDIT</span> Vos instructions</h4>
           ${studentResults.length === 0 ? '<p style="color:var(--text-muted);">Aucune étape soumise</p>' :
             studentResults.map((s, i) => `
               <div class="student-step ${s.status}">
                 <strong>${i+1}.</strong> ${s.text} 
-                ${s.status === 'matched' ? '✅' : s.status === 'partial' ? '!' : '➕'}
+                ${s.status === 'matched' ? '✅' : s.status === 'partial' ? '!' : '<span style="font-size:.65rem;font-weight:800;color:#10b981;background:rgba(16,185,129,.1);padding:.1rem .3rem;border-radius:3px">+</span>'}
               </div>
             `).join('')}
           ${Array.from({length: totalExpected - fullMatches}, (_, i) => 
