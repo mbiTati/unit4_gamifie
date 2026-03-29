@@ -1,5 +1,5 @@
 // CommentWidget — Bouton "Question au prof" injectable dans n'importe quelle page
-// Usage: ajouter <script src="../codequest/comment-widget.js"></script> en bas de page
+// Usage: ajouter <script src="../app/comment-widget.js"></script> en bas de page
 
 (function() {
   const SUPABASE_URL = 'https://jslbfkaujahihvjdxcjg.supabase.co';
