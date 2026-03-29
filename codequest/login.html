@@ -44,49 +44,13 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
     <div class="unit">Unit 4 — Database Design & Development</div>
   </div>
   
-  <div class="tabs">
-    <button class="tab active" onclick="switchMode('login')">Connexion</button>
-    <button class="tab" onclick="switchMode('signup')">Inscription</button>
-  </div>
+  
   
   <div id="msgArea"></div>
   
   <div id="formArea">
     <!-- Signup-only fields -->
-    <div id="signupFields" style="display:none">
-      <div class="row2">
-        <div class="form-group">
-          <label>Prénom</label>
-          <div class="input-wrap"><input type="text" id="firstName" placeholder="Prénom"></div>
-        </div>
-        <div class="form-group">
-          <label>Nom</label>
-          <div class="input-wrap"><input type="text" id="lastName" placeholder="Nom"></div>
-        </div>
-      </div>
-      <div class="row2">
-        <div class="form-group">
-          <label>Classe</label>
-          <div class="input-wrap">
-            <select id="className">
-              <option value="BI1">BI1</option>
-              <option value="BI2">BI2</option>
-              <option value="ID1">ID1</option>
-              <option value="ID2">ID2</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Cohorte</label>
-          <div class="input-wrap">
-            <select id="cohort">
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
+    
     
     <!-- Shared fields -->
     <div class="form-group">
@@ -108,23 +72,19 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   
   <div class="footer-links">
     <a href="../index.html">← Accéder au hub sans compte</a>
-    <br><br>
-    <span style="font-size:.6rem">Mot de passe par défaut : Schulz2025!</span>
+    <br><span style="font-size:.6rem;color:var(--muted)">Votre compte est créé par votre enseignant(e)</span>
   </div>
 </div>
 
 <script src="supabase-config.js"></script>
 <script>
-let mode = 'login';
+
 
 if (supabase.isLoggedIn()) {
   window.location.href = 'home.html';
 }
 
-function switchMode(m) {
-  mode = m;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.tab:${m === 'login' ? 'first' : 'last'}-child`).classList.add('active');
+-child`).classList.add('active');
   document.getElementById('signupFields').style.display = m === 'signup' ? 'block' : 'none';
   document.getElementById('btnSubmit').textContent = m === 'login' ? 'Se connecter' : "S'inscrire";
   document.getElementById('msgArea').innerHTML = '';
@@ -152,7 +112,7 @@ async function handleSubmit() {
   document.getElementById('loading').style.display = 'block';
   
   try {
-    if (mode === 'login') {
+    {
       const result = await supabase.signIn(email, pwd);
       if (result.access_token) {
         // Load or link student profile

@@ -5,15 +5,15 @@ const UNIT_ID = 4;
 
 // XP Levels (shared across all 3 apps)
 const XP_LEVELS = [
-  { name: 'Noob Master', min: 0, color: '#94a3b8' },
-  { name: 'Noob Coder', min: 50, color: '#a78bfa' },
-  { name: 'Little Coder', min: 150, color: '#60a5fa' },
-  { name: 'Vibe Coder', min: 300, color: '#34d399' },
-  { name: 'Code Rookie', min: 500, color: '#fbbf24' },
-  { name: 'J Coder', min: 750, color: '#f97316' },
-  { name: 'Code Master', min: 1000, color: '#ef4444' },
-  { name: 'Code Legend', min: 1500, color: '#ec4899' },
-  { name: 'Lord Coder', min: 2000, color: '#8b5cf6' },
+  { name: 'Data Padawan', min: 0, color: '#94a3b8' },
+  { name: 'Query Rookie', min: 50, color: '#a78bfa' },
+  { name: 'Table Builder', min: 150, color: '#60a5fa' },
+  { name: 'Join Warrior', min: 300, color: '#34d399' },
+  { name: 'Schema Architect', min: 500, color: '#fbbf24' },
+  { name: 'Index Master', min: 750, color: '#f97316' },
+  { name: 'Database Sensei', min: 1000, color: '#ef4444' },
+  { name: 'Data Wizard', min: 1500, color: '#ec4899' },
+  { name: 'SQL Overlord', min: 2000, color: '#8b5cf6' },
 ];
 
 function getLevel(xp) {

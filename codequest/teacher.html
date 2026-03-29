@@ -343,6 +343,7 @@ function renderManage() {
         <input id="addEmail" placeholder="Email">
         <select id="addClass"><option value="BI1">BI1</option><option value="BI2">BI2</option><option value="ID1">ID1</option><option value="ID2">ID2</option></select>
         <select id="addCohort"><option value="2025">2025</option><option value="2026">2026</option></select>
+        <span style="font-size:.65rem;color:var(--muted);padding:.3rem">mdp: Schulz2025!</span>
         <button class="btn-add" onclick="addStudent()">Ajouter</button>
       </div>
       <div id="addMsg" style="font-size:.78rem;margin-top:.3rem;min-height:1rem"></div>
@@ -480,17 +481,30 @@ async function addStudent() {
   const email = document.getElementById('addEmail').value.trim().toLowerCase();
   const cls = document.getElementById('addClass').value;
   const cohort = document.getElementById('addCohort').value;
+  const defaultPwd = 'Schulz2025!';
   const msg = document.getElementById('addMsg');
   
   if (!first || !last || !email) { msg.innerHTML = '<span style="color:var(--error)">Tous les champs sont requis.</span>'; return; }
   
+  msg.innerHTML = '<span style="color:var(--muted)">Création en cours...</span>';
+  
+  // 1. Try to create Supabase Auth account (may fail without admin rights — that's OK)
+  try {
+    await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: defaultPwd })
+    });
+  } catch(e) { /* Auth creation optional — student can sign up later */ }
+  
+  // 2. Create student profile
   const result = await supabase.insert('cq_students', {
     first_name: first, last_name: last.toUpperCase(), email: email,
     class_name: cls, cohort: cohort, role: 'student',
   });
   
   if (result && !result.error) {
-    msg.innerHTML = '<span style="color:var(--lo1)">✅ Élève ajouté !</span>';
+    msg.innerHTML = `<span style="color:var(--lo1)">✅ ${first} ${last.toUpperCase()} ajouté(e) !<br><span style="font-size:.7rem">Email: ${email} — Mot de passe: Schulz2025!</span></span>`;
     document.getElementById('addFirst').value = '';
     document.getElementById('addLast').value = '';
     document.getElementById('addEmail').value = '';

@@ -248,7 +248,17 @@ async function loadDashboard() {
     document.getElementById('levelBadge').style.borderColor = level.color;
     document.getElementById('levelBadge').style.background = level.color + '15';
     document.getElementById('levelBadge').querySelector('span').textContent = level.index;
-    document.getElementById('levelName').textContent = student ? `${student.first_name} — ${level.name}` : level.name;
+    if (student && student.role === 'teacher') {
+      document.getElementById('levelBadge').style.borderColor = '#F59E0B';
+      document.getElementById('levelBadge').style.background = 'rgba(245,158,11,.1)';
+      document.getElementById('levelBadge').querySelector('span').textContent = 'PROF';
+      document.getElementById('levelName').textContent = student.first_name + ' — Enseignant(e)';
+      document.getElementById('levelXP').textContent = 'Dashboard enseignant disponible dans la navigation';
+      document.getElementById('xpFill').style.width = '100%';
+      document.getElementById('xpFill').style.background = 'linear-gradient(90deg, #F59E0B, #EF4444)';
+    } else {
+      document.getElementById('levelName').textContent = student ? `${student.first_name} — ${level.name}` : level.name;
+    }
     document.getElementById('levelXP').textContent = `${totalXP} XP — prochain niveau à ${level.nextMin} XP`;
     document.getElementById('xpFill').style.width = (level.progress * 100) + '%';
     
