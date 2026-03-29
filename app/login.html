@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DataQuest — Connexion</title>
@@ -7,87 +7,66 @@
 :root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--success:#10b981}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(ellipse at 20% 50%,rgba(13,115,119,.15) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(50,224,196,.08) 0%,transparent 40%)}
-.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.logo{text-align:center;margin-bottom:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.logo{text-align:center;margin-bottom:2rem}
 .logo .school{font-size:.65rem;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:.3rem}
 .logo h1{font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.logo .unit{font-size:.78rem;color:var(--muted);margin-top:.3rem}
-.tabs{display:flex;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.tab{flex:1;padding:.55rem;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:600}
-.tab.active{background:var(--accent);color:#fff}
-.form-group{margin-bottom:1rem}
-.form-group label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-.input-wrap{position:relative}
-.input-wrap input,.input-wrap select{width:100%;padding:.6rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem}
-.input-wrap input:focus,.input-wrap select:focus{outline:none;border-color:var(--accent2)}
-.input-wrap .pwd-input{padding-right:2.5rem}
-.eye-btn{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:.2rem}
-.btn-login{width:100%;padding:.7rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;margin-top:.3rem}
-.btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(13,115,119,.3)}
-.btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.msg{font-size:.78rem;margin-top:.6rem;padding:.4rem .6rem;border-radius:6px;text-align:center;display:none}
+.logo .sub{font-size:.78rem;color:var(--muted);margin-top:.3rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
+.field .wrap{position:relative}
+.field input{width:100%;padding:.65rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.88rem}
+.field input:focus{outline:none;border-color:var(--accent2)}
+.field .pwd{padding-right:2.5rem}
+.eye{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem}
+.btn{width:100%;padding:.75rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;margin-top:.5rem}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(13,115,119,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{font-size:.78rem;margin-top:.8rem;padding:.5rem .7rem;border-radius:6px;text-align:center;display:none}
 .msg.error{background:rgba(239,68,68,.1);color:var(--error);border:1px solid rgba(239,68,68,.2);display:block}
 .msg.success{background:rgba(16,185,129,.1);color:var(--success);border:1px solid rgba(16,185,129,.2);display:block}
-.footer-links{text-align:center;margin-top:1.2rem;font-size:.72rem;color:var(--muted)}
-.footer-links a{color:var(--accent2);text-decoration:none;font-weight:600}
-.loading{display:none;text-align:center;padding:1rem}
-.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+.note{text-align:center;margin-top:1.5rem;font-size:.68rem;color:var(--muted)}
+.spinner{display:none;text-align:center;padding:1.5rem}
+.spinner::after{content:'';display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="login-card">
+<div class="card">
   <div class="logo">
     <div class="school">École Schulz</div>
     <h1>DataQuest</h1>
-    <div class="unit">Unit 4 — Database Design & Development</div>
+    <div class="sub">Unit 4 — Database Design & Development</div>
   </div>
-  
-  
   
   <div id="msgArea"></div>
   
-  <div id="formArea">
-    <!-- Signup-only fields -->
-    
-    
-    <!-- Shared fields -->
-    <div class="form-group">
+  <div id="form">
+    <div class="field">
       <label>Email</label>
-      <div class="input-wrap"><input type="email" id="email" placeholder="votre.email@example.com" autocomplete="email"></div>
+      <div class="wrap"><input type="email" id="email" placeholder="votre.email@example.com" autocomplete="email"></div>
     </div>
-    <div class="form-group">
+    <div class="field">
       <label>Mot de passe</label>
-      <div class="input-wrap">
-        <input type="password" id="password" class="pwd-input" placeholder="••••••••" autocomplete="current-password">
-        <button class="eye-btn" onclick="togglePwd()">👁</button>
+      <div class="wrap">
+        <input type="password" id="password" class="pwd" placeholder="••••••••" autocomplete="current-password">
+        <button class="eye" onclick="togglePwd()">👁</button>
       </div>
     </div>
-    
-    <button class="btn-login" id="btnSubmit" onclick="handleSubmit()">Se connecter</button>
+    <button class="btn" id="btnLogin" onclick="doLogin()">Se connecter</button>
   </div>
   
-  <div class="loading" id="loading"><div class="spinner"></div><div style="margin-top:.5rem;font-size:.78rem;color:var(--muted)">Chargement...</div></div>
+  <div class="spinner" id="spinner"></div>
   
-  <div class="footer-links">
-    <a href="../index.html">← Accéder au hub sans compte</a>
-    <br><span style="font-size:.6rem;color:var(--muted)">Votre compte est créé par votre enseignant(e)</span>
-  </div>
+  <div class="note">Votre compte est créé par votre enseignant(e)</div>
 </div>
 
 <script src="supabase-config.js"></script>
 <script>
-
-
-if (supabase.isLoggedIn()) {
-  window.location.href = 'home.html';
-}
-
--child`).classList.add('active');
-  document.getElementById('signupFields').style.display = m === 'signup' ? 'block' : 'none';
-  document.getElementById('btnSubmit').textContent = m === 'login' ? 'Se connecter' : "S'inscrire";
-  document.getElementById('msgArea').innerHTML = '';
+// If already logged in, redirect
+const existingStudent = JSON.parse(localStorage.getItem('cq_student') || 'null');
+if (existingStudent && supabase.isLoggedIn()) {
+  window.location.href = existingStudent.role === 'teacher' ? 'teacher.html' : 'home.html';
 }
 
 function togglePwd() {
@@ -95,87 +74,90 @@ function togglePwd() {
   inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
-document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') handleSubmit(); });
+// Enter key triggers login
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('password').focus();
+});
 
-async function handleSubmit() {
+async function doLogin() {
   const email = document.getElementById('email').value.trim().toLowerCase();
   const pwd = document.getElementById('password').value;
   const msgArea = document.getElementById('msgArea');
   msgArea.innerHTML = '';
   
   if (!email || !pwd) {
-    msgArea.innerHTML = '<div class="msg error">Remplissez tous les champs.</div>';
+    msgArea.innerHTML = '<div class="msg error">Remplissez email et mot de passe.</div>';
     return;
   }
   
-  document.getElementById('formArea').style.display = 'none';
-  document.getElementById('loading').style.display = 'block';
+  // Show spinner
+  document.getElementById('form').style.display = 'none';
+  document.getElementById('spinner').style.display = 'block';
   
   try {
-    // Step 1: Try to sign in
+    // 1. Try signIn
     let result = await supabase.signIn(email, pwd);
     
-    // Step 2: If login fails, check if profile exists (teacher-created student without auth)
+    // 2. If fails, check if profile exists (teacher-created, no auth yet)
     if (!result.access_token) {
-      // Check if email exists in cq_students (using anon key — SELECT is public)
       const checkRes = await fetch(SUPABASE_URL + '/rest/v1/cq_students?email=eq.' + encodeURIComponent(email) + '&select=id', {
         headers: { 'apikey': SUPABASE_ANON_KEY }
       });
       const profiles = await checkRes.json();
       
       if (Array.isArray(profiles) && profiles.length > 0) {
-        // Profile exists — try auto-signup then login
-        await fetch(SUPABASE_URL + '/auth/v1/signup', {
-          method: 'POST',
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password: pwd })
-        });
-        // Wait a moment then retry login
+        // Profile exists but no auth — create auth via RPC then retry
+        await supabase.rpc('create_student_account', { student_email: email, student_password: pwd });
         await new Promise(r => setTimeout(r, 500));
         result = await supabase.signIn(email, pwd);
       }
     }
     
-    // Step 3: If still no token, show error
+    // 3. If still no token, error
     if (!result.access_token) {
-      msgArea.innerHTML = '<div class="msg error">' + (result.error_description || result.msg || 'Email ou mot de passe incorrect.') + '</div>';
-      showForm();
+      showError(result.error_description || result.msg || 'Email ou mot de passe incorrect.');
       return;
     }
     
-    // Step 4: Login successful — load student profile
+    // 4. Load student profile
     const profileRes = await fetch(SUPABASE_URL + '/rest/v1/cq_students?email=eq.' + encodeURIComponent(email) + '&select=*', {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + result.access_token }
+      headers: { 'apikey': SUPABASE_ANON_KEY }
     });
-    const studentProfiles = await profileRes.json();
+    const studentList = await profileRes.json();
     
-    if (Array.isArray(studentProfiles) && studentProfiles.length > 0) {
-      const profile = studentProfiles[0];
-      
-      // Link auth_id if needed
-      if (!profile.auth_id && result.user) {
-        await fetch(SUPABASE_URL + '/rest/v1/cq_students?id=eq.' + profile.id, {
-          method: 'PATCH',
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + result.access_token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ auth_id: result.user.id })
-        });
-      }
-      
-      localStorage.setItem('cq_student', JSON.stringify(profile));
-      window.location.href = profile.role === 'teacher' ? 'teacher.html' : 'home.html';
-    } else {
-      msgArea.innerHTML = '<div class="msg error">Profil non trouvé. Contactez votre enseignant(e).</div>';
-      showForm();
+    if (!Array.isArray(studentList) || studentList.length === 0) {
+      showError('Profil non trouvé. Contactez votre enseignant(e).');
+      return;
     }
-  } catch catch (e) {
-    msgArea.innerHTML = `<div class="msg error">Erreur : ${e.message}</div>`;
-    showForm();
+    
+    const profile = studentList[0];
+    
+    // Link auth_id if missing
+    if (!profile.auth_id && result.user) {
+      await fetch(SUPABASE_URL + '/rest/v1/cq_students?id=eq.' + profile.id, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + result.access_token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auth_id: result.user.id })
+      });
+      profile.auth_id = result.user.id;
+    }
+    
+    // Save and redirect
+    localStorage.setItem('cq_student', JSON.stringify(profile));
+    window.location.href = profile.role === 'teacher' ? 'teacher.html' : 'home.html';
+    
+  } catch(e) {
+    showError('Erreur de connexion : ' + e.message);
   }
 }
 
-function showForm() {
-  document.getElementById('formArea').style.display = 'block';
-  document.getElementById('loading').style.display = 'none';
+function showError(msg) {
+  document.getElementById('form').style.display = 'block';
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('msgArea').innerHTML = '<div class="msg error">' + msg + '</div>';
 }
 </script>
 </body>
