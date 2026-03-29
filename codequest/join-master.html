@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Join Master</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:950px;margin:0 auto;padding:1.5rem}
+.progress-bar{height:6px;background:var(--surface);border-radius:3px;margin-bottom:1rem}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s}
+.exercise-info{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.exercise-info h2{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.exercise-info p{font-size:.8rem;color:var(--muted)}
+.tables-area{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.table-card .header{background:var(--surface);padding:.5rem .8rem;font-weight:700;font-size:.8rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+.table-card table{width:100%;border-collapse:collapse;font-size:.75rem}
+.table-card th{background:rgba(59,130,246,.1);color:var(--lo2);padding:.3rem .5rem;text-align:left;font-size:.68rem;font-weight:700}
+.table-card td{padding:.3rem .5rem;border-bottom:1px solid rgba(255,255,255,.03);font-family:monospace;font-size:.72rem;transition:all .3s}
+.table-card td.highlight{background:rgba(50,224,196,.12);color:var(--accent2);font-weight:700}
+.table-card td.miss{background:rgba(239,68,68,.08);color:var(--error);opacity:.5}
+.join-btns{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.join-btn{padding:.5rem 1.2rem;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+.join-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.join-btn.selected{border-color:var(--accent2);background:rgba(50,224,196,.1);color:var(--accent2)}
+.join-btn.correct{border-color:var(--lo1);background:rgba(16,185,129,.1);color:var(--lo1)}
+.join-btn.wrong{border-color:var(--error);background:rgba(239,68,68,.1);color:var(--error)}
+.venn{display:flex;justify-content:center;margin:1rem 0}
+.venn svg{max-width:300px}
+.result-area{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:1rem;display:none}
+.result-area .header{background:var(--surface);padding:.5rem .8rem;font-weight:700;font-size:.8rem;border-bottom:1px solid var(--border)}
+.result-area table{width:100%;border-collapse:collapse;font-size:.75rem}
+.result-area th{background:rgba(50,224,196,.1);color:var(--accent2);padding:.3rem .5rem;font-size:.68rem}
+.result-area td{padding:.3rem .5rem;border-bottom:1px solid rgba(255,255,255,.03);font-family:monospace;font-size:.72rem}
+.feedback{text-align:center;font-size:.9rem;font-weight:700;margin:1rem 0;min-height:2rem}
+.score-bar{display:flex;justify-content:center;gap:1rem;margin-bottom:1rem;font-size:.85rem}
+.score-bar .score{font-weight:800;color:var(--accent2)}
+.btn-next{display:block;margin:1rem auto;padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(50,224,196,.2)}
+@media(max-width:600px){.tables-area{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Join Master</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+  <div class="score-bar">
+    <span>Exercice <strong id="exNum">1</strong>/<span id="exTotal">6</span></span>
+    <span>Score : <span class="score" id="score">0</span></span>
+  </div>
+  <div class="exercise-info" id="exInfo"><h2>Chargement...</h2></div>
+  <div class="tables-area" id="tablesArea"></div>
+  <div class="join-btns" id="joinBtns"></div>
+  <div class="venn" id="venn"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="result-area" id="resultArea"></div>
+  <button class="btn-next" id="btnNext" style="display:none" onclick="nextExercise()">Exercice suivant →</button>
+</div>
+
+<script>
+const EXERCISES = [
+  {
+    title: "INNER JOIN — Quels articles ont une famille ?",
+    desc: "Reliez les articles à leurs familles. Seuls les articles AVEC une famille correspondante apparaissent.",
+    answer: "INNER JOIN",
+    tableA: { name: "article", key: "NOFAM", cols: ["NOART","DESART","NOFAM"], rows: [
+      [1,"VTT Montagnard",46],[2,"VTT Élégante",47],[27,"VTC Escarpés",57],[140,"Casque Pro",null]
+    ]},
+    tableB: { name: "famille", key: "NOFAM", cols: ["NOFAM","LIBFAM"], rows: [
+      [46,"VTT"],[47,"VTT"],[57,"VTC"],[71,"Accessoires"]
+    ]},
+  },
+  {
+    title: "LEFT JOIN — Tous les clients, même sans commande",
+    desc: "Affichez TOUS les clients. Ceux sans commande auront NULL dans les colonnes de commande.",
+    answer: "LEFT JOIN",
+    tableA: { name: "client", key: "NOCLI", cols: ["NOCLI","RSCLI"], rows: [
+      [100,"VELOCIP 33"],[101,"VELOCIP COLMAR"],[200,"BICYCLE 06"],[502,"VELO PLUS"]
+    ]},
+    tableB: { name: "commande", key: "NOCLI", cols: ["NOCDE","NOCLI","DATCDE"], rows: [
+      [1001,100,"2024-01-15"],[1002,100,"2024-03-10"],[1003,200,"2024-02-20"]
+    ]},
+  },
+  {
+    title: "INNER JOIN — Ventes avec nom du modèle",
+    desc: "Chaque vente doit afficher le nom du modèle. Les ventes sans modèle valide sont exclues.",
+    answer: "INNER JOIN",
+    tableA: { name: "vente", key: "id_modele", cols: ["id_vente","id_modele","prix_paye"], rows: [
+      [1,1,169.90],[2,5,119.90],[3,4,199.90],[4,99,89.90]
+    ]},
+    tableB: { name: "modele", key: "id_modele", cols: ["id_modele","nom_modele"], rows: [
+      [1,"Air Max 90"],[4,"Ultraboost"],[5,"Samba OG"]
+    ]},
+  },
+  {
+    title: "LEFT JOIN — Produits jamais commandés",
+    desc: "Trouvez les produits qui n'ont JAMAIS été commandés. Utilisez LEFT JOIN + IS NULL.",
+    answer: "LEFT JOIN",
+    tableA: { name: "produit", key: "id_produit", cols: ["id_produit","nom_produit"], rows: [
+      [1,"Pain levain"],[4,"Croissant"],[7,"Tarte citron"],[14,"Tablette noir"]
+    ]},
+    tableB: { name: "commande", key: "id_produit", cols: ["id_cde","id_produit","qte"], rows: [
+      [1,1,2],[2,4,6],[3,4,10]
+    ]},
+  },
+  {
+    title: "INNER JOIN — Polices avec type d'assurance",
+    desc: "Associez chaque police à son type d'assurance.",
+    answer: "INNER JOIN",
+    tableA: { name: "police", key: "id_type", cols: ["numero","id_type","prime"], rows: [
+      ["POL-001",1,720],["POL-002",3,380],["POL-003",5,2400]
+    ]},
+    tableB: { name: "type_assurance", key: "id_type", cols: ["id_type","libelle","domaine"], rows: [
+      [1,"RC Auto","Auto"],[3,"Ménage RC","Habitation"],[5,"Compl. santé","Santé"],[8,"Voyage","Voyage"]
+    ]},
+  },
+  {
+    title: "LEFT JOIN — Bateaux sans réservation",
+    desc: "Affichez TOUS les bateaux, y compris ceux qui n'ont jamais été réservés.",
+    answer: "LEFT JOIN",
+    tableA: { name: "bateau", key: "id_bateau", cols: ["id_bateau","nom_bateau"], rows: [
+      [1,"Soleil"],[5,"Jet Bleu"],[11,"Mistral"],[12,"SUP Alpha"]
+    ]},
+    tableB: { name: "reservation", key: "id_bateau", cols: ["id_resa","id_bateau","montant"], rows: [
+      [1,5,120],[2,1,45],[3,5,250]
+    ]},
+  },
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function renderExercise() {
+  const ex = EXERCISES[current];
+  document.getElementById('exNum').textContent = current + 1;
+  document.getElementById('exTotal').textContent = EXERCISES.length;
+  document.getElementById('pbar').style.width = (current / EXERCISES.length * 100) + '%';
+  document.getElementById('exInfo').innerHTML = `<h2>${ex.title}</h2><p>${ex.desc}</p>`;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'none';
+  answered = false;
+  
+  // Render tables
+  const area = document.getElementById('tablesArea');
+  area.innerHTML = renderTable(ex.tableA, 'A') + renderTable(ex.tableB, 'B');
+  
+  // Render join buttons
+  const btns = document.getElementById('joinBtns');
+  btns.innerHTML = ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN'].map(j =>
+    `<button class="join-btn" onclick="checkAnswer('${j}',this)">${j}</button>`
+  ).join('');
+  
+  // Venn diagram
+  renderVenn('none');
+}
+
+function renderTable(t, side) {
+  let html = `<div class="table-card" id="table${side}"><div class="header"><span>${t.name}</span><span style="font-size:.65rem;color:var(--muted)">Clé: ${t.key}</span></div><table><thead><tr>`;
+  for (const col of t.cols) html += `<th>${col}</th>`;
+  html += '</tr></thead><tbody>';
+  for (const row of t.rows) {
+    html += '<tr>';
+    for (let i = 0; i < row.length; i++) {
+      const v = row[i];
+      html += `<td data-key="${t.key === t.cols[i] ? v : ''}">${v === null ? '<em style="color:var(--muted)">NULL</em>' : v}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function checkAnswer(join, btn) {
+  if (answered) return;
+  answered = true;
+  const ex = EXERCISES[current];
+  const correct = join === ex.answer;
+  
+  // Highlight buttons
+  document.querySelectorAll('.join-btn').forEach(b => {
+    if (b.textContent === ex.answer) b.classList.add('correct');
+    if (b === btn && !correct) b.classList.add('wrong');
+    b.style.pointerEvents = 'none';
+  });
+  
+  if (correct) {
+    score += 10;
+    document.getElementById('score').textContent = score;
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--lo1)">✅ Correct ! +10 points</span>';
+  } else {
+    document.getElementById('feedback').innerHTML = `<span style="color:var(--error)">❌ La bonne réponse était : ${ex.answer}</span>`;
+  }
+  
+  // Animate table highlights
+  highlightJoin(ex, ex.answer);
+  renderVenn(ex.answer);
+  showResult(ex, ex.answer);
+  
+  document.getElementById('btnNext').style.display = 'block';
+}
+
+function highlightJoin(ex, joinType) {
+  const keyA = ex.tableA.key;
+  const keyB = ex.tableB.key;
+  const keyIdxA = ex.tableA.cols.indexOf(keyA);
+  const keyIdxB = ex.tableB.cols.indexOf(keyB);
+  
+  const keysA = new Set(ex.tableA.rows.map(r => r[keyIdxA]).filter(v => v !== null));
+  const keysB = new Set(ex.tableB.rows.map(r => r[keyIdxB]).filter(v => v !== null));
+  const matched = new Set([...keysA].filter(k => keysB.has(k)));
+  
+  // Highlight rows in table A
+  const rowsA = document.querySelectorAll('#tableA tbody tr');
+  ex.tableA.rows.forEach((row, i) => {
+    const key = row[keyIdxA];
+    const isMatch = key !== null && matched.has(key);
+    const cells = rowsA[i]?.querySelectorAll('td') || [];
+    cells.forEach(c => {
+      if (joinType === 'INNER JOIN') {
+        c.classList.toggle('highlight', isMatch);
+        c.classList.toggle('miss', !isMatch);
+      } else {
+        c.classList.add('highlight');
+      }
+    });
+  });
+  
+  // Highlight rows in table B
+  const rowsB = document.querySelectorAll('#tableB tbody tr');
+  ex.tableB.rows.forEach((row, i) => {
+    const key = row[keyIdxB];
+    const isMatch = key !== null && matched.has(key);
+    const cells = rowsB[i]?.querySelectorAll('td') || [];
+    cells.forEach(c => {
+      if (joinType === 'RIGHT JOIN' || joinType === 'FULL JOIN') {
+        c.classList.add('highlight');
+      } else {
+        c.classList.toggle('highlight', isMatch);
+        c.classList.toggle('miss', !isMatch);
+      }
+    });
+  });
+}
+
+function renderVenn(type) {
+  const svg = document.getElementById('venn');
+  const fillA = type === 'LEFT JOIN' || type === 'FULL JOIN' ? 'rgba(59,130,246,.3)' : 'rgba(59,130,246,.08)';
+  const fillB = type === 'RIGHT JOIN' || type === 'FULL JOIN' ? 'rgba(245,158,11,.3)' : 'rgba(245,158,11,.08)';
+  const fillI = type !== 'none' ? 'rgba(50,224,196,.35)' : 'rgba(50,224,196,.08)';
+  
+  svg.innerHTML = `<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="110" cy="90" r="70" fill="${fillA}" stroke="#3b82f6" stroke-width="2"/>
+    <circle cx="190" cy="90" r="70" fill="${fillB}" stroke="#f59e0b" stroke-width="2"/>
+    <path d="M150,30 A70,70 0 0,0 150,150 A70,70 0 0,0 150,30" fill="${fillI}" stroke="none"/>
+    <text x="75" y="90" font-size="11" fill="#3b82f6" text-anchor="middle" font-weight="700">Table A</text>
+    <text x="225" y="90" font-size="11" fill="#f59e0b" text-anchor="middle" font-weight="700">Table B</text>
+    ${type !== 'none' ? `<text x="150" y="170" font-size="12" fill="#32E0C4" text-anchor="middle" font-weight="800">${type}</text>` : ''}
+  </svg>`;
+}
+
+function showResult(ex, joinType) {
+  const keyIdxA = ex.tableA.cols.indexOf(ex.tableA.key);
+  const keyIdxB = ex.tableB.cols.indexOf(ex.tableB.key);
+  const resultRows = [];
+  
+  for (const rowA of ex.tableA.rows) {
+    const keyA = rowA[keyIdxA];
+    const matchesB = ex.tableB.rows.filter(r => r[keyIdxB] === keyA && keyA !== null);
+    
+    if (matchesB.length > 0) {
+      for (const rowB of matchesB) {
+        resultRows.push([...rowA, ...rowB.filter((_, i) => i !== keyIdxB)]);
+      }
+    } else if (joinType === 'LEFT JOIN' || joinType === 'FULL JOIN') {
+      const nullsB = ex.tableB.cols.filter((_, i) => i !== keyIdxB).map(() => null);
+      resultRows.push([...rowA, ...nullsB]);
+    }
+  }
+  
+  if (joinType === 'RIGHT JOIN' || joinType === 'FULL JOIN') {
+    for (const rowB of ex.tableB.rows) {
+      const keyB = rowB[keyIdxB];
+      const hasMatch = ex.tableA.rows.some(r => r[keyIdxA] === keyB && keyB !== null);
+      if (!hasMatch) {
+        const nullsA = ex.tableA.cols.map(() => null);
+        resultRows.push([...nullsA, ...rowB.filter((_, i) => i !== keyIdxB)]);
+      }
+    }
+  }
+  
+  const allCols = [...ex.tableA.cols, ...ex.tableB.cols.filter((_, i) => i !== keyIdxB)];
+  
+  const area = document.getElementById('resultArea');
+  let html = `<div class="header">Résultat du ${joinType} — ${resultRows.length} ligne(s)</div><table><thead><tr>`;
+  for (const col of allCols) html += `<th>${col}</th>`;
+  html += '</tr></thead><tbody>';
+  for (const row of resultRows) {
+    html += '<tr>';
+    for (const val of row) {
+      html += `<td>${val === null ? '<em style="color:var(--muted)">NULL</em>' : val}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  area.innerHTML = html;
+  area.style.display = 'block';
+}
+
+function nextExercise() {
+  current++;
+  if (current >= EXERCISES.length) {
+    document.querySelector('.main').innerHTML = `
+      <div style="text-align:center;padding:3rem">
+        <div style="font-size:3rem;margin-bottom:1rem">${score >= 50 ? '🏆' : score >= 30 ? '⭐' : '💪'}</div>
+        <h2 style="font-size:1.5rem;margin-bottom:.5rem">Join Master terminé !</h2>
+        <div style="font-size:2rem;font-weight:800;color:var(--accent2);margin-bottom:1rem">${score} / ${EXERCISES.length * 10}</div>
+        <p style="color:var(--muted);margin-bottom:1.5rem">${score >= 50 ? 'Excellent ! Tu maîtrises les jointures !' : score >= 30 ? 'Bien joué ! Continue à pratiquer.' : 'N\'abandonne pas ! Les jointures deviendront claires avec la pratique.'}</p>
+        <a href="home.html" style="padding:.6rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;border-radius:8px;font-weight:700">← Accueil</a>
+      </div>`;
+    return;
+  }
+  renderExercise();
+}
+
+renderExercise();
+</script>
+</body>
+</html>

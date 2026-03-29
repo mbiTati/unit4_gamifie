@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Constraint Catcher</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:800px;margin:0 auto;padding:1.5rem}
+.stats-bar{display:flex;gap:1rem;justify-content:center;margin-bottom:1rem}
+.stats-bar .s{text-align:center}
+.stats-bar .s .n{font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stats-bar .s .l{font-size:.6rem;color:var(--muted);text-transform:uppercase}
+.progress-bar{height:6px;background:var(--surface);border-radius:3px;margin-bottom:1.5rem}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s}
+.schema-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.schema-card h2{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.schema-card .desc{font-size:.78rem;color:var(--muted);margin-bottom:.8rem}
+.schema-code{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;white-space:pre-wrap}
+.schema-code .keyword{color:#c084fc;font-weight:700}
+.schema-code .type{color:#60a5fa}
+.schema-code .table-name{color:var(--accent2);font-weight:700}
+.schema-code .error-line{background:rgba(239,68,68,.1);border-left:3px solid var(--error);padding-left:.5rem;margin-left:-.5rem}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem}
+.option{padding:.6rem .8rem;background:var(--surface);border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;transition:all .2s;text-align:center}
+.option:hover{border-color:var(--accent2);color:var(--accent2)}
+.option.selected{border-color:var(--accent2);background:rgba(50,224,196,.08)}
+.option.correct{border-color:var(--lo1);background:rgba(16,185,129,.1);color:var(--lo1)}
+.option.wrong{border-color:var(--error);background:rgba(239,68,68,.08);color:var(--error)}
+.btn-validate{display:block;margin:1rem auto 0;padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
+.btn-validate:disabled{opacity:.4;cursor:not-allowed}
+.feedback{text-align:center;font-size:.85rem;font-weight:700;margin:1rem 0;min-height:2rem}
+.explanation{background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:.6rem .8rem;font-size:.78rem;margin-top:.5rem;display:none;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Constraint Catcher</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="stats-bar">
+    <div class="s"><div class="n" id="sRound">1/8</div><div class="l">Round</div></div>
+    <div class="s"><div class="n" id="sScore" style="color:var(--accent2)">0</div><div class="l">Score</div></div>
+    <div class="s"><div class="n" id="sAccuracy" style="color:var(--gold)">-</div><div class="l">Précision</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+  <div id="gameArea"></div>
+</div>
+
+<script>
+const SCHEMAS = [
+  {
+    title: "Table CLIENT — Quelle contrainte manque ?",
+    desc: "Cette table stocke les clients. L'email doit être unique et le nom est obligatoire.",
+    sql: `CREATE TABLE client (
+  id_client INT,
+  nom VARCHAR(80),
+  email VARCHAR(150),
+  ville VARCHAR(80)
+);`,
+    options: ["PRIMARY KEY sur id_client", "UNIQUE sur email", "NOT NULL sur nom", "Toutes les trois"],
+    answer: 3,
+    explanation: "id_client doit être PRIMARY KEY (identifiant unique). email doit être UNIQUE (pas de doublon). nom doit être NOT NULL (obligatoire)."
+  },
+  {
+    title: "Table VENTE — FK manquante",
+    desc: "Cette table référence un client et un modèle. Quelle contrainte relationnelle manque ?",
+    sql: `CREATE TABLE vente (
+  id_vente INT PRIMARY KEY,
+  id_client INT,
+  id_modele INT,
+  prix_paye DECIMAL(8,2),
+  date_vente DATE
+);`,
+    options: ["FOREIGN KEY sur id_client", "FOREIGN KEY sur id_modele", "Les deux FK manquent", "CHECK sur prix_paye > 0"],
+    answer: 2,
+    explanation: "id_client et id_modele sont des clés étrangères qui doivent référencer les tables client et modele. Un CHECK sur prix_paye serait bien aussi, mais les FK sont prioritaires pour l'intégrité référentielle."
+  },
+  {
+    title: "Table PRODUIT — Type incorrect",
+    desc: "Le prix est stocké en VARCHAR. Est-ce un problème ?",
+    sql: `CREATE TABLE produit (
+  id_produit INT PRIMARY KEY,
+  nom VARCHAR(100) NOT NULL,
+  prix VARCHAR(20),
+  stock INT DEFAULT 0
+);`,
+    options: ["Non, VARCHAR est acceptable", "Oui, utiliser DECIMAL(8,2)", "Utiliser INT pour le prix", "Utiliser FLOAT"],
+    answer: 1,
+    explanation: "Le prix doit être en DECIMAL(8,2) pour les calculs précis (pas VARCHAR qui empêche les calculs, ni FLOAT qui a des erreurs d'arrondi)."
+  },
+  {
+    title: "Table COMMANDE — CHECK manquant",
+    desc: "La quantité peut être négative et le statut n'est pas contrôlé.",
+    sql: `CREATE TABLE commande (
+  id_cde INT PRIMARY KEY,
+  id_client INT REFERENCES client(id_client),
+  quantite INT NOT NULL,
+  statut VARCHAR(20),
+  date_cde DATE NOT NULL
+);`,
+    options: ["CHECK (quantite > 0)", "CHECK sur statut (valeurs autorisées)", "DEFAULT sur statut", "Toutes ces contraintes"],
+    answer: 3,
+    explanation: "quantite doit être > 0 (CHECK), statut devrait avoir des valeurs contrôlées (CHECK IN), et un DEFAULT 'En attente' sur statut évite les NULL."
+  },
+  {
+    title: "Table NOTE — Clé primaire composite",
+    desc: "Un élève ne peut avoir qu'une note par matière. Comment garantir l'unicité ?",
+    sql: `CREATE TABLE note (
+  id_eleve INT REFERENCES eleve(id_eleve),
+  id_matiere INT REFERENCES matiere(id_matiere),
+  valeur DECIMAL(4,2) NOT NULL,
+  date_eval DATE
+);`,
+    options: ["PRIMARY KEY (id_eleve)", "PRIMARY KEY (id_matiere)", "PRIMARY KEY (id_eleve, id_matiere)", "UNIQUE (id_eleve, id_matiere)"],
+    answer: 2,
+    explanation: "La clé primaire composite (id_eleve, id_matiere) garantit qu'un élève n'a qu'une seule note par matière. C'est la table d'association typique d'une relation N:M."
+  },
+  {
+    title: "Table RESERVATION — Contrainte CHECK date",
+    desc: "La date de fin doit être après la date de début.",
+    sql: `CREATE TABLE reservation (
+  id_resa INT PRIMARY KEY,
+  id_client INT REFERENCES client(id_client),
+  date_debut DATE NOT NULL,
+  date_fin DATE NOT NULL,
+  montant DECIMAL(8,2) NOT NULL
+);`,
+    options: ["CHECK (date_fin > date_debut)", "CHECK (montant > 0)", "Les deux CHECK", "Aucun CHECK nécessaire"],
+    answer: 2,
+    explanation: "Les deux CHECK sont nécessaires : date_fin > date_debut (logique métier) et montant > 0 (cohérence des données)."
+  },
+  {
+    title: "Table STOCK — Auto-incrément",
+    desc: "L'identifiant doit s'incrémenter automatiquement.",
+    sql: `CREATE TABLE stock (
+  id_stock INT PRIMARY KEY,
+  id_produit INT REFERENCES produit(id_produit),
+  quantite INT DEFAULT 0,
+  seuil_alerte INT DEFAULT 5
+);`,
+    options: ["Ajouter AUTO_INCREMENT à id_stock", "Ajouter SERIAL au lieu de INT", "Utiliser UUID", "C'est correct tel quel"],
+    answer: 0,
+    explanation: "AUTO_INCREMENT (MySQL) ou SERIAL (PostgreSQL) permet de générer automatiquement les identifiants. Sans cela, il faut les gérer manuellement, source d'erreurs."
+  },
+  {
+    title: "Table EMPLOYE — Cascade delete",
+    desc: "Si un département est supprimé, que faire des employés ?",
+    sql: `CREATE TABLE employe (
+  id_emp INT PRIMARY KEY AUTO_INCREMENT,
+  nom VARCHAR(80) NOT NULL,
+  id_dept INT REFERENCES departement(id_dept),
+  salaire DECIMAL(10,2) CHECK (salaire > 0)
+);`,
+    options: ["ON DELETE CASCADE", "ON DELETE SET NULL", "ON DELETE RESTRICT", "Dépend du contexte métier"],
+    answer: 3,
+    explanation: "CASCADE supprime les employés avec le département. SET NULL garde les employés sans département. RESTRICT empêche la suppression. Le bon choix dépend de la logique métier !"
+  },
+];
+
+let current = 0;
+let score = 0;
+let attempts = 0;
+let correct = 0;
+
+function renderSchema() {
+  if (current >= SCHEMAS.length) { endGame(); return; }
+  const s = SCHEMAS[current];
+  
+  document.getElementById('sRound').textContent = `${current+1}/${SCHEMAS.length}`;
+  document.getElementById('pbar').style.width = (current / SCHEMAS.length * 100) + '%';
+  
+  // Syntax highlight the SQL
+  let highlighted = s.sql
+    .replace(/\b(CREATE TABLE|PRIMARY KEY|FOREIGN KEY|REFERENCES|NOT NULL|DEFAULT|CHECK|UNIQUE|AUTO_INCREMENT|SERIAL|INT|VARCHAR|DECIMAL|DATE|TEXT|BOOLEAN)\b/gi, '<span class="keyword">$1</span>')
+    .replace(/\b(INT|VARCHAR\(\d+\)|DECIMAL\(\d+,\d+\)|DATE|TEXT|BOOLEAN)\b/gi, '<span class="type">$1</span>');
+  
+  document.getElementById('gameArea').innerHTML = `
+    <div class="schema-card">
+      <h2>${s.title}</h2>
+      <div class="desc">${s.desc}</div>
+      <div class="schema-code">${highlighted}</div>
+      <div class="options" id="options">
+        ${s.options.map((o, i) => `<div class="option" data-idx="${i}" onclick="selectOption(${i})">${o}</div>`).join('')}
+      </div>
+      <button class="btn-validate" id="btnValidate" onclick="validateAnswer()" disabled>Valider</button>
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation">${s.explanation}</div>
+    </div>
+  `;
+}
+
+let selectedOption = -1;
+
+function selectOption(idx) {
+  if (document.querySelector('.option.correct')) return; // Already answered
+  selectedOption = idx;
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  document.querySelector(`[data-idx="${idx}"]`).classList.add('selected');
+  document.getElementById('btnValidate').disabled = false;
+}
+
+function validateAnswer() {
+  const s = SCHEMAS[current];
+  attempts++;
+  
+  const isCorrect = selectedOption === s.answer;
+  
+  document.querySelectorAll('.option').forEach(o => {
+    o.style.pointerEvents = 'none';
+    if (parseInt(o.dataset.idx) === s.answer) o.classList.add('correct');
+    if (parseInt(o.dataset.idx) === selectedOption && !isCorrect) o.classList.add('wrong');
+  });
+  
+  document.getElementById('btnValidate').disabled = true;
+  document.getElementById('explanation').style.display = 'block';
+  
+  if (isCorrect) {
+    correct++;
+    score += 10;
+    document.getElementById('sScore').textContent = score;
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--lo1)">✅ Correct ! +10 pts</span>';
+  } else {
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--error)">❌ Mauvaise réponse</span>';
+  }
+  
+  document.getElementById('sAccuracy').textContent = Math.round(correct / attempts * 100) + '%';
+  
+  // Next button
+  setTimeout(() => {
+    document.getElementById('feedback').innerHTML += `<br><button class="btn-validate" onclick="current++;renderSchema()" style="margin-top:.5rem">Suivant →</button>`;
+  }, 800);
+}
+
+function endGame() {
+  const pct = Math.round(correct / SCHEMAS.length * 100);
+  document.getElementById('gameArea').innerHTML = `
+    <div style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">${pct >= 80 ? '🏆' : pct >= 50 ? '⭐' : '💪'}</div>
+      <h2 style="font-size:1.5rem;margin-bottom:.5rem">Constraint Catcher terminé !</h2>
+      <div style="font-size:2.5rem;font-weight:900;color:var(--accent2)">${score} pts</div>
+      <div style="font-size:1rem;color:var(--muted);margin:.5rem 0">${correct}/${SCHEMAS.length} correct (${pct}%)</div>
+      <p style="color:var(--muted);margin-bottom:1.5rem">${pct >= 80 ? 'Tu maîtrises les contraintes SQL !' : 'Continue à pratiquer les contraintes !'}</p>
+      <div style="display:flex;gap:1rem;justify-content:center">
+        <a href="constraint-catcher.html" style="padding:.5rem 1rem;background:var(--surface);color:var(--accent2);text-decoration:none;border:1px solid var(--border);border-radius:8px;font-weight:700">Recommencer</a>
+        <a href="home.html" style="padding:.5rem 1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;border-radius:8px;font-weight:700">← Accueil</a>
+      </div>
+    </div>`;
+}
+
+renderSchema();
+</script>
+</body>
+</html>

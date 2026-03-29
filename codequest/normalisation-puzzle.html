@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Normalisation Puzzle</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.level-badge{display:inline-block;padding:.3rem .8rem;border-radius:6px;font-weight:800;font-size:.85rem;margin-bottom:1rem}
+.level-1nf{background:rgba(59,130,246,.1);color:#3b82f6;border:1px solid rgba(59,130,246,.2)}
+.level-2nf{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.level-3nf{background:rgba(139,92,246,.1);color:#8b5cf6;border:1px solid rgba(139,92,246,.2)}
+.scenario{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.scenario h2{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.scenario p{font-size:.8rem;color:var(--muted)}
+.source-table{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.source-table .header{background:var(--surface);padding:.4rem .8rem;font-weight:700;font-size:.78rem;color:var(--error);border-bottom:1px solid var(--border)}
+.source-table table{width:100%;border-collapse:collapse;font-size:.72rem}
+.source-table th{background:rgba(239,68,68,.08);color:var(--error);padding:.3rem .5rem;font-size:.65rem}
+.source-table td{padding:.3rem .5rem;border-bottom:1px solid rgba(255,255,255,.03);font-family:monospace}
+.target-area{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;margin-bottom:1rem}
+.target-table{background:var(--card);border:2px dashed var(--border);border-radius:10px;min-height:120px;padding:.8rem;transition:all .2s}
+.target-table.over{border-color:var(--accent2);background:rgba(50,224,196,.03)}
+.target-table .title{font-size:.78rem;font-weight:700;color:var(--accent2);margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center}
+.target-table .title input{background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-size:.72rem;font-family:inherit;width:120px}
+.target-table .cols{display:flex;flex-wrap:wrap;gap:.3rem;min-height:30px}
+.col-chip{padding:.25rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-size:.7rem;font-family:monospace;cursor:grab;user-select:none;transition:all .2s}
+.col-chip:active{cursor:grabbing;transform:scale(1.05)}
+.col-chip.pk{border-color:var(--gold);color:var(--gold);font-weight:700}
+.col-chip.fk{border-color:var(--accent2);color:var(--accent2)}
+.source-cols{display:flex;flex-wrap:wrap;gap:.3rem;padding:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:1rem;min-height:40px}
+.source-cols .label{font-size:.7rem;color:var(--muted);width:100%;margin-bottom:.3rem}
+.controls{display:flex;gap:.5rem;justify-content:center;margin:1rem 0;flex-wrap:wrap}
+.btn{padding:.4rem 1rem;border:none;border-radius:6px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.btn-check{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-add{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.2)}
+.btn-reset{background:rgba(239,68,68,.08);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+.feedback{text-align:center;font-size:.9rem;font-weight:700;margin:1rem 0;min-height:2rem;line-height:1.5}
+.hint-box{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:.6rem 1rem;font-size:.78rem;color:var(--gold);margin-bottom:1rem;display:none}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Normalisation Puzzle</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div id="gameArea"></div>
+</div>
+
+<script>
+const LEVELS = [
+  {
+    nf: "1NF",
+    title: "1NF — Éliminer les groupes répétitifs",
+    desc: "Cette table viole la 1NF car une cellule contient plusieurs valeurs. Séparez en tables atomiques.",
+    hint: "Un téléphone par ligne ! Créez une table séparée pour les téléphones avec une FK vers client.",
+    sourceTable: { name: "client_brut", cols: ["NOCLI","NOM","TELEPHONES"], rows: [
+      [1,"Dupont","079 111 22 33, 022 333 44 55"],
+      [2,"Rochat","078 222 33 44"],
+      [3,"Keller","076 444 55 66, 079 555 66 77, 022 666 77 88"],
+    ]},
+    allCols: ["NOCLI","NOM","NO_TEL","TELEPHONE"],
+    expected: [
+      { name: "CLIENT", cols: ["NOCLI","NOM"], pk: ["NOCLI"] },
+      { name: "TELEPHONE_CLIENT", cols: ["NO_TEL","NOCLI","TELEPHONE"], pk: ["NO_TEL"], fk: ["NOCLI"] },
+    ]
+  },
+  {
+    nf: "2NF",
+    title: "2NF — Éliminer les dépendances partielles",
+    desc: "La clé primaire est composite (NOCDE, NOART). Certaines colonnes dépendent seulement d'une partie de la clé.",
+    hint: "DATCDE et NOCLI dépendent uniquement de NOCDE (pas de NOART). Séparez la commande de la ligne de commande.",
+    sourceTable: { name: "commande_ligne", cols: ["NOCDE","NOART","DATCDE","NOCLI","QTECDE","DESART"], rows: [
+      [1001,1,"2024-01-15",100,3,"VTT Montagnard"],
+      [1001,27,"2024-01-15",100,1,"VTC Escarpés"],
+      [1002,1,"2024-03-10",101,2,"VTT Montagnard"],
+    ]},
+    allCols: ["NOCDE","NOART","DATCDE","NOCLI","QTECDE","DESART"],
+    expected: [
+      { name: "COMMANDE", cols: ["NOCDE","DATCDE","NOCLI"], pk: ["NOCDE"] },
+      { name: "LIGNE_CDE", cols: ["NOCDE","NOART","QTECDE"], pk: ["NOCDE","NOART"], fk: ["NOCDE","NOART"] },
+      { name: "ARTICLE", cols: ["NOART","DESART"], pk: ["NOART"] },
+    ]
+  },
+  {
+    nf: "3NF",
+    title: "3NF — Éliminer les dépendances transitives",
+    desc: "LIBFAM dépend de NOFAM, pas directement de NOART. C'est une dépendance transitive : NOART → NOFAM → LIBFAM.",
+    hint: "Créez une table FAMILLE séparée. NOFAM reste dans ARTICLE comme FK, mais LIBFAM part dans FAMILLE.",
+    sourceTable: { name: "article_complet", cols: ["NOART","DESART","NOFAM","LIBFAM","CAART"], rows: [
+      [1,"VTT Montagnard",46,"VTT",1937250],
+      [27,"VTC Escarpés",57,"VTC",685430],
+      [101,"Vélo ville-vite",57,"VTC",475000],
+      [140,"Casque Pro",71,"Accessoires",125000],
+    ]},
+    allCols: ["NOART","DESART","NOFAM","LIBFAM","CAART"],
+    expected: [
+      { name: "ARTICLE", cols: ["NOART","DESART","NOFAM","CAART"], pk: ["NOART"], fk: ["NOFAM"] },
+      { name: "FAMILLE", cols: ["NOFAM","LIBFAM"], pk: ["NOFAM"] },
+    ]
+  },
+];
+
+let currentLevel = 0;
+let tables = [];
+let tableCount = 0;
+
+function startLevel() {
+  const level = LEVELS[currentLevel];
+  const game = document.getElementById('gameArea');
+  
+  const badgeClass = `level-${level.nf.toLowerCase()}`;
+  
+  game.innerHTML = `
+    <div class="level-badge ${badgeClass}">${level.nf}</div>
+    <div class="scenario"><h2>${level.title}</h2><p>${level.desc}</p></div>
+    
+    <div class="source-table">
+      <div class="header">Table NON normalisée — ${level.sourceTable.name}</div>
+      <table><thead><tr>${level.sourceTable.cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${level.sourceTable.rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    </div>
+    
+    <div class="hint-box" id="hintBox">${level.hint}</div>
+    
+    <div style="font-size:.8rem;font-weight:600;margin-bottom:.5rem;color:var(--accent2)">Colonnes disponibles (glissez vers les tables) :</div>
+    <div class="source-cols" id="sourceCols">
+      ${level.allCols.map(c => `<div class="col-chip" draggable="true" data-col="${c}" ondragstart="drag(event)">${c}</div>`).join('')}
+    </div>
+    
+    <div class="target-area" id="targetArea"></div>
+    
+    <div class="controls">
+      <button class="btn btn-add" onclick="addTable()">+ Ajouter une table</button>
+      <button class="btn btn-check" onclick="checkNorm()">Vérifier</button>
+      <button class="btn btn-reset" onclick="startLevel()">Recommencer</button>
+      <button class="btn" style="background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.2)" onclick="document.getElementById('hintBox').style.display='block'">Indice</button>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+  `;
+  
+  tables = [];
+  tableCount = 0;
+  
+  // Add initial tables matching expected count
+  for (let i = 0; i < level.expected.length; i++) addTable();
+}
+
+function addTable() {
+  tableCount++;
+  const id = 'table_' + tableCount;
+  tables.push(id);
+  
+  const area = document.getElementById('targetArea');
+  const div = document.createElement('div');
+  div.className = 'target-table';
+  div.id = id;
+  div.ondragover = e => { e.preventDefault(); div.classList.add('over'); };
+  div.ondragleave = () => div.classList.remove('over');
+  div.ondrop = e => { e.preventDefault(); div.classList.remove('over'); drop(e, id); };
+  
+  div.innerHTML = `
+    <div class="title">
+      <input placeholder="Nom de la table..." value="TABLE_${tableCount}">
+      <span style="font-size:.6rem;color:var(--muted)">${id}</span>
+    </div>
+    <div class="cols" id="${id}_cols"></div>
+  `;
+  area.appendChild(div);
+}
+
+function drag(e) {
+  e.dataTransfer.setData('text/plain', e.target.dataset.col);
+  e.target.style.opacity = '.4';
+  setTimeout(() => e.target.style.opacity = '1', 100);
+}
+
+function drop(e, tableId) {
+  const col = e.dataTransfer.getData('text/plain');
+  const target = document.getElementById(tableId + '_cols');
+  
+  // Check if already in this table
+  if ([...target.children].some(c => c.dataset.col === col)) return;
+  
+  const chip = document.createElement('div');
+  chip.className = 'col-chip';
+  chip.dataset.col = col;
+  chip.textContent = col;
+  chip.draggable = true;
+  chip.ondragstart = drag;
+  chip.onclick = () => {
+    // Toggle PK/FK
+    if (chip.classList.contains('pk')) {
+      chip.classList.remove('pk');
+      chip.classList.add('fk');
+    } else if (chip.classList.contains('fk')) {
+      chip.classList.remove('fk');
+    } else {
+      chip.classList.add('pk');
+    }
+  };
+  chip.title = 'Cliquez pour marquer PK (doré) → FK (teal) → normal';
+  target.appendChild(chip);
+}
+
+function checkNorm() {
+  const level = LEVELS[currentLevel];
+  const feedback = document.getElementById('feedback');
+  
+  // Get user's tables
+  const userTables = [];
+  for (const id of tables) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const name = el.querySelector('input').value.trim().toUpperCase();
+    const cols = [...el.querySelectorAll('.col-chip')].map(c => c.dataset.col);
+    if (cols.length === 0) continue;
+    userTables.push({ name, cols: cols.sort() });
+  }
+  
+  // Compare with expected
+  const expectedSorted = level.expected.map(t => ({ name: t.name, cols: [...t.cols].sort() }));
+  
+  let correct = true;
+  
+  // Check same number of tables
+  if (userTables.length !== expectedSorted.length) {
+    feedback.innerHTML = `<span style="color:var(--error)">❌ ${userTables.length} table(s) — attendu : ${expectedSorted.length} table(s)</span>`;
+    return;
+  }
+  
+  // Check each expected table has a match
+  const matched = [];
+  for (const exp of expectedSorted) {
+    const match = userTables.find(u => 
+      u.cols.length === exp.cols.length && 
+      u.cols.every((c, i) => c === exp.cols[i]) &&
+      !matched.includes(userTables.indexOf(u))
+    );
+    if (match) {
+      matched.push(userTables.indexOf(match));
+    } else {
+      correct = false;
+    }
+  }
+  
+  if (correct) {
+    feedback.innerHTML = `<span style="color:var(--lo1)">✅ Bravo ! La ${level.nf} est respectée !</span>`;
+    
+    // Show next button or end
+    setTimeout(() => {
+      if (currentLevel < LEVELS.length - 1) {
+        feedback.innerHTML += `<br><button class="btn btn-check" onclick="currentLevel++;startLevel()" style="margin-top:.5rem">Niveau suivant → ${LEVELS[currentLevel+1].nf}</button>`;
+      } else {
+        feedback.innerHTML += `<br><span style="color:var(--accent2);font-size:1.2rem">🏆 Normalisation complète !</span><br><a href="home.html" style="color:var(--accent2)">← Retour</a>`;
+      }
+    }, 500);
+  } else {
+    // Give a helpful error
+    const missingCols = [];
+    for (const exp of expectedSorted) {
+      const match = userTables.find(u => u.cols.length === exp.cols.length && u.cols.every((c, i) => c === exp.cols[i]));
+      if (!match) missingCols.push(`${exp.name} (${exp.cols.join(', ')})`);
+    }
+    feedback.innerHTML = `<span style="color:var(--error)">❌ Pas encore ! Tables attendues :<br>${missingCols.map(m => `<span style="font-size:.75rem;font-family:monospace">${m}</span>`).join('<br>')}</span>`;
+  }
+}
+
+startLevel();
+</script>
+</body>
+</html>

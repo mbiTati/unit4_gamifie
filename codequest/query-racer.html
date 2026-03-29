@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Query Racer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:800px;margin:0 auto;padding:1.5rem}
+.race-track{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem;position:relative;overflow:hidden}
+.track-bg{height:30px;background:var(--surface);border-radius:15px;position:relative;margin-bottom:.5rem}
+.car{position:absolute;top:2px;left:0;height:26px;width:50px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:13px;transition:left .5s ease;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff}
+.finish-line{position:absolute;right:5px;top:0;height:100%;width:3px;background:repeating-linear-gradient(to bottom,#fff 0 4px,#000 4px 8px)}
+.timer{font-size:2rem;font-weight:900;font-family:'JetBrains Mono',monospace;text-align:center;color:var(--accent2);margin:.5rem 0}
+.timer.warning{color:var(--gold)}
+.timer.danger{color:var(--error);animation:blink .5s infinite}
+@keyframes blink{50%{opacity:.5}}
+.challenge{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.challenge h3{font-size:.9rem;font-weight:700;margin-bottom:.5rem}
+.challenge .expected{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.5rem;margin-top:.5rem;overflow-x:auto}
+.challenge .expected table{width:100%;border-collapse:collapse;font-size:.72rem}
+.challenge .expected th{background:rgba(59,130,246,.1);color:#3b82f6;padding:.25rem .4rem;font-size:.65rem;text-align:left}
+.challenge .expected td{padding:.2rem .4rem;border-bottom:1px solid rgba(255,255,255,.03);font-family:monospace;font-size:.7rem}
+textarea{width:100%;min-height:70px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.6rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;resize:vertical}
+textarea:focus{outline:none;border-color:var(--accent2)}
+.btn-bar{display:flex;gap:.5rem;margin-top:.5rem}
+.btn{padding:.5rem 1rem;border:none;border-radius:6px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.btn-go{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-go:disabled{opacity:.4;cursor:not-allowed}
+.btn-skip{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.2)}
+.result-msg{margin-top:.5rem;font-size:.82rem;font-weight:600;min-height:1.5rem}
+.stats{display:flex;gap:1rem;justify-content:center;margin-bottom:1rem}
+.stats .s{text-align:center}
+.stats .s .n{font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stats .s .l{font-size:.6rem;color:var(--muted);text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Query Racer</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="stats">
+    <div class="s"><div class="n" id="sRound">1/8</div><div class="l">Round</div></div>
+    <div class="s"><div class="n" id="sScore" style="color:var(--accent2)">0</div><div class="l">Score</div></div>
+    <div class="s"><div class="n" id="sStreak" style="color:var(--gold)">0</div><div class="l">Série</div></div>
+  </div>
+  
+  <div class="race-track">
+    <div class="track-bg">
+      <div class="car" id="car">▶</div>
+      <div class="finish-line"></div>
+    </div>
+  </div>
+  
+  <div class="timer" id="timer">30</div>
+  
+  <div class="challenge" id="challenge"></div>
+  
+  <textarea id="sqlInput" placeholder="-- Écrivez votre requête SQL ici..." spellcheck="false"></textarea>
+  <div class="btn-bar">
+    <button class="btn btn-go" id="btnGo" onclick="submitQuery()">▶ Valider</button>
+    <button class="btn btn-skip" onclick="skip()">Passer →</button>
+  </div>
+  <div class="result-msg" id="resultMsg"></div>
+</div>
+
+<script>
+const CHALLENGES = [
+  { q: "Affichez le nom et le prix des modèles de la catégorie 'Running'.", expected_cols: ["nom_modele","prix_vente"], expected_rows: 5, hint: "SELECT nom_modele, prix_vente FROM modele WHERE categorie = 'Running'", time: 30 },
+  { q: "Combien de clients sont inscrits ?", expected_cols: ["nb"], expected_rows: 1, hint: "SELECT COUNT(*) AS nb FROM client", time: 20 },
+  { q: "Affichez les marques triées par pays d'origine.", expected_cols: ["nom_marque","pays_origine"], expected_rows: 6, hint: "SELECT nom_marque, pays_origine FROM marque ORDER BY pays_origine", time: 25 },
+  { q: "Affichez les ventes par mode de paiement avec le nombre et le total.", expected_cols: ["mode_paiement","nb","total"], expected_rows: 4, hint: "SELECT mode_paiement, COUNT(*) AS nb, SUM(prix_paye) AS total FROM vente GROUP BY mode_paiement", time: 35 },
+  { q: "Quels modèles coûtent entre 100 et 150 CHF ? Affichez nom et prix.", expected_cols: ["nom_modele","prix_vente"], expected_rows: 5, hint: "SELECT nom_modele, prix_vente FROM modele WHERE prix_vente BETWEEN 100 AND 150", time: 30 },
+  { q: "Affichez chaque modèle avec sa marque (JOIN).", expected_cols: ["nom_modele","nom_marque"], expected_rows: 15, hint: "SELECT nom_modele, nom_marque FROM modele JOIN marque ON modele.id_marque = marque.id_marque", time: 35 },
+  { q: "CA total par marque, trié du plus gros au plus petit.", expected_cols: ["nom_marque","ca"], expected_rows: 5, hint: "SELECT nom_marque, SUM(prix_paye) AS ca FROM vente JOIN modele ON ... JOIN marque ON ... GROUP BY ... ORDER BY ca DESC", time: 45 },
+  { q: "Quels clients ont une carte de fidélité ? Affichez nom, prénom, ville.", expected_cols: ["nom","prenom","ville"], expected_rows: 6, hint: "SELECT nom, prenom, ville FROM client WHERE carte_fidelite = 1", time: 25 },
+];
+
+// Load FootLocker DB
+const DB_SQL = `CREATE TABLE marque(id_marque INTEGER PRIMARY KEY,nom_marque TEXT,pays_origine TEXT,site_web TEXT);CREATE TABLE modele(id_modele INTEGER PRIMARY KEY,id_marque INT,nom_modele TEXT,categorie TEXT,prix_vente REAL,date_sortie TEXT,couleur TEXT);CREATE TABLE client(id_client INTEGER PRIMARY KEY,nom TEXT,prenom TEXT,email TEXT,telephone TEXT,ville TEXT,code_postal TEXT,date_inscription TEXT,carte_fidelite INT);CREATE TABLE vente(id_vente INTEGER PRIMARY KEY,id_client INT,id_modele INT,pointure REAL,quantite INT,prix_paye REAL,date_vente TEXT,mode_paiement TEXT);INSERT INTO marque VALUES(1,'Nike','USA','https://www.nike.com'),(2,'Adidas','Allemagne','https://www.adidas.ch'),(3,'New Balance','USA','https://www.newbalance.ch'),(4,'Puma','Allemagne','https://www.puma.com'),(5,'Asics','Japon','https://www.asics.ch'),(6,'Vans','USA','https://www.vans.ch');INSERT INTO modele VALUES(1,1,'Air Max 90','Lifestyle',169.90,'2024-01-15','Blanc/Rouge'),(2,1,'Air Force 1','Lifestyle',129.90,'2023-06-01','Blanc'),(3,1,'Pegasus 41','Running',149.90,'2024-03-10','Noir/Vert'),(4,2,'Ultraboost 24','Running',199.90,'2024-02-20','Core Black'),(5,2,'Samba OG','Lifestyle',119.90,'2023-09-15','Blanc/Noir'),(6,2,'Predator Edge','Football',249.90,'2024-01-05','Rouge/Noir'),(7,3,'574 Classic','Lifestyle',109.90,'2023-04-01','Gris'),(8,3,'FuelCell RC Elite','Running',229.90,'2024-05-10','Bleu/Orange'),(9,4,'Suede Classic','Lifestyle',89.90,'2023-01-20','Bordeaux'),(10,4,'Deviate Nitro 3','Running',179.90,'2024-06-15','Jaune/Noir'),(11,5,'Gel-Kayano 31','Running',189.90,'2024-04-01','Bleu Marine'),(12,5,'Gel-1130','Lifestyle',139.90,'2024-02-01','Blanc/Argent'),(13,6,'Old Skool','Skateboard',89.90,'2023-03-15','Noir/Blanc'),(14,6,'Sk8-Hi','Skateboard',99.90,'2023-05-01','Noir'),(15,1,'Dunk Low','Lifestyle',119.90,'2024-07-01','Panda');INSERT INTO client VALUES(1,'Mueller','Thomas','thomas@gmail.com','079 123','Geneve','1201','2023-01-15',1),(2,'Rochat','Julie','julie@bluewin.ch','078 234','Lausanne','1003','2023-03-20',1),(3,'Da Silva','Marco','marco@hotmail.com','076 345','Geneve','1205','2023-06-10',0),(4,'Schneider','Anna','anna@gmail.com','079 456','Nyon','1260','2023-09-01',1),(5,'Bonvin','Lucas','lucas@proton.me','078 567','Sion','1950','2024-01-10',0),(6,'Keller','Sophie','sophie@sunrise.ch','076 678','Fribourg','1700','2024-02-15',1),(7,'Ndiaye','Amadou','amadou@gmail.com','079 789','Geneve','1202','2024-03-05',0),(8,'Favre','Emilie','emilie@bluewin.ch','078 890','Montreux','1820','2024-04-20',1),(9,'Rossi','Luca','luca@gmail.com','076 901','Lausanne','1006','2024-05-12',0),(10,'Dupont','Marie','marie@hotmail.com','079 012','Vevey','1800','2024-06-01',1),(11,'Mbeki','David','david@proton.me','078 123','Geneve','1209','2024-07-15',0),(12,'Blanc','Nathalie',NULL,'076 234','Morges','1110','2024-08-01',0);INSERT INTO vente VALUES(1,1,1,43,1,169.90,'2024-01-20','Carte'),(2,1,5,43,1,119.90,'2024-03-15','Twint'),(3,2,2,39,1,129.90,'2024-02-10','Carte'),(4,2,7,39,1,109.90,'2024-06-20','Cash'),(5,3,4,42,1,199.90,'2024-03-05','Carte'),(6,3,15,42,1,119.90,'2024-07-10','Twint'),(7,4,11,40,1,189.90,'2024-04-12','En ligne'),(8,4,12,40,1,139.90,'2024-04-12','En ligne'),(9,5,13,42,1,89.90,'2024-05-01','Cash'),(10,6,3,41,1,149.90,'2024-05-15','Carte'),(11,6,9,41,1,89.90,'2024-05-15','Carte'),(12,7,15,43,1,119.90,'2024-06-01','Twint'),(13,7,1,44,1,169.90,'2024-06-01','Twint'),(14,8,2,38,1,129.90,'2024-06-20','Carte'),(15,8,5,39,1,119.90,'2024-08-05','Twint'),(16,9,10,42,1,179.90,'2024-07-01','Carte'),(17,10,7,40,1,109.90,'2024-07-15','En ligne'),(18,10,14,41,1,99.90,'2024-07-15','En ligne'),(19,11,6,43,1,249.90,'2024-08-01','Carte'),(20,NULL,13,40,1,89.90,'2024-08-10','Cash'),(21,NULL,9,42,1,89.90,'2024-08-15','Cash'),(22,1,15,43,1,119.90,'2024-08-20','Twint'),(23,2,11,39,1,189.90,'2024-09-01','Carte'),(24,6,15,41,1,119.90,'2024-09-10','Carte'),(25,3,1,42,1,169.90,'2024-09-15','Twint');`;
+
+let db = null;
+let current = 0;
+let score = 0;
+let streak = 0;
+let timer = null;
+let timeLeft = 0;
+
+async function init() {
+  const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` });
+  db = new SQL.Database();
+  DB_SQL.split(';').filter(s => s.trim()).forEach(s => { try { db.run(s + ';'); } catch(e) {} });
+  
+  // Generate expected results for each challenge
+  for (const ch of CHALLENGES) {
+    try {
+      const r = db.exec(ch.hint);
+      if (r.length > 0) {
+        ch.expected_data = r[0];
+      }
+    } catch(e) {}
+  }
+  
+  loadChallenge();
+}
+
+function loadChallenge() {
+  if (current >= CHALLENGES.length) { endGame(); return; }
+  const ch = CHALLENGES[current];
+  
+  document.getElementById('sRound').textContent = `${current+1}/${CHALLENGES.length}`;
+  document.getElementById('car').style.left = (current / CHALLENGES.length * 85) + '%';
+  document.getElementById('sqlInput').value = '';
+  document.getElementById('resultMsg').textContent = '';
+  document.getElementById('btnGo').disabled = false;
+  
+  // Show challenge with expected result preview
+  let preview = '';
+  if (ch.expected_data) {
+    preview = '<div class="expected"><table><tr>' + 
+      ch.expected_data.columns.map(c => `<th>${c}</th>`).join('') + '</tr>' +
+      ch.expected_data.values.slice(0,3).map(r => '<tr>' + r.map(v => `<td>${v === null ? 'NULL' : v}</td>`).join('') + '</tr>').join('') +
+      (ch.expected_data.values.length > 3 ? `<tr><td colspan="${ch.expected_data.columns.length}" style="color:var(--muted);font-size:.6rem">... ${ch.expected_data.values.length - 3} de plus</td></tr>` : '') +
+      '</table></div>';
+  }
+  
+  document.getElementById('challenge').innerHTML = `
+    <h3>Round ${current+1} — ${ch.q}</h3>
+    <p style="font-size:.75rem;color:var(--muted)">Résultat attendu : ${ch.expected_rows} ligne(s), ${ch.expected_cols.length} colonne(s)</p>
+    ${preview}
+  `;
+  
+  // Start timer
+  timeLeft = ch.time;
+  updateTimer();
+  if (timer) clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      document.getElementById('resultMsg').innerHTML = '<span style="color:var(--error)">⏱ Temps écoulé !</span>';
+      document.getElementById('btnGo').disabled = true;
+      streak = 0;
+      document.getElementById('sStreak').textContent = streak;
+      setTimeout(() => { current++; loadChallenge(); }, 2000);
+    }
+  }, 1000);
+  
+  document.getElementById('sqlInput').focus();
+}
+
+function updateTimer() {
+  const el = document.getElementById('timer');
+  el.textContent = timeLeft;
+  el.className = 'timer' + (timeLeft <= 5 ? ' danger' : timeLeft <= 10 ? ' warning' : '');
+}
+
+function submitQuery() {
+  const sql = document.getElementById('sqlInput').value.trim();
+  if (!sql || !db) return;
+  
+  const ch = CHALLENGES[current];
+  const msg = document.getElementById('resultMsg');
+  
+  try {
+    const r = db.exec(sql);
+    if (!r || r.length === 0) {
+      msg.innerHTML = '<span style="color:var(--error)">❌ Aucun résultat.</span>';
+      return;
+    }
+    
+    const gotRows = r[0].values.length;
+    const gotCols = r[0].columns.length;
+    
+    if (gotRows === ch.expected_rows && gotCols === ch.expected_cols.length) {
+      clearInterval(timer);
+      const bonus = Math.max(0, timeLeft) * 2;
+      const points = 10 + bonus;
+      score += points;
+      streak++;
+      
+      document.getElementById('sScore').textContent = score;
+      document.getElementById('sStreak').textContent = streak;
+      msg.innerHTML = `<span style="color:var(--lo1)">✅ Correct ! +${points} pts (dont ${bonus} bonus temps)</span>`;
+      document.getElementById('btnGo').disabled = true;
+      
+      setTimeout(() => { current++; loadChallenge(); }, 1500);
+    } else {
+      msg.innerHTML = `<span style="color:var(--error)">❌ ${gotRows} lignes/${gotCols} cols (attendu: ${ch.expected_rows}/${ch.expected_cols.length})</span>`;
+      streak = 0;
+      document.getElementById('sStreak').textContent = streak;
+    }
+  } catch(e) {
+    msg.innerHTML = `<span style="color:var(--error)">❌ ${e.message}</span>`;
+  }
+}
+
+function skip() {
+  clearInterval(timer);
+  streak = 0;
+  document.getElementById('sStreak').textContent = streak;
+  current++;
+  loadChallenge();
+}
+
+function endGame() {
+  clearInterval(timer);
+  document.getElementById('car').style.left = '85%';
+  document.querySelector('.main').innerHTML = `
+    <div style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">${score >= 100 ? '🏆' : score >= 60 ? '⭐' : '💪'}</div>
+      <h2 style="font-size:1.5rem;margin-bottom:.5rem">Course terminée !</h2>
+      <div style="font-size:2.5rem;font-weight:900;color:var(--accent2);margin-bottom:.5rem">${score} pts</div>
+      <p style="color:var(--muted);margin-bottom:1.5rem">${score >= 100 ? 'Incroyable ! Tu es un Query Racer !' : score >= 60 ? 'Bien joué !' : 'Continue à pratiquer !'}</p>
+      <div style="display:flex;gap:1rem;justify-content:center">
+        <a href="query-racer.html" style="padding:.5rem 1rem;background:var(--surface);color:var(--accent2);text-decoration:none;border:1px solid var(--border);border-radius:8px;font-weight:700">Recommencer</a>
+        <a href="home.html" style="padding:.5rem 1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;border-radius:8px;font-weight:700">← Accueil</a>
+      </div>
+    </div>`;
+}
+
+document.getElementById('sqlInput').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitQuery(); }
+});
+
+init();
+</script>
+</body>
+</html>
