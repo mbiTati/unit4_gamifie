@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Documents & Mémos</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo3:#f59e0b;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.section{margin-bottom:2rem}
+.section h2{font-size:1rem;font-weight:700;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.section h2 .badge{font-size:.6rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;color:#fff}
+.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem}
+.doc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;display:flex;align-items:center;gap:.6rem;text-decoration:none;color:inherit;transition:all .2s}
+.doc:hover{border-color:var(--accent2);transform:translateY(-1px)}
+.doc .icon{font-size:.6rem;font-weight:800;padding:.2rem .4rem;border-radius:4px;min-width:40px;text-align:center}
+.doc .info h4{font-size:.78rem;font-weight:600;margin-bottom:.1rem}
+.doc .info p{font-size:.65rem;color:var(--muted)}
+.search{margin-bottom:1.5rem}
+.search input{width:100%;padding:.6rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem}
+.search input:focus{outline:none;border-color:var(--accent2)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Documents & Mémos</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="search"><input type="text" id="searchInput" placeholder="Rechercher un document..." oninput="filterDocs()"></div>
+  
+  <div class="section" id="memos">
+    <h2><span class="badge" style="background:var(--accent)">MÉMO</span> Fiches mémo (PDF)</h2>
+    <div class="docs-grid" id="memosGrid"></div>
+  </div>
+  
+  <div class="section" id="pptx">
+    <h2><span class="badge" style="background:var(--lo2)">PPTX</span> Présentations</h2>
+    <div class="docs-grid" id="pptxGrid"></div>
+  </div>
+  
+  <div class="section" id="exercices">
+    <h2><span class="badge" style="background:var(--lo1)">EXOS</span> Exercices</h2>
+    <div class="docs-grid" id="exosGrid"></div>
+  </div>
+  
+  <div class="section" id="corriges">
+    <h2><span class="badge" style="background:var(--lo4)">CORR</span> Corrigés</h2>
+    <div class="docs-grid" id="corGrid"></div>
+  </div>
+  
+  <div class="section" id="pro">
+    <h2><span class="badge" style="background:var(--gold)">PRO</span> Cas professionnels</h2>
+    <div class="docs-grid" id="proGrid"></div>
+  </div>
+</div>
+
+<script>
+const MODULES = [
+  {n:1, t:'Dictionnaire des Données', lo:'LO1'},
+  {n:2, t:'Matrice des DF', lo:'LO1'},
+  {n:3, t:'Graphe des Dépendances', lo:'LO1'},
+  {n:4, t:'MCD Merise + CIF', lo:'LO1'},
+  {n:5, t:'MLD Modèle Logique', lo:'LO1'},
+  {n:6, t:'Normalisation 3NF', lo:'LO1'},
+  {n:7, t:'MPD Modèle Physique', lo:'LO1'},
+  {n:8, t:'Interface & Validation', lo:'LO1'},
+  {n:9, t:'CREATE TABLE & Types', lo:'LO2'},
+  {n:10, t:'Contraintes & Clés', lo:'LO2'},
+  {n:11, t:'INSERT & Données', lo:'LO2'},
+  {n:12, t:'SELECT & WHERE', lo:'LO2'},
+  {n:13, t:'Agrégation & GROUP BY', lo:'LO2'},
+  {n:14, t:'JOIN & Relations', lo:'LO2'},
+  {n:15, t:'Vues & Sous-requêtes', lo:'LO2'},
+  {n:16, t:'Sécurité & Maintenance', lo:'LO2'},
+  {n:17, t:'Plan de Tests', lo:'LO3'},
+  {n:18, t:'Exécution des Tests', lo:'LO3'},
+  {n:19, t:'DFD & Flowcharts', lo:'LO4'},
+  {n:20, t:'Guide Utilisateur', lo:'LO4'},
+];
+
+const PRO_CASES = [
+  {name:'footlocker', title:'FootLocker'},
+  {name:'bateaux_gva', title:'Bateaux GVA'},
+  {name:'boulangerie', title:'Boulangerie Luxe'},
+  {name:'assurance', title:'Assurance'},
+];
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function renderDoc(href, icon, iconColor, title, sub) {
+  return `<a class="doc" href="${href}" target="_blank" data-search="${title.toLowerCase()} ${sub.toLowerCase()}">
+    <div class="icon" style="background:${iconColor}15;color:${iconColor};border:1px solid ${iconColor}30">${icon}</div>
+    <div class="info"><h4>${title}</h4><p>${sub}</p></div>
+  </a>`;
+}
+
+// Memos
+document.getElementById('memosGrid').innerHTML = MODULES.map(m =>
+  renderDoc(`../docs/fiches_memo/Memo_Module${pad(m.n)}.pdf`, 'PDF', '#ef4444', `Mémo ${pad(m.n)}`, m.t)
+).join('');
+
+// PPTX
+document.getElementById('pptxGrid').innerHTML = MODULES.map(m =>
+  renderDoc(`../pptx/Module${pad(m.n)}_${m.t.replace(/[^a-zA-Z0-9]/g,'_')}.pptx`, 'PPTX', '#3b82f6', `Module ${pad(m.n)}`, m.t)
+).join('');
+
+// Exercices
+document.getElementById('exosGrid').innerHTML = MODULES.map(m =>
+  renderDoc(`../docs/exercices/Module${pad(m.n)}_Exercices.docx`, 'DOCX', '#10b981', `Exercices ${pad(m.n)}`, m.t)
+).join('');
+
+// Corrigés
+document.getElementById('corGrid').innerHTML = MODULES.map(m =>
+  renderDoc(`../docs/corriges/Module${pad(m.n)}_Corrige.docx`, 'CORR', '#8b5cf6', `Corrigé ${pad(m.n)}`, m.t)
+).join('');
+
+// Pro cases
+document.getElementById('proGrid').innerHTML = PRO_CASES.map(p =>
+  renderDoc(`../docs/exercices/CasPro_${p.name}_Exercice.docx`, 'PRO', '#f59e0b', p.title, 'Exercice') +
+  renderDoc(`../docs/corriges/CasPro_${p.name}_Corrige.docx`, 'CORR', '#8b5cf6', p.title, 'Corrigé')
+).join('');
+
+function filterDocs() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.doc').forEach(d => {
+    d.style.display = d.dataset.search.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -60,6 +60,8 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   <h1>CodeQuest — Unit 4</h1>
   <div class="topbar-right">
     <a href="../index.html">Hub Cours</a>
+    <a href="teacher.html" id="teacherLink" style="display:none">Dashboard Prof</a>
+    <a href="cours.html">Documents</a>
     <a href="scores.html">Classement</a>
     <a href="settings.html">Paramètres</a>
     <button onclick="doLogout()">Déconnexion</button>
@@ -109,6 +111,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
       <h3>Constraint Catcher</h3>
       <p>Identifiez les contraintes manquantes dans les schémas</p>
     </a>
+    <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">ERD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p></a>
     <a class="action" href="sql-editor.html">
       <div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div>
       <h3>SQL Editor Live</h3>
@@ -159,7 +162,8 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
       <h3>Cas Professionnels</h3>
       <p>4 cas réels : FootLocker, Bateaux, Boulangerie, Assurance</p>
     </a>
-  <a class="action" href="sql-editor.html">
+  <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">ERD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p></a>
+    <a class="action" href="sql-editor.html">
       <div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div>
       <h3>SQL Editor — Supabase Live</h3>
       <p>Requêtes en temps réel sur les vraies BDD GESCOM + SwissSound</p>
@@ -295,6 +299,11 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 
+// Show teacher link if teacher
+if (student && student.role === 'teacher') {
+  const tl = document.getElementById('teacherLink');
+  if (tl) tl.style.display = '';
+}
 loadDashboard();
 </script>
 </body>

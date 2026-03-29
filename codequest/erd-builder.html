@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — ERD Builder</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:950px;margin:0 auto;padding:1.5rem}
+.challenge-info{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.challenge-info h2{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.challenge-info p{font-size:.8rem;color:var(--muted)}
+.toolbar{display:flex;gap:.4rem;margin-bottom:.8rem;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem}
+.tool-btn{padding:.3rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:5px;font-size:.75rem;font-weight:600;cursor:pointer;color:var(--text);font-family:inherit;transition:all .2s}
+.tool-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.tool-btn.active{border-color:var(--accent2);background:rgba(50,224,196,.1);color:var(--accent2)}
+.canvas-area{background:var(--card);border:1px solid var(--border);border-radius:12px;min-height:400px;position:relative;overflow:hidden;cursor:crosshair}
+.canvas-area svg{width:100%;height:400px}
+.entity{cursor:move;user-select:none}
+.entity rect{transition:stroke .2s}
+.entity:hover rect{stroke:var(--accent2);stroke-width:2}
+.relation{cursor:move;user-select:none}
+.controls{display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap}
+.btn{padding:.4rem 1rem;border:none;border-radius:6px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer}
+.btn-check{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-clear{background:rgba(239,68,68,.08);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+.btn-hint{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.2)}
+.feedback{margin-top:.8rem;font-size:.82rem;line-height:1.6}
+.progress{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem}
+.progress .dot{width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800}
+.progress .dot.done{border-color:var(--lo1);color:var(--lo1)}.progress .dot.current{border-color:var(--accent2);color:var(--accent2)}
+.entities-list{margin-top:.5rem}
+.ent-row{display:flex;gap:.3rem;align-items:center;margin-bottom:.3rem;padding:.3rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-size:.78rem}
+.ent-row input{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-family:monospace;font-size:.75rem;width:100px}
+.ent-row .del{background:none;border:none;color:var(--error);cursor:pointer;opacity:.5;font-size:.7rem}.ent-row .del:hover{opacity:1}
+.rel-row{display:flex;gap:.3rem;align-items:center;margin-bottom:.3rem;padding:.3rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-size:.75rem}
+.rel-row select{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .3rem;font-size:.72rem}
+.rel-row input{background:var(--card);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .3rem;font-size:.72rem;width:80px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>ERD Builder</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="progress" id="progressDots"></div>
+  <div id="gameArea"></div>
+</div>
+
+<script>
+const CHALLENGES = [
+  {
+    title: "Défi 1 : Bibliothèque simple",
+    desc: "Créez le MCD d'une bibliothèque avec : LIVRE, AUTEUR, EMPRUNTEUR. Un livre a un auteur. Un emprunteur emprunte plusieurs livres.",
+    expectedEntities: ["LIVRE", "AUTEUR", "EMPRUNTEUR"],
+    expectedRelations: [
+      { from: "AUTEUR", to: "LIVRE", card: "1,N" },
+      { from: "EMPRUNTEUR", to: "LIVRE", card: "0,N" },
+    ],
+    hint: "3 entités + 2 relations. AUTEUR (1,N) — écrit — LIVRE. EMPRUNTEUR (0,N) — emprunte — LIVRE."
+  },
+  {
+    title: "Défi 2 : E-commerce",
+    desc: "Créez le MCD : CLIENT, PRODUIT, COMMANDE, CATEGORIE. Un client passe des commandes. Chaque commande contient des produits. Un produit a une catégorie.",
+    expectedEntities: ["CLIENT", "PRODUIT", "COMMANDE", "CATEGORIE"],
+    expectedRelations: [
+      { from: "CLIENT", to: "COMMANDE", card: "1,N" },
+      { from: "COMMANDE", to: "PRODUIT", card: "N,M" },
+      { from: "CATEGORIE", to: "PRODUIT", card: "1,N" },
+    ],
+    hint: "4 entités + 3 relations. La relation COMMANDE-PRODUIT est N:M (une commande = plusieurs produits)."
+  },
+  {
+    title: "Défi 3 : SwissSound Studios",
+    desc: "Créez le MCD du studio : ARTISTE, ALBUM, SALLE, SESSION, INGENIEUR. Un artiste a des albums. Une session se fait dans une salle avec un ingénieur.",
+    expectedEntities: ["ARTISTE", "ALBUM", "SALLE", "SESSION", "INGENIEUR"],
+    expectedRelations: [
+      { from: "ARTISTE", to: "ALBUM", card: "1,N" },
+      { from: "SALLE", to: "SESSION", card: "1,N" },
+      { from: "INGENIEUR", to: "SESSION", card: "1,N" },
+      { from: "ARTISTE", to: "SESSION", card: "N,M" },
+    ],
+    hint: "5 entités + 4 relations. SESSION est l'entité centrale qui relie ARTISTE (N:M), SALLE (1:N) et INGENIEUR (1:N)."
+  },
+];
+
+let currentChallenge = 0;
+let entities = [];
+let relations = [];
+let entCount = 0;
+let relCount = 0;
+
+function renderProgress() {
+  document.getElementById('progressDots').innerHTML = CHALLENGES.map((_, i) =>
+    `<div class="dot ${i < currentChallenge ? 'done' : i === currentChallenge ? 'current' : ''}">${i+1}</div>`
+  ).join('');
+}
+
+function renderChallenge() {
+  if (currentChallenge >= CHALLENGES.length) { endGame(); return; }
+  const ch = CHALLENGES[currentChallenge];
+  entities = [];
+  relations = [];
+  entCount = 0;
+  relCount = 0;
+  renderProgress();
+  
+  document.getElementById('gameArea').innerHTML = `
+    <div class="challenge-info">
+      <h2>${ch.title}</h2>
+      <p>${ch.desc}</p>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <div style="font-size:.82rem;font-weight:700;margin-bottom:.3rem;color:var(--accent2)">Entités</div>
+        <div class="entities-list" id="entList"></div>
+        <button class="tool-btn" onclick="addEntity()" style="width:100%;margin-top:.3rem">+ Ajouter une entité</button>
+      </div>
+      <div>
+        <div style="font-size:.82rem;font-weight:700;margin-bottom:.3rem;color:var(--gold)">Relations</div>
+        <div class="entities-list" id="relList"></div>
+        <button class="tool-btn" onclick="addRelation()" style="width:100%;margin-top:.3rem">+ Ajouter une relation</button>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="btn btn-check" onclick="checkERD()">Vérifier</button>
+      <button class="btn btn-clear" onclick="renderChallenge()">Recommencer</button>
+      <button class="btn btn-hint" onclick="document.getElementById('hintBox').style.display='block'">Indice</button>
+    </div>
+    <div id="hintBox" style="display:none;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:.6rem .8rem;font-size:.78rem;color:var(--gold);margin-top:.5rem">${ch.hint}</div>
+    <div class="feedback" id="feedback"></div>
+  `;
+}
+
+function addEntity(name = '') {
+  entCount++;
+  const id = 'ent_' + entCount;
+  entities.push(id);
+  const list = document.getElementById('entList');
+  const div = document.createElement('div');
+  div.className = 'ent-row';
+  div.id = id;
+  div.innerHTML = `<span style="color:var(--accent2);font-weight:700;min-width:20px">${entCount}</span>
+    <input type="text" value="${name}" placeholder="NOM_ENTITÉ" style="flex:1;text-transform:uppercase">
+    <button class="del" onclick="this.parentElement.remove();entities=entities.filter(e=>e!=='${id}')">✕</button>`;
+  list.appendChild(div);
+}
+
+function addRelation() {
+  relCount++;
+  const id = 'rel_' + relCount;
+  relations.push(id);
+  const list = document.getElementById('relList');
+  const div = document.createElement('div');
+  div.className = 'rel-row';
+  div.id = id;
+  div.innerHTML = `<input type="text" placeholder="Entité 1" style="width:70px;text-transform:uppercase">
+    <select><option>1,1</option><option>0,1</option><option>1,N</option><option selected>0,N</option><option>N,M</option></select>
+    <span style="color:var(--gold)">—</span>
+    <input type="text" placeholder="Entité 2" style="width:70px;text-transform:uppercase">
+    <button class="del" onclick="this.parentElement.remove();relations=relations.filter(r=>r!=='${id}')" style="background:none;border:none;color:var(--error);cursor:pointer;opacity:.5;font-size:.7rem">✕</button>`;
+  list.appendChild(div);
+}
+
+function checkERD() {
+  const ch = CHALLENGES[currentChallenge];
+  const feedback = document.getElementById('feedback');
+  
+  // Get user entities
+  const userEntities = [];
+  document.querySelectorAll('.ent-row input[type="text"]').forEach(inp => {
+    const v = inp.value.trim().toUpperCase();
+    if (v) userEntities.push(v);
+  });
+  
+  // Get user relations
+  const userRelations = [];
+  document.querySelectorAll('.rel-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const select = row.querySelector('select');
+    const from = inputs[0]?.value.trim().toUpperCase();
+    const to = inputs[1]?.value.trim().toUpperCase();
+    const card = select?.value;
+    if (from && to) userRelations.push({ from, to, card });
+  });
+  
+  let html = '<div style="font-size:.8rem;line-height:1.8">';
+  let score = 0;
+  let total = 0;
+  
+  // Check entities
+  html += '<strong>Entités :</strong><br>';
+  for (const exp of ch.expectedEntities) {
+    total++;
+    const found = userEntities.includes(exp);
+    if (found) score++;
+    html += `${found ? '✅' : '❌'} ${exp}<br>`;
+  }
+  
+  // Check relations
+  html += '<br><strong>Relations :</strong><br>';
+  for (const exp of ch.expectedRelations) {
+    total++;
+    const found = userRelations.some(r =>
+      (r.from === exp.from && r.to === exp.to) || (r.from === exp.to && r.to === exp.from)
+    );
+    if (found) score++;
+    html += `${found ? '✅' : '❌'} ${exp.from} — ${exp.to} (${exp.card})<br>`;
+  }
+  
+  html += '</div>';
+  
+  const pct = Math.round(score / total * 100);
+  if (pct >= 80) {
+    html = `<div style="color:var(--lo1);font-weight:700;margin-bottom:.3rem">✅ Bravo ! ${score}/${total} (${pct}%)</div>` + html;
+    setTimeout(() => {
+      feedback.innerHTML += `<br><button class="btn btn-check" onclick="currentChallenge++;renderChallenge()">Suivant →</button>`;
+    }, 500);
+  } else {
+    html = `<div style="color:var(--error);margin-bottom:.3rem">❌ ${score}/${total} — continuez !</div>` + html;
+  }
+  
+  feedback.innerHTML = html;
+}
+
+function endGame() {
+  document.getElementById('gameArea').innerHTML = `
+    <div style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🏆</div>
+      <h2>ERD Builder terminé !</h2>
+      <p style="color:var(--muted);margin:1rem 0">Tu sais construire un MCD !</p>
+      <a href="home.html" style="padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;text-decoration:none;border-radius:8px;font-weight:700">← Accueil</a>
+    </div>`;
+  renderProgress();
+}
+
+renderChallenge();
+</script>
+</body>
+</html>
