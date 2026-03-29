@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Classement</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:700px;margin:0 auto;padding:1.5rem}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin:2rem 0;height:200px}
+.podium-slot{text-align:center;border-radius:10px 10px 0 0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:.8rem;min-width:100px}
+.podium-slot .name{font-weight:700;font-size:.85rem;margin-bottom:.3rem}
+.podium-slot .xp{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.1rem}
+.podium-slot .rank{font-size:1.5rem;margin-bottom:.3rem}
+.p1{height:180px;background:linear-gradient(to top,rgba(245,158,11,.15),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.3)}
+.p2{height:140px;background:linear-gradient(to top,rgba(148,163,184,.1),rgba(148,163,184,.03));border:1px solid rgba(148,163,184,.2)}
+.p3{height:110px;background:linear-gradient(to top,rgba(205,127,50,.1),rgba(205,127,50,.03));border:1px solid rgba(205,127,50,.2)}
+.leaderboard{margin-top:1rem}
+.lb-row{display:flex;align-items:center;gap:1rem;padding:.6rem .8rem;border-bottom:1px solid var(--border);transition:background .2s}
+.lb-row:hover{background:rgba(50,224,196,.03)}
+.lb-row.me{background:rgba(50,224,196,.06);border-left:3px solid var(--accent2)}
+.lb-rank{width:30px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--muted);text-align:center}
+.lb-name{flex:1;font-weight:600;font-size:.85rem}
+.lb-level{font-size:.65rem;font-weight:700;padding:.1rem .4rem;border-radius:3px}
+.lb-xp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;color:var(--accent2)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Classement — Unit 4</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="podium" id="podium"></div>
+  <div class="leaderboard" id="leaderboard"><div style="text-align:center;color:var(--muted);padding:2rem">Chargement...</div></div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script>
+const currentStudent = JSON.parse(localStorage.getItem('cq_student') || 'null');
+
+async function loadLeaderboard() {
+  const students = await supabase.query('cq_students', {
+    select: '*',
+    filter: { 'role': 'eq.student', 'class_name': 'eq.BI1' }
+  });
+  
+  const allProgress = await supabase.query('cq_student_progress', {
+    select: '*',
+    filter: { 'module_id': 'gte.401' }
+  }) || [];
+  
+  // Calculate XP per student
+  const rankings = students.map(s => {
+    const sp = allProgress.filter(p => p.student_id === s.id && p.module_id >= 401 && p.module_id <= 420);
+    let xp = 0;
+    for (const p of sp) xp += (p.credits_earned || 0) + (p.game_score || 0);
+    const level = getLevel(xp);
+    return { ...s, xp, level };
+  }).sort((a, b) => b.xp - a.xp);
+  
+  // Podium
+  const podium = document.getElementById('podium');
+  const top3 = rankings.slice(0, 3);
+  const medals = ['🥇', '🥈', '🥉'];
+  const pClasses = ['p2', 'p1', 'p3'];
+  const order = [1, 0, 2]; // Display order: 2nd, 1st, 3rd
+  
+  podium.innerHTML = order.map(i => {
+    const s = top3[i];
+    if (!s) return '';
+    return `<div class="podium-slot ${pClasses[i]}">
+      <div class="rank">${medals[i]}</div>
+      <div class="name">${s.first_name}</div>
+      <div class="xp" style="color:${s.level.color}">${s.xp} XP</div>
+      <div style="font-size:.65rem;color:var(--muted)">${s.level.name}</div>
+    </div>`;
+  }).join('');
+  
+  // Full leaderboard
+  const lb = document.getElementById('leaderboard');
+  lb.innerHTML = rankings.map((s, i) => {
+    const isMe = currentStudent && s.id === currentStudent.id;
+    return `<div class="lb-row ${isMe ? 'me' : ''}">
+      <div class="lb-rank">${i + 1}</div>
+      <div class="lb-name">${s.first_name} ${s.last_name}${isMe ? ' (vous)' : ''}</div>
+      <span class="lb-level" style="background:${s.level.color}15;color:${s.level.color}">${s.level.name}</span>
+      <div class="lb-xp">${s.xp} XP</div>
+    </div>`;
+  }).join('');
+}
+
+loadLeaderboard();
+</script>
+</body>
+</html>

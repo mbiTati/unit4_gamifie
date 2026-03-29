@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Paramètres</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:500px;margin:0 auto;padding:1.5rem}
+.setting-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.setting-card h3{font-size:.9rem;font-weight:700;margin-bottom:.8rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase}
+.input-wrap{position:relative}
+.input-wrap input{width:100%;padding:.6rem .8rem;padding-right:2.2rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.85rem}
+.input-wrap input:focus{outline:none;border-color:var(--accent2)}
+.eye-btn{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem}
+.btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0}
+.toggle-row label{font-size:.85rem}
+.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:.3s}
+.toggle.on{background:var(--accent2)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.3s}
+.toggle.on::after{left:22px}
+.msg{font-size:.8rem;margin-top:.5rem;padding:.4rem .6rem;border-radius:4px;display:none}
+.msg.success{background:rgba(16,185,129,.1);color:#10b981;display:block}
+.msg.error{background:rgba(239,68,68,.1);color:var(--error);display:block}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Paramètres</h1>
+  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+</div>
+<div class="main">
+  <div class="setting-card">
+    <h3>Changer le mot de passe</h3>
+    <div class="form-group">
+      <label>Nouveau mot de passe</label>
+      <div class="input-wrap">
+        <input type="password" id="newPwd" placeholder="••••••••">
+        <button class="eye-btn" onclick="const i=document.getElementById('newPwd');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🔒'">👁</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Confirmer</label>
+      <div class="input-wrap">
+        <input type="password" id="confirmPwd" placeholder="••••••••">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="changePwd()">Mettre à jour</button>
+    <div class="msg" id="pwdMsg"></div>
+  </div>
+  
+  <div class="setting-card">
+    <h3>Préférences</h3>
+    <div class="toggle-row">
+      <label>Scores publics dans le classement</label>
+      <div class="toggle on" id="togglePublic" onclick="this.classList.toggle('on');saveSettings()"></div>
+    </div>
+  </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script>
+async function changePwd() {
+  const newPwd = document.getElementById('newPwd').value;
+  const confirm = document.getElementById('confirmPwd').value;
+  const msg = document.getElementById('pwdMsg');
+  
+  if (newPwd.length < 6) {
+    msg.className = 'msg error'; msg.textContent = 'Minimum 6 caractères.'; return;
+  }
+  if (newPwd !== confirm) {
+    msg.className = 'msg error'; msg.textContent = 'Les mots de passe ne correspondent pas.'; return;
+  }
+  
+  try {
+    const token = localStorage.getItem('cq_token');
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: newPwd })
+    });
+    if (res.ok) {
+      msg.className = 'msg success'; msg.textContent = 'Mot de passe mis à jour.';
+    } else {
+      msg.className = 'msg error'; msg.textContent = 'Erreur lors de la mise à jour.';
+    }
+  } catch (e) {
+    msg.className = 'msg error'; msg.textContent = 'Erreur réseau.';
+  }
+}
+
+function saveSettings() {
+  const isPublic = document.getElementById('togglePublic').classList.contains('on');
+  localStorage.setItem('cq_public_scores', isPublic);
+}
+</script>
+</body>
+</html>

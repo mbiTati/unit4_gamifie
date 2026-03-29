@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — Accueil</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo3:#f59e0b;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse at 20% 50%,rgba(13,115,119,.1) 0%,transparent 50%)}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.8rem;align-items:center}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;cursor:pointer;font-family:inherit}
+.topbar-right a:hover,.topbar-right button:hover{color:var(--accent2);border-color:var(--accent)}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+
+/* Level Badge */
+.level-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}
+.level-badge{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;border:3px solid;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(50,224,196,.3)}50%{box-shadow:0 0 20px 5px rgba(50,224,196,.15)}}
+.level-info{flex:1;min-width:200px}
+.level-name{font-size:1.3rem;font-weight:800;margin-bottom:.2rem}
+.level-xp{font-size:.8rem;color:var(--muted)}
+.xp-bar{height:10px;background:var(--surface);border-radius:5px;margin-top:.5rem;overflow:hidden;position:relative}
+.xp-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));position:relative;transition:width 1s ease}
+.xp-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:shimmer 2s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;margin-bottom:1.5rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
+.stat .n{font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat .l{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem}
+
+/* Modules Grid */
+.section-title{font-size:1rem;font-weight:700;margin:1.5rem 0 .8rem;display:flex;align-items:center;gap:.5rem}
+.section-title .lo-badge{font-size:.6rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;color:#fff}
+.modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem}
+.module{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden}
+.module:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
+.module .code{font-size:.6rem;font-weight:800;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase}
+.module .title{font-size:.85rem;font-weight:700;margin-top:.2rem}
+.module .progress-mini{height:4px;background:var(--surface);border-radius:2px;margin-top:.5rem;overflow:hidden}
+.module .progress-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .5s}
+.module .score{font-size:.65rem;color:var(--muted);margin-top:.3rem}
+.module.completed{border-color:var(--lo1)}
+.module.completed::after{content:'✅';position:absolute;top:.5rem;right:.5rem;font-size:.8rem}
+
+/* Quick Actions */
+.actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.8rem;margin-top:1.5rem}
+.action{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;display:block}
+.action:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.action .ic{font-size:.7rem;font-weight:800;padding:.2rem .5rem;border-radius:4px;display:inline-block;margin-bottom:.4rem}
+.action h3{font-size:.85rem;font-weight:700}
+.action p{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>CodeQuest — Unit 4</h1>
+  <div class="topbar-right">
+    <a href="../index.html">Hub Cours</a>
+    <a href="scores.html">Classement</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="doLogout()">Déconnexion</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="level-card" id="levelCard">
+    <div class="level-badge" id="levelBadge" style="border-color:var(--accent2);background:rgba(50,224,196,.08)">
+      <span id="levelIdx">0</span>
+    </div>
+    <div class="level-info">
+      <div class="level-name" id="levelName">Chargement...</div>
+      <div class="level-xp" id="levelXP"></div>
+      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+  </div>
+  
+  <div class="stats" id="statsGrid">
+    <div class="stat"><div class="n" id="statModules">-</div><div class="l">Modules complétés</div></div>
+    <div class="stat"><div class="n" id="statXP">-</div><div class="l">XP Total</div></div>
+    <div class="stat"><div class="n" id="statQuiz">-</div><div class="l">Score Quiz Moyen</div></div>
+    <div class="stat"><div class="n" id="statRank">-</div><div class="l">Classement</div></div>
+  </div>
+  
+  <div id="modulesContainer"></div>
+  
+  <div class="section-title">Accès rapide</div>
+  <div class="actions">
+    <a class="action" href="../jeux/exercices_gescom/index.html">
+      <div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">SQL 1</div>
+      <h3>Exercices SQL — Partie 1</h3>
+      <p>29 exercices SELECT, WHERE, ORDER BY</p>
+    </a>
+    <a class="action" href="../jeux/exercices_gescom_avances/index.html">
+      <div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">SQL 2</div>
+      <h3>Exercices SQL — Partie 2</h3>
+      <p>28 exercices JOIN, GROUP BY, sous-requêtes</p>
+    </a>
+    <a class="action" href="../jeux/sql_sandbox/index.html">
+      <div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">SAND</div>
+      <h3>Bac à sable SQL</h3>
+      <p>Requêtes libres sur GESCOM + SwissSound</p>
+    </a>
+    <a class="action" href="../jeux/cas_footlocker/index.html">
+      <div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">PRO</div>
+      <h3>Cas Professionnels</h3>
+      <p>4 cas réels : FootLocker, Bateaux, Boulangerie, Assurance</p>
+    </a>
+  </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script>
+const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+if (!student) {
+  // Not logged in — allow guest mode but show limited info
+  document.getElementById('levelName').textContent = 'Mode invité';
+  document.getElementById('levelXP').textContent = 'Connectez-vous pour sauvegarder votre progression';
+}
+
+const LO_CONFIG = [
+  { phase: 1, name: 'LO1 — Conception', color: 'var(--lo1)', modules: [401,402,403,404,405,406,407,408] },
+  { phase: 2, name: 'LO2 — Développement', color: 'var(--lo2)', modules: [409,410,411,412,413,414,415,416] },
+  { phase: 3, name: 'LO3 — Tests', color: 'var(--lo3)', modules: [417,418] },
+  { phase: 4, name: 'LO4 — Documentation', color: 'var(--lo4)', modules: [419,420] },
+];
+
+// Module page mapping
+const MODULE_PAGES = {
+  401: '../jeux/module01_serpent_donnees/index.html',
+  402: '../jeux/module02_usine_besoins/index.html',
+  403: '../jeux/module03_collectionneur_donnees/index.html',
+  404: '../jeux/module04_detective_dependances/index.html',
+  405: '../jeux/module05_constructeur_mcd/index.html',
+  406: '../jeux/module06_transformateur_mld/index.html',
+  407: '../jeux/module07_nettoyeur_tables/index.html',
+  408: '../jeux/module08_bouclier_validation/index.html',
+  409: '../jeux/module09_architecte_sql/index.html',
+  410: '../jeux/module10_chaine_contraintes/index.html',
+  411: '../jeux/module11_demineur_sql/index.html',
+  412: '../jeux/module12_detective_donnees/index.html',
+  413: '../jeux/module13_comptable_fou/index.html',
+  414: '../jeux/module14_puzzle_tables/index.html',
+  415: '../jeux/module15_masque_vue/index.html',
+  416: '../jeux/module16_coffre_fort/index.html',
+  417: '../jeux/module17_testeur_fou/index.html',
+  418: '../jeux/module18_chasse_bugs/index.html',
+  419: '../jeux/module19_cartographe/index.html',
+  420: '../jeux/module20_guide_parfait/index.html',
+};
+
+async function loadDashboard() {
+  try {
+    // Load modules
+    const modules = await supabase.query('cq_modules', {
+      select: '*',
+      filter: { 'unit_id': 'eq.4' },
+      order: 'order_index.asc'
+    });
+    
+    // Load progress
+    let progress = [];
+    if (student) {
+      progress = await supabase.query('cq_student_progress', {
+        select: '*',
+        filter: { 'student_id': `eq.${student.id}` }
+      }) || [];
+    }
+    
+    const progressMap = {};
+    let totalXP = 0;
+    let completedCount = 0;
+    let quizScores = [];
+    
+    for (const p of progress) {
+      progressMap[p.module_id] = p;
+      totalXP += (p.credits_earned || 0) + (p.game_score || 0);
+      if (p.completed_at) completedCount++;
+      if (p.quiz_score !== null && p.total_questions > 0) {
+        quizScores.push(Math.round(p.quiz_score / p.total_questions * 100));
+      }
+    }
+    
+    // Update level display
+    const level = getLevel(totalXP);
+    document.getElementById('levelBadge').style.borderColor = level.color;
+    document.getElementById('levelBadge').style.background = level.color + '15';
+    document.getElementById('levelBadge').querySelector('span').textContent = level.index;
+    document.getElementById('levelName').textContent = student ? `${student.first_name} — ${level.name}` : level.name;
+    document.getElementById('levelXP').textContent = `${totalXP} XP — prochain niveau à ${level.nextMin} XP`;
+    document.getElementById('xpFill').style.width = (level.progress * 100) + '%';
+    
+    // Stats
+    document.getElementById('statModules').textContent = `${completedCount}/20`;
+    document.getElementById('statXP').textContent = totalXP;
+    document.getElementById('statQuiz').textContent = quizScores.length > 0 ? Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) + '%' : '-';
+    
+    // Render modules by LO
+    const container = document.getElementById('modulesContainer');
+    container.innerHTML = '';
+    
+    for (const lo of LO_CONFIG) {
+      const loModules = modules.filter(m => lo.modules.includes(m.id));
+      if (loModules.length === 0) continue;
+      
+      container.innerHTML += `<div class="section-title">
+        <span class="lo-badge" style="background:${lo.color}">${lo.name.split('—')[0].trim()}</span>
+        ${lo.name.split('—')[1]?.trim() || ''}
+      </div>
+      <div class="modules">
+        ${loModules.map(m => {
+          const p = progressMap[m.id];
+          const completed = p?.completed_at;
+          const score = p?.quiz_score;
+          const total = p?.total_questions;
+          const pct = total > 0 ? Math.round(score/total*100) : 0;
+          const href = MODULE_PAGES[m.id] || '#';
+          return `<a class="module ${completed ? 'completed' : ''}" href="${href}">
+            <div class="code">${m.code}</div>
+            <div class="title">${m.title}</div>
+            ${p ? `<div class="progress-mini"><div class="progress-fill" style="width:${completed ? 100 : 50}%"></div></div>
+            <div class="score">${completed ? '✅ Terminé' : 'En cours'} ${total > 0 ? '— Quiz: '+pct+'%' : ''}</div>` : 
+            '<div class="score" style="color:var(--muted)">Pas commencé</div>'}
+          </a>`;
+        }).join('')}
+      </div>`;
+    }
+    
+  } catch (e) {
+    console.error('Dashboard error:', e);
+  }
+}
+
+function doLogout() {
+  supabase.signOut();
+  localStorage.removeItem('cq_student');
+  window.location.href = 'login.html';
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
