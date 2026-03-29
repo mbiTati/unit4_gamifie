@@ -53,10 +53,17 @@ const supabase = {
   // WRITE — needs auth token
   async insert(table, data) {
     await this._ensureToken();
-    const res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+    let res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
       method: 'POST', headers: { ..._headers(true), 'Prefer': 'return=representation' },
       body: JSON.stringify(data)
     });
+    // Retry with anon if auth expired
+    if (res.status === 401 || res.status === 403) {
+      res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+        method: 'POST', headers: { ..._headers(false), 'Prefer': 'return=representation' },
+        body: JSON.stringify(data)
+      });
+    }
     return res.json();
   },
 
@@ -81,9 +88,15 @@ const supabase = {
 
   async rpc(fn, params = {}) {
     await this._ensureToken();
-    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    let res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
       method: 'POST', headers: _headers(true), body: JSON.stringify(params)
     });
+    // If auth fails, retry with anon key only
+    if (res.status === 401 || res.status === 403) {
+      res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+        method: 'POST', headers: _headers(false), body: JSON.stringify(params)
+      });
+    }
     return res.json();
   },
 
