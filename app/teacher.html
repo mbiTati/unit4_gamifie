@@ -486,15 +486,24 @@ async function linkAuth(email) {
   msg.innerHTML = '<span style="color:var(--muted)">Création du compte Auth...</span>';
   
   try {
-    const result = await supabase.rpc('create_student_account', { student_email: email, student_password: 'Schulz2025!' });
-    if (result && result.success) {
-      msg.innerHTML = `<span style="color:var(--lo1)">✅ Compte Auth créé pour ${email}</span>`;
+    // Create via official signup API
+    const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: 'Schulz2025!' })
+    });
+    const signupData = await signupRes.json();
+    
+    if (signupData.id) {
+      // Link auth_id to cq_students
+      await supabase.rpc('create_student_account', { student_email: email });
+      msg.innerHTML = '<span style="color:var(--lo1)">\u2705 Compte créé pour ' + email + '</span>';
       loadData();
     } else {
-      msg.innerHTML = `<span style="color:var(--error)">Erreur : ${result?.error || 'inconnue'}</span>`;
+      msg.innerHTML = '<span style="color:var(--error)">Erreur : ' + (signupData.msg || JSON.stringify(signupData)) + '</span>';
     }
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--error)">Erreur : ${e.message}</span>`;
+    msg.innerHTML = '<span style="color:var(--error)">Erreur : ' + e.message + '</span>';
   }
 }
 
@@ -568,6 +577,7 @@ async function addStudent() {
   const email = document.getElementById('addEmail').value.trim().toLowerCase();
   const cls = document.getElementById('addClassSelect').value;
   const cohort = document.getElementById('addCohort').value;
+  const defaultPwd = 'Schulz2025!';
   const msg = document.getElementById('addMsg');
   
   if (!first || !last || !email || !cls) { 
@@ -577,28 +587,43 @@ async function addStudent() {
   msg.innerHTML = '<span style="color:var(--muted)">Création en cours...</span>';
   
   try {
-    // 1. Create student profile
+    // Step 1: Create auth account via official Supabase Auth API (signup endpoint)
+    const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: defaultPwd })
+    });
+    const signupData = await signupRes.json();
+    
+    let authId = null;
+    if (signupData.id) {
+      authId = signupData.id;
+    } else if (signupData.error) {
+      // User might already exist in auth
+      if (signupData.msg && signupData.msg.includes('already')) {
+        msg.innerHTML = '<span style="color:var(--error)">Cet email existe déjà dans le système auth.</span>';
+        return;
+      }
+    }
+    
+    // Step 2: Create student profile in cq_students
     const profileResult = await supabase.insert('cq_students', {
       first_name: first, last_name: last.toUpperCase(), email: email,
       class_name: cls, cohort: cohort, role: 'student',
+      auth_id: authId,
     });
     
-    if (profileResult?.message?.includes('duplicate') || profileResult?.message?.includes('unique')) {
-      msg.innerHTML = '<span style="color:var(--error)">Cet email existe déjà.</span>';
+    if (profileResult && profileResult.message && (profileResult.message.includes('duplicate') || profileResult.message.includes('unique'))) {
+      msg.innerHTML = '<span style="color:var(--error)">Cet email existe déjà dans les profils.</span>';
       return;
     }
     
-    // 2. Create Auth account via RPC
-    const authResult = await supabase.rpc('create_student_account', { 
-      student_email: email, 
-      student_password: 'Schulz2025!' 
-    });
-    
-    if (authResult?.success) {
-      msg.innerHTML = `<span style="color:var(--lo1)">✅ <strong>${first} ${last.toUpperCase()}</strong> ajouté(e) !<br><span style="font-size:.7rem">Email: ${email} — Mot de passe: Schulz2025!</span></span>`;
-    } else {
-      msg.innerHTML = `<span style="color:var(--gold)">⚠ Profil créé mais compte Auth en attente.<br><span style="font-size:.7rem">${authResult?.error || 'L\'élève devra se connecter une première fois avec Schulz2025!'}</span></span>`;
+    // Step 3: If auth_id wasn't set (signup didn't return id), try linking via RPC
+    if (!authId) {
+      await supabase.rpc('create_student_account', { student_email: email });
     }
+    
+    msg.innerHTML = '<span style="color:var(--lo1)">\u2705 <strong>' + first + ' ' + last.toUpperCase() + '</strong> ajouté(e) !<br><span style="font-size:.7rem">Email: ' + email + ' — Mot de passe: ' + defaultPwd + '</span></span>';
     
     document.getElementById('addFirst').value = '';
     document.getElementById('addLast').value = '';
@@ -606,7 +631,7 @@ async function addStudent() {
     loadData();
     
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--error)">Erreur : ${e.message}</span>`;
+    msg.innerHTML = '<span style="color:var(--error)">Erreur : ' + e.message + '</span>';
   }
 }
 
