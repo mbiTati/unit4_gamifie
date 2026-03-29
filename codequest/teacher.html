@@ -73,7 +73,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   <div class="topbar-right">
     <a href="home.html">Accueil</a>
     <a href="../index.html">Hub Cours</a>
-    <a href="../enseignant.html">Documents</a>
+    <a href="../codequest/teacher.html">Documents</a>
     <button onclick="logout()">Déconnexion</button>
   </div>
 </div>
@@ -94,6 +94,8 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
     <button class="tab" onclick="showTab('comments',this)">Questions <span class="badge" id="commentBadge" style="display:none">0</span></button>
     <button class="tab" onclick="showTab('manage',this)">Gérer les élèves</button>
     <button class="tab" onclick="showTab('modules',this)">Par module</button>
+    <button class="tab" onclick="showTab('docs',this)">Mes Documents</button>
+    <button class="tab" onclick="showTab('tools',this)">Outils & SQL</button>
   </div>
   
   <!-- FILTERS -->
@@ -109,6 +111,88 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   <div id="tab-comments" style="display:none"><div id="commentsList"></div></div>
   <div id="tab-manage" style="display:none" id="manageTab"></div>
   <div id="tab-modules" style="display:none"><div id="modulesList"></div></div>
+  
+  <div id="tab-docs" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
+      <!-- PPTX -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--lo2);margin-bottom:.6rem"><span style="background:rgba(59,130,246,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">PPTX</span> Présentations</h3>
+        <div id="pptxList" style="font-size:.75rem;line-height:2"></div>
+      </div>
+      <!-- Exercices -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--lo1);margin-bottom:.6rem"><span style="background:rgba(16,185,129,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">EXOS</span> Exercices élèves</h3>
+        <div id="exosList" style="font-size:.75rem;line-height:2"></div>
+      </div>
+      <!-- Corrigés -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--lo4);margin-bottom:.6rem"><span style="background:rgba(139,92,246,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">CORR</span> Corrigés</h3>
+        <div id="corrList" style="font-size:.75rem;line-height:2"></div>
+      </div>
+      <!-- Mémos -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--error);margin-bottom:.6rem"><span style="background:rgba(239,68,68,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">MÉMO</span> Fiches PDF</h3>
+        <div id="memoList" style="font-size:.75rem;line-height:2"></div>
+      </div>
+      <!-- Cas Pro -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--gold);margin-bottom:.6rem"><span style="background:rgba(245,158,11,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">PRO</span> Cas professionnels</h3>
+        <div id="proList" style="font-size:.75rem;line-height:2"></div>
+      </div>
+      <!-- Documents prof -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:.6rem"><span style="background:rgba(148,163,184,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">DOCS</span> Documents enseignant</h3>
+        <div style="font-size:.75rem;line-height:2">
+          <a href="../docs/GUIDE_ENSEIGNANTE.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Guide enseignante</a><br>
+          <a href="../docs/PLAN_COMPLET_UNIT4_GAMIFIE.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Plan complet Unit 4</a><br>
+          <a href="../templates/plan_tests_template.html" target="_blank" style="color:var(--accent2);text-decoration:none">Template plan de tests</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="tab-tools" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
+      <!-- SQL Scripts -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--lo2);margin-bottom:.6rem"><span style="background:rgba(59,130,246,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">SQL</span> Scripts SQL</h3>
+        <div style="font-size:.75rem;line-height:2">
+          <a href="../sql/00_swisssound_create.sql" target="_blank" style="color:var(--accent2);text-decoration:none">SwissSound — CREATE</a><br>
+          <a href="../sql/01_insert_data.sql" target="_blank" style="color:var(--accent2);text-decoration:none">SwissSound — INSERT</a><br>
+          <a href="../sql/02_queries.sql" target="_blank" style="color:var(--accent2);text-decoration:none">SwissSound — Requêtes</a><br>
+          <a href="../sql/03_views_procedures_security.sql" target="_blank" style="color:var(--accent2);text-decoration:none">SwissSound — Vues & Sécurité</a><br>
+          <a href="../sql/gescom_sqlite.sql" target="_blank" style="color:var(--accent2);text-decoration:none">GESCOM — Script SQLite</a><br>
+          <a href="../sql/footlocker_sqlite.sql" target="_blank" style="color:var(--accent2);text-decoration:none">FootLocker — SQLite</a><br>
+          <a href="../sql/bateaux_gva_sqlite.sql" target="_blank" style="color:var(--accent2);text-decoration:none">Bateaux GVA — SQLite</a><br>
+          <a href="../sql/boulangerie_sqlite.sql" target="_blank" style="color:var(--accent2);text-decoration:none">Boulangerie — SQLite</a><br>
+          <a href="../sql/assurance_sqlite.sql" target="_blank" style="color:var(--accent2);text-decoration:none">Assurance — SQLite</a>
+        </div>
+      </div>
+      <!-- Outils interactifs -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--accent2);margin-bottom:.6rem"><span style="background:rgba(50,224,196,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">TOOLS</span> Outils interactifs</h3>
+        <div style="font-size:.75rem;line-height:2">
+          <a href="sql-editor.html" style="color:var(--accent2);text-decoration:none">SQL Editor Live (Supabase)</a><br>
+          <a href="../jeux/sql_sandbox/index.html" style="color:var(--accent2);text-decoration:none">Bac à sable SQL (SQLite)</a><br>
+          <a href="../jeux/exercices_gescom/index.html" style="color:var(--accent2);text-decoration:none">Exercices GESCOM P1 (29 ex.)</a><br>
+          <a href="../jeux/exercices_gescom_avances/index.html" style="color:var(--accent2);text-decoration:none">Exercices GESCOM P2 (28 ex.)</a><br>
+          <a href="../jeux/matrice_df/index.html" style="color:var(--accent2);text-decoration:none">Matrice DF Interactive</a><br>
+          <a href="../jeux/constructeur_mcd/index.html" style="color:var(--accent2);text-decoration:none">Constructeur MCD</a><br>
+          <a href="../exercices-entreprise.html" style="color:var(--accent2);text-decoration:none">4 Exercices Entreprise</a>
+        </div>
+      </div>
+      <!-- Supabase -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem">
+        <h3 style="font-size:.85rem;font-weight:700;color:var(--gold);margin-bottom:.6rem"><span style="background:rgba(245,158,11,.1);padding:.1rem .4rem;border-radius:3px;font-size:.6rem;font-weight:800">CLOUD</span> Supabase</h3>
+        <div style="font-size:.75rem;line-height:2">
+          <a href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg" target="_blank" style="color:var(--accent2);text-decoration:none">Dashboard Supabase</a><br>
+          <a href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/editor" target="_blank" style="color:var(--accent2);text-decoration:none">Table Editor</a><br>
+          <a href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/sql/new" target="_blank" style="color:var(--accent2);text-decoration:none">SQL Editor Supabase</a><br>
+          <span style="color:var(--muted);font-size:.65rem">Schemas : gescom, swisssound, footlocker, bateaux_gva, boulangerie, assurance</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="supabase-config.js"></script>
@@ -126,7 +210,7 @@ let allModules = [];
 function showTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  ['progress','comments','manage','modules'].forEach(t => {
+  ['progress','comments','manage','modules','docs','tools'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
@@ -310,6 +394,39 @@ async function resetStudent(id) {
     headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
   });
   loadData();
+
+function renderDocs() {
+  const pad = n => String(n).padStart(2, '0');
+  const modules = Array.from({length:20}, (_,i) => i+1);
+  const titles = ['DD','Matrice DF','Graphe','MCD+CIF','MLD','3NF','MPD','Interface','CREATE TABLE','Contraintes','INSERT','SELECT/WHERE','GROUP BY','JOIN','Vues','Sécurité','Plan Tests','Exécution Tests','DFD','Guide Utilisateur'];
+  
+  document.getElementById('pptxList').innerHTML = modules.map(n => 
+    `<a href="../pptx/Module${pad(n)}_${titles[n-1].replace(/[^a-zA-Z0-9]/g,'_')}.pptx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('exosList').innerHTML = modules.map(n => 
+    `<a href="../docs/exercices/Module${pad(n)}_Exercices.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('corrList').innerHTML = modules.map(n => 
+    `<a href="../docs/corriges/Module${pad(n)}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('memoList').innerHTML = modules.map(n => 
+    `<a href="../docs/fiches_memo/Memo_Module${pad(n)}.pdf" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  const pros = [{n:'footlocker',t:'FootLocker'},{n:'bateaux_gva',t:'Bateaux GVA'},{n:'boulangerie',t:'Boulangerie Luxe'},{n:'assurance',t:'Assurance'}];
+  document.getElementById('proList').innerHTML = pros.map(p => 
+    `<strong>${p.t}</strong><br>` +
+    `<a href="../docs/exercices/CasPro_${p.n}_Exercice.docx" target="_blank" style="color:var(--accent2);text-decoration:none;margin-left:.5rem">Exercice</a> · ` +
+    `<a href="../docs/corriges/CasPro_${p.n}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Corrigé</a> · ` +
+    `<a href="../jeux/cas_${p.n}/index.html" style="color:var(--accent2);text-decoration:none">Interactif</a><br>`
+  ).join('');
+}
+
+renderDocs();
+
 }
 
 async function deleteStudent(id, name) {
@@ -322,6 +439,39 @@ async function deleteStudent(id, name) {
     method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
   });
   loadData();
+
+function renderDocs() {
+  const pad = n => String(n).padStart(2, '0');
+  const modules = Array.from({length:20}, (_,i) => i+1);
+  const titles = ['DD','Matrice DF','Graphe','MCD+CIF','MLD','3NF','MPD','Interface','CREATE TABLE','Contraintes','INSERT','SELECT/WHERE','GROUP BY','JOIN','Vues','Sécurité','Plan Tests','Exécution Tests','DFD','Guide Utilisateur'];
+  
+  document.getElementById('pptxList').innerHTML = modules.map(n => 
+    `<a href="../pptx/Module${pad(n)}_${titles[n-1].replace(/[^a-zA-Z0-9]/g,'_')}.pptx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('exosList').innerHTML = modules.map(n => 
+    `<a href="../docs/exercices/Module${pad(n)}_Exercices.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('corrList').innerHTML = modules.map(n => 
+    `<a href="../docs/corriges/Module${pad(n)}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('memoList').innerHTML = modules.map(n => 
+    `<a href="../docs/fiches_memo/Memo_Module${pad(n)}.pdf" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  const pros = [{n:'footlocker',t:'FootLocker'},{n:'bateaux_gva',t:'Bateaux GVA'},{n:'boulangerie',t:'Boulangerie Luxe'},{n:'assurance',t:'Assurance'}];
+  document.getElementById('proList').innerHTML = pros.map(p => 
+    `<strong>${p.t}</strong><br>` +
+    `<a href="../docs/exercices/CasPro_${p.n}_Exercice.docx" target="_blank" style="color:var(--accent2);text-decoration:none;margin-left:.5rem">Exercice</a> · ` +
+    `<a href="../docs/corriges/CasPro_${p.n}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Corrigé</a> · ` +
+    `<a href="../jeux/cas_${p.n}/index.html" style="color:var(--accent2);text-decoration:none">Interactif</a><br>`
+  ).join('');
+}
+
+renderDocs();
+
 }
 
 async function addStudent() {
@@ -345,6 +495,39 @@ async function addStudent() {
     document.getElementById('addLast').value = '';
     document.getElementById('addEmail').value = '';
     loadData();
+
+function renderDocs() {
+  const pad = n => String(n).padStart(2, '0');
+  const modules = Array.from({length:20}, (_,i) => i+1);
+  const titles = ['DD','Matrice DF','Graphe','MCD+CIF','MLD','3NF','MPD','Interface','CREATE TABLE','Contraintes','INSERT','SELECT/WHERE','GROUP BY','JOIN','Vues','Sécurité','Plan Tests','Exécution Tests','DFD','Guide Utilisateur'];
+  
+  document.getElementById('pptxList').innerHTML = modules.map(n => 
+    `<a href="../pptx/Module${pad(n)}_${titles[n-1].replace(/[^a-zA-Z0-9]/g,'_')}.pptx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('exosList').innerHTML = modules.map(n => 
+    `<a href="../docs/exercices/Module${pad(n)}_Exercices.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('corrList').innerHTML = modules.map(n => 
+    `<a href="../docs/corriges/Module${pad(n)}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('memoList').innerHTML = modules.map(n => 
+    `<a href="../docs/fiches_memo/Memo_Module${pad(n)}.pdf" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  const pros = [{n:'footlocker',t:'FootLocker'},{n:'bateaux_gva',t:'Bateaux GVA'},{n:'boulangerie',t:'Boulangerie Luxe'},{n:'assurance',t:'Assurance'}];
+  document.getElementById('proList').innerHTML = pros.map(p => 
+    `<strong>${p.t}</strong><br>` +
+    `<a href="../docs/exercices/CasPro_${p.n}_Exercice.docx" target="_blank" style="color:var(--accent2);text-decoration:none;margin-left:.5rem">Exercice</a> · ` +
+    `<a href="../docs/corriges/CasPro_${p.n}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Corrigé</a> · ` +
+    `<a href="../jeux/cas_${p.n}/index.html" style="color:var(--accent2);text-decoration:none">Interactif</a><br>`
+  ).join('');
+}
+
+renderDocs();
+
   } else {
     msg.innerHTML = `<span style="color:var(--error)">Erreur : ${JSON.stringify(result?.error || result?.message || 'inconnue')}</span>`;
   }
@@ -360,6 +543,39 @@ async function replyComment(id) {
     body: JSON.stringify({ teacher_reply: text, replied_at: new Date().toISOString(), is_read: true })
   });
   loadData();
+
+function renderDocs() {
+  const pad = n => String(n).padStart(2, '0');
+  const modules = Array.from({length:20}, (_,i) => i+1);
+  const titles = ['DD','Matrice DF','Graphe','MCD+CIF','MLD','3NF','MPD','Interface','CREATE TABLE','Contraintes','INSERT','SELECT/WHERE','GROUP BY','JOIN','Vues','Sécurité','Plan Tests','Exécution Tests','DFD','Guide Utilisateur'];
+  
+  document.getElementById('pptxList').innerHTML = modules.map(n => 
+    `<a href="../pptx/Module${pad(n)}_${titles[n-1].replace(/[^a-zA-Z0-9]/g,'_')}.pptx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('exosList').innerHTML = modules.map(n => 
+    `<a href="../docs/exercices/Module${pad(n)}_Exercices.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('corrList').innerHTML = modules.map(n => 
+    `<a href="../docs/corriges/Module${pad(n)}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('memoList').innerHTML = modules.map(n => 
+    `<a href="../docs/fiches_memo/Memo_Module${pad(n)}.pdf" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  const pros = [{n:'footlocker',t:'FootLocker'},{n:'bateaux_gva',t:'Bateaux GVA'},{n:'boulangerie',t:'Boulangerie Luxe'},{n:'assurance',t:'Assurance'}];
+  document.getElementById('proList').innerHTML = pros.map(p => 
+    `<strong>${p.t}</strong><br>` +
+    `<a href="../docs/exercices/CasPro_${p.n}_Exercice.docx" target="_blank" style="color:var(--accent2);text-decoration:none;margin-left:.5rem">Exercice</a> · ` +
+    `<a href="../docs/corriges/CasPro_${p.n}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Corrigé</a> · ` +
+    `<a href="../jeux/cas_${p.n}/index.html" style="color:var(--accent2);text-decoration:none">Interactif</a><br>`
+  ).join('');
+}
+
+renderDocs();
+
 }
 
 async function markRead(id) {
@@ -370,9 +586,75 @@ async function markRead(id) {
     body: JSON.stringify({ is_read: true })
   });
   loadData();
+
+function renderDocs() {
+  const pad = n => String(n).padStart(2, '0');
+  const modules = Array.from({length:20}, (_,i) => i+1);
+  const titles = ['DD','Matrice DF','Graphe','MCD+CIF','MLD','3NF','MPD','Interface','CREATE TABLE','Contraintes','INSERT','SELECT/WHERE','GROUP BY','JOIN','Vues','Sécurité','Plan Tests','Exécution Tests','DFD','Guide Utilisateur'];
+  
+  document.getElementById('pptxList').innerHTML = modules.map(n => 
+    `<a href="../pptx/Module${pad(n)}_${titles[n-1].replace(/[^a-zA-Z0-9]/g,'_')}.pptx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('exosList').innerHTML = modules.map(n => 
+    `<a href="../docs/exercices/Module${pad(n)}_Exercices.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('corrList').innerHTML = modules.map(n => 
+    `<a href="../docs/corriges/Module${pad(n)}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('memoList').innerHTML = modules.map(n => 
+    `<a href="../docs/fiches_memo/Memo_Module${pad(n)}.pdf" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  const pros = [{n:'footlocker',t:'FootLocker'},{n:'bateaux_gva',t:'Bateaux GVA'},{n:'boulangerie',t:'Boulangerie Luxe'},{n:'assurance',t:'Assurance'}];
+  document.getElementById('proList').innerHTML = pros.map(p => 
+    `<strong>${p.t}</strong><br>` +
+    `<a href="../docs/exercices/CasPro_${p.n}_Exercice.docx" target="_blank" style="color:var(--accent2);text-decoration:none;margin-left:.5rem">Exercice</a> · ` +
+    `<a href="../docs/corriges/CasPro_${p.n}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Corrigé</a> · ` +
+    `<a href="../jeux/cas_${p.n}/index.html" style="color:var(--accent2);text-decoration:none">Interactif</a><br>`
+  ).join('');
+}
+
+renderDocs();
+
 }
 
 loadData();
+
+function renderDocs() {
+  const pad = n => String(n).padStart(2, '0');
+  const modules = Array.from({length:20}, (_,i) => i+1);
+  const titles = ['DD','Matrice DF','Graphe','MCD+CIF','MLD','3NF','MPD','Interface','CREATE TABLE','Contraintes','INSERT','SELECT/WHERE','GROUP BY','JOIN','Vues','Sécurité','Plan Tests','Exécution Tests','DFD','Guide Utilisateur'];
+  
+  document.getElementById('pptxList').innerHTML = modules.map(n => 
+    `<a href="../pptx/Module${pad(n)}_${titles[n-1].replace(/[^a-zA-Z0-9]/g,'_')}.pptx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('exosList').innerHTML = modules.map(n => 
+    `<a href="../docs/exercices/Module${pad(n)}_Exercices.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('corrList').innerHTML = modules.map(n => 
+    `<a href="../docs/corriges/Module${pad(n)}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  document.getElementById('memoList').innerHTML = modules.map(n => 
+    `<a href="../docs/fiches_memo/Memo_Module${pad(n)}.pdf" target="_blank" style="color:var(--accent2);text-decoration:none">M${pad(n)} — ${titles[n-1]}</a><br>`
+  ).join('');
+  
+  const pros = [{n:'footlocker',t:'FootLocker'},{n:'bateaux_gva',t:'Bateaux GVA'},{n:'boulangerie',t:'Boulangerie Luxe'},{n:'assurance',t:'Assurance'}];
+  document.getElementById('proList').innerHTML = pros.map(p => 
+    `<strong>${p.t}</strong><br>` +
+    `<a href="../docs/exercices/CasPro_${p.n}_Exercice.docx" target="_blank" style="color:var(--accent2);text-decoration:none;margin-left:.5rem">Exercice</a> · ` +
+    `<a href="../docs/corriges/CasPro_${p.n}_Corrige.docx" target="_blank" style="color:var(--accent2);text-decoration:none">Corrigé</a> · ` +
+    `<a href="../jeux/cas_${p.n}/index.html" style="color:var(--accent2);text-decoration:none">Interactif</a><br>`
+  ).join('');
+}
+
+renderDocs();
+
 </script>
 </body>
 </html>
