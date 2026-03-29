@@ -239,6 +239,10 @@ async function loadData() {
   renderData();
   renderComments();
   renderManage();
+  // Populate class filter from cq_classes
+  const classesData = await supabase.query('cq_classes', { select: '*', order: 'name.asc' }) || [];
+  const fc2 = document.getElementById('filterClass');
+  if (fc2) fc2.innerHTML = '<option value="all">Toutes</option>' + classesData.map(cl => `<option value="${cl.name}">${cl.name}</option>`).join('');
   renderModules();
 }
 
@@ -333,35 +337,128 @@ function renderComments() {
 
 function renderManage() {
   document.getElementById('tab-manage').innerHTML = `
+    <!-- GESTION DES CLASSES -->
+    <div class="add-form" style="margin-bottom:1.5rem">
+      <h3 style="color:var(--gold)">Gestion des classes</h3>
+      <div id="classesList" style="margin-bottom:.6rem"></div>
+      <div class="row">
+        <input id="newClassName" placeholder="Nom de la classe (ex: BI2)" style="max-width:120px">
+        <input id="newClassDesc" placeholder="Description" style="flex:2">
+        <select id="newClassCohort"><option value="2025">2025</option><option value="2026">2026</option></select>
+        <button class="btn-add" onclick="addClass()">Créer la classe</button>
+      </div>
+      <div id="classMsg" style="font-size:.78rem;margin-top:.3rem;min-height:1rem"></div>
+    </div>
+    
+    <!-- AJOUTER UN ÉLÈVE -->
     <div class="add-form">
       <h3>Ajouter un élève</h3>
+      <p style="font-size:.7rem;color:var(--muted);margin-bottom:.5rem">Le compte Supabase Auth est créé automatiquement. Mot de passe par défaut : <strong>Schulz2025!</strong></p>
       <div class="row">
         <input id="addFirst" placeholder="Prénom">
         <input id="addLast" placeholder="Nom">
-        <input id="addEmail" placeholder="Email">
-        <select id="addClass"><option value="BI1">BI1</option><option value="BI2">BI2</option><option value="ID1">ID1</option><option value="ID2">ID2</option></select>
+        <input id="addEmail" placeholder="Email" type="email">
+      </div>
+      <div class="row">
+        <select id="addClass"><option value="">— Classe —</option></select>
         <select id="addCohort"><option value="2025">2025</option><option value="2026">2026</option></select>
-        <span style="font-size:.65rem;color:var(--muted);padding:.3rem">mdp: Schulz2025!</span>
-        <button class="btn-add" onclick="addStudent()">Ajouter</button>
+        <button class="btn-add" onclick="addStudent()">Ajouter l'élève</button>
       </div>
       <div id="addMsg" style="font-size:.78rem;margin-top:.3rem;min-height:1rem"></div>
     </div>
-    <div style="font-size:.85rem;font-weight:700;margin-bottom:.5rem">Tous les élèves (${allStudents.filter(s=>s.role!=='teacher').length})</div>
+    
+    <!-- LISTE DES ÉLÈVES -->
+    <div style="font-size:.85rem;font-weight:700;margin:1rem 0 .5rem">Tous les élèves (${allStudents.filter(s=>s.role!=='teacher').length})</div>
     <div style="overflow-x:auto"><table class="s-table">
-      <thead><tr><th>Nom</th><th>Email</th><th>Classe</th><th>Cohorte</th><th>Rôle</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Nom</th><th>Email</th><th>Classe</th><th>Cohorte</th><th>Auth</th><th>Actions</th></tr></thead>
       <tbody>${allStudents.filter(s => s.role !== 'teacher').map(s => `<tr>
         <td><strong>${s.first_name} ${s.last_name}</strong></td>
-        <td style="font-size:.7rem;color:var(--muted)">${s.email}</td>
+        <td style="font-size:.68rem;color:var(--muted)">${s.email}</td>
         <td>${s.class_name || '-'}</td>
         <td>${s.cohort || '-'}</td>
-        <td style="font-size:.65rem">${s.role}</td>
+        <td>${s.auth_id ? '<span style="color:var(--lo1);font-size:.65rem">✅ Lié</span>' : '<span style="color:var(--error);font-size:.65rem">⚠ Non lié</span> <button class="btn-sm btn-primary" onclick="linkAuth(\''+s.email+'\')">Créer compte</button>'}</td>
         <td>
           <button class="btn-sm btn-danger" onclick="resetStudent('${s.id}')">Reset</button>
-          <button class="btn-sm btn-danger" onclick="deleteStudent('${s.id}','${s.first_name} ${s.last_name}')">Supprimer</button>
+          <button class="btn-sm btn-danger" onclick="deleteStudent('${s.id}','${s.first_name} ${s.last_name}')">Suppr</button>
         </td>
       </tr>`).join('')}</tbody>
     </table></div>
   `;
+  
+  // Load classes
+  loadClasses();
+}
+
+async function loadClasses() {
+  const classes = await supabase.query('cq_classes', { select: '*', order: 'name.asc' }) || [];
+  
+  // Render classes list
+  document.getElementById('classesList').innerHTML = classes.length > 0 ? 
+    classes.map(cl => `<div style="display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;margin:.2rem;font-size:.75rem">
+      <strong>${cl.name}</strong> <span style="color:var(--muted);font-size:.65rem">${cl.description || ''} · ${cl.cohort}</span>
+      <button style="background:none;border:none;color:var(--error);cursor:pointer;font-size:.65rem;opacity:.5" onclick="deleteClass(${cl.id},'${cl.name}')">✕</button>
+    </div>`).join('') :
+    '<span style="color:var(--muted);font-size:.75rem">Aucune classe. Créez-en une.</span>';
+  
+  // Populate class selectors
+  const selects = document.querySelectorAll('#addClass, #filterClass');
+  const classSelect = document.getElementById('addClass');
+  if (classSelect) {
+    classSelect.innerHTML = '<option value="">— Classe —</option>' + 
+      classes.map(cl => `<option value="${cl.name}">${cl.name}</option>`).join('');
+  }
+}
+
+async function addClass() {
+  const name = document.getElementById('newClassName').value.trim().toUpperCase();
+  const desc = document.getElementById('newClassDesc').value.trim();
+  const cohort = document.getElementById('newClassCohort').value;
+  const msg = document.getElementById('classMsg');
+  
+  if (!name) { msg.innerHTML = '<span style="color:var(--error)">Nom requis.</span>'; return; }
+  
+  const result = await supabase.insert('cq_classes', { name, description: desc, cohort });
+  
+  if (result && !result.error && !result.message) {
+    msg.innerHTML = `<span style="color:var(--lo1)">✅ Classe ${name} créée !</span>`;
+    document.getElementById('newClassName').value = '';
+    document.getElementById('newClassDesc').value = '';
+    loadClasses();
+    loadData(); // Refresh filters
+  } else {
+    const errMsg = result?.message || JSON.stringify(result?.error || '');
+    if (errMsg.includes('duplicate') || errMsg.includes('unique')) {
+      msg.innerHTML = `<span style="color:var(--error)">La classe ${name} existe déjà.</span>`;
+    } else {
+      msg.innerHTML = `<span style="color:var(--error)">Erreur : ${errMsg}</span>`;
+    }
+  }
+}
+
+async function deleteClass(id, name) {
+  if (!confirm(`Supprimer la classe ${name} ?`)) return;
+  const token = localStorage.getItem('cq_token');
+  await fetch(`${SUPABASE_URL}/rest/v1/cq_classes?id=eq.${id}`, {
+    method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  loadClasses();
+}
+
+async function linkAuth(email) {
+  const msg = document.getElementById('addMsg');
+  msg.innerHTML = '<span style="color:var(--muted)">Création du compte Auth...</span>';
+  
+  try {
+    const result = await supabase.rpc('create_student_account', { student_email: email, student_password: 'Schulz2025!' });
+    if (result && result.success) {
+      msg.innerHTML = `<span style="color:var(--lo1)">✅ Compte Auth créé pour ${email}</span>`;
+      loadData();
+    } else {
+      msg.innerHTML = `<span style="color:var(--error)">Erreur : ${result?.error || 'inconnue'}</span>`;
+    }
+  } catch(e) {
+    msg.innerHTML = `<span style="color:var(--error)">Erreur : ${e.message}</span>`;
+  }
 }
 
 function renderModules() {
@@ -451,55 +548,45 @@ async function addStudent() {
   const email = document.getElementById('addEmail').value.trim().toLowerCase();
   const cls = document.getElementById('addClass').value;
   const cohort = document.getElementById('addCohort').value;
-  const defaultPwd = 'Schulz2025!';
   const msg = document.getElementById('addMsg');
   
-  if (!first || !last || !email) { msg.innerHTML = '<span style="color:var(--error)">Tous les champs sont requis.</span>'; return; }
+  if (!first || !last || !email || !cls) { 
+    msg.innerHTML = '<span style="color:var(--error)">Tous les champs sont requis (y compris la classe).</span>'; return; 
+  }
   
   msg.innerHTML = '<span style="color:var(--muted)">Création en cours...</span>';
   
-  // 1. Try to create Supabase Auth account (may fail without admin rights — that's OK)
   try {
-    await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: defaultPwd })
+    // 1. Create student profile
+    const profileResult = await supabase.insert('cq_students', {
+      first_name: first, last_name: last.toUpperCase(), email: email,
+      class_name: cls, cohort: cohort, role: 'student',
     });
-  } catch(e) { /* Auth creation optional — student can sign up later */ }
-  
-  // 2. Create student profile
-  const result = await supabase.insert('cq_students', {
-    first_name: first, last_name: last.toUpperCase(), email: email,
-    class_name: cls, cohort: cohort, role: 'student',
-  });
-  
-  if (result && !result.error) {
-    msg.innerHTML = `<span style="color:var(--lo1)">✅ ${first} ${last.toUpperCase()} ajouté(e) !<br><span style="font-size:.7rem">Email: ${email} — Mot de passe: Schulz2025!</span></span>`;
+    
+    if (profileResult?.message?.includes('duplicate') || profileResult?.message?.includes('unique')) {
+      msg.innerHTML = '<span style="color:var(--error)">Cet email existe déjà.</span>';
+      return;
+    }
+    
+    // 2. Create Auth account via RPC
+    const authResult = await supabase.rpc('create_student_account', { 
+      student_email: email, 
+      student_password: 'Schulz2025!' 
+    });
+    
+    if (authResult?.success) {
+      msg.innerHTML = `<span style="color:var(--lo1)">✅ <strong>${first} ${last.toUpperCase()}</strong> ajouté(e) !<br><span style="font-size:.7rem">Email: ${email} — Mot de passe: Schulz2025!</span></span>`;
+    } else {
+      msg.innerHTML = `<span style="color:var(--gold)">⚠ Profil créé mais compte Auth en attente.<br><span style="font-size:.7rem">${authResult?.error || 'L\'élève devra se connecter une première fois avec Schulz2025!'}</span></span>`;
+    }
+    
     document.getElementById('addFirst').value = '';
     document.getElementById('addLast').value = '';
     document.getElementById('addEmail').value = '';
     loadData();
-
-// Handle URL tab parameter
-const urlParams = new URLSearchParams(window.location.search);
-const tabParam = urlParams.get('tab');
-if (tabParam) {
-  showTab(tabParam, document.querySelector(`.tab[onclick*="${tabParam}"]`));
-}
-
-
-function renderDocs() {
-  document.getElementById('pptxList').innerHTML = `<a href="../pptx/Module01_Introduction_aux_BDD.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M01 — Introduction aux BDD</a><a href="../pptx/Module02_Recueil_des_besoins.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M02 — Recueil des besoins</a><a href="../pptx/Module03_Dictionnaire_des_donn%C3%A9es.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M03 — Dictionnaire des données</a><a href="../pptx/Module04_D%C3%A9pendances_fonctionnelles.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M04 — Dépendances fonctionnelles</a><a href="../pptx/Module05_MCD_entit%C3%A9s_CIF_cardinalit%C3%A9s.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M05 — MCD, entités, CIF</a><a href="../pptx/Module06_MLD_MCD_vers_sch%C3%A9ma_relationnel.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M06 — MLD — Schéma relationnel</a><a href="../pptx/Module07_Normalisation_1NF_2NF_3NF.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M07 — Normalisation 1NF/2NF/3NF</a><a href="../pptx/Module08_MPD__Interfaces__BDD_OO.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M08 — MPD, Interfaces, BDD OO</a><a href="../pptx/Module09_CREATE_DATABASE_et_TABLE.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M09 — CREATE DATABASE/TABLE</a><a href="../pptx/Module10_Contraintes_et_int%C3%A9grit%C3%A9.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M10 — Contraintes et intégrité</a><a href="../pptx/Module11_DML_INSERT_UPDATE_DELETE.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M11 — DML INSERT/UPDATE/DELETE</a><a href="../pptx/Module12_SELECT_filtrage_et_tri.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M12 — SELECT, filtrage et tri</a><a href="../pptx/Module13_Agr%C3%A9gation_GROUP_BY_HAVING.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M13 — Agrégation GROUP BY/HAVING</a><a href="../pptx/Module14_JOIN_multitables.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M14 — JOIN multitables</a><a href="../pptx/Module15_Vues_proc%C3%A9dures_fonctions.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M15 — Vues, procédures, fonctions</a><a href="../pptx/Module16_S%C3%A9curit%C3%A9_RGPD_chiffrement.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M16 — Sécurité, RGPD, chiffrement</a><a href="../pptx/Module17_Plan_de_tests.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M17 — Plan de tests</a><a href="../pptx/Module18_Ex%C3%A9cution_et_%C3%A9valuation_tests.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M18 — Exécution des tests</a><a href="../pptx/Module19_Documentation_technique.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M19 — Documentation technique</a><a href="../pptx/Module20_Doc_Utilisateur.pptx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M20 — Guide utilisateur</a>`;
-  document.getElementById('exosList').innerHTML = `<a href="../docs/exercices/Module01_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M01 — Introduction aux BDD</a><a href="../docs/exercices/Module02_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M02 — Recueil des besoins</a><a href="../docs/exercices/Module03_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M03 — Dictionnaire des données</a><a href="../docs/exercices/Module04_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M04 — Dépendances fonctionnelles</a><a href="../docs/exercices/Module05_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M05 — MCD, entités, CIF</a><a href="../docs/exercices/Module06_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M06 — MLD — Schéma relationnel</a><a href="../docs/exercices/Module07_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M07 — Normalisation 1NF/2NF/3NF</a><a href="../docs/exercices/Module08_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M08 — MPD, Interfaces, BDD OO</a><a href="../docs/exercices/Module09_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M09 — CREATE DATABASE/TABLE</a><a href="../docs/exercices/Module10_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M10 — Contraintes et intégrité</a><a href="../docs/exercices/Module11_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M11 — DML INSERT/UPDATE/DELETE</a><a href="../docs/exercices/Module12_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M12 — SELECT, filtrage et tri</a><a href="../docs/exercices/Module13_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M13 — Agrégation GROUP BY/HAVING</a><a href="../docs/exercices/Module14_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M14 — JOIN multitables</a><a href="../docs/exercices/Module15_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M15 — Vues, procédures, fonctions</a><a href="../docs/exercices/Module16_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M16 — Sécurité, RGPD, chiffrement</a><a href="../docs/exercices/Module17_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M17 — Plan de tests</a><a href="../docs/exercices/Module18_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M18 — Exécution des tests</a><a href="../docs/exercices/Module19_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M19 — Documentation technique</a><a href="../docs/exercices/Module20_Exercices.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M20 — Guide utilisateur</a>`;
-  document.getElementById('corrList').innerHTML = `<a href="../docs/corriges/Module01_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M01 — Introduction aux BDD</a><a href="../docs/corriges/Module02_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M02 — Recueil des besoins</a><a href="../docs/corriges/Module03_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M03 — Dictionnaire des données</a><a href="../docs/corriges/Module04_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M04 — Dépendances fonctionnelles</a><a href="../docs/corriges/Module05_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M05 — MCD, entités, CIF</a><a href="../docs/corriges/Module06_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M06 — MLD — Schéma relationnel</a><a href="../docs/corriges/Module07_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M07 — Normalisation 1NF/2NF/3NF</a><a href="../docs/corriges/Module08_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M08 — MPD, Interfaces, BDD OO</a><a href="../docs/corriges/Module09_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M09 — CREATE DATABASE/TABLE</a><a href="../docs/corriges/Module10_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M10 — Contraintes et intégrité</a><a href="../docs/corriges/Module11_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M11 — DML INSERT/UPDATE/DELETE</a><a href="../docs/corriges/Module12_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M12 — SELECT, filtrage et tri</a><a href="../docs/corriges/Module13_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M13 — Agrégation GROUP BY/HAVING</a><a href="../docs/corriges/Module14_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M14 — JOIN multitables</a><a href="../docs/corriges/Module15_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M15 — Vues, procédures, fonctions</a><a href="../docs/corriges/Module16_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M16 — Sécurité, RGPD, chiffrement</a><a href="../docs/corriges/Module17_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M17 — Plan de tests</a><a href="../docs/corriges/Module18_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M18 — Exécution des tests</a><a href="../docs/corriges/Module19_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M19 — Documentation technique</a><a href="../docs/corriges/Module20_Corrige.docx" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M20 — Guide utilisateur</a>`;
-  document.getElementById('memoList').innerHTML = `<a href="../docs/fiches_memo/Memo_Module01.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M01 — Introduction aux BDD</a><a href="../docs/fiches_memo/Memo_Module02.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M02 — Recueil des besoins</a><a href="../docs/fiches_memo/Memo_Module03.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M03 — Dictionnaire des données</a><a href="../docs/fiches_memo/Memo_Module04.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M04 — Dépendances fonctionnelles</a><a href="../docs/fiches_memo/Memo_Module05.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M05 — MCD, entités, CIF</a><a href="../docs/fiches_memo/Memo_Module06.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M06 — MLD — Schéma relationnel</a><a href="../docs/fiches_memo/Memo_Module07.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M07 — Normalisation 1NF/2NF/3NF</a><a href="../docs/fiches_memo/Memo_Module08.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M08 — MPD, Interfaces, BDD OO</a><a href="../docs/fiches_memo/Memo_Module09.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M09 — CREATE DATABASE/TABLE</a><a href="../docs/fiches_memo/Memo_Module10.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M10 — Contraintes et intégrité</a><a href="../docs/fiches_memo/Memo_Module11.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M11 — DML INSERT/UPDATE/DELETE</a><a href="../docs/fiches_memo/Memo_Module12.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M12 — SELECT, filtrage et tri</a><a href="../docs/fiches_memo/Memo_Module13.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M13 — Agrégation GROUP BY/HAVING</a><a href="../docs/fiches_memo/Memo_Module14.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M14 — JOIN multitables</a><a href="../docs/fiches_memo/Memo_Module15.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M15 — Vues, procédures, fonctions</a><a href="../docs/fiches_memo/Memo_Module16.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M16 — Sécurité, RGPD, chiffrement</a><a href="../docs/fiches_memo/Memo_Module17.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M17 — Plan de tests</a><a href="../docs/fiches_memo/Memo_Module18.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M18 — Exécution des tests</a><a href="../docs/fiches_memo/Memo_Module19.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M19 — Documentation technique</a><a href="../docs/fiches_memo/Memo_Module20.pdf" target="_blank" download style="color:var(--accent2);text-decoration:none;display:block;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><span style="color:var(--muted);font-size:.6rem;margin-right:.3rem">⬇</span>M20 — Guide utilisateur</a>`;
-  document.getElementById('proList').innerHTML = `<div style="padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><strong>FootLocker</strong> <a href="../docs/exercices/CasPro_footlocker_Exercice.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem;margin-left:.3rem">⬇ Exercice</a> · <a href="../docs/corriges/CasPro_footlocker_Corrige.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem">⬇ Corrigé</a> · <a href="../jeux/cas_footlocker/index.html" style="color:var(--gold);text-decoration:none;font-size:.7rem">▶ Interactif</a></div><div style="padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><strong>Bateaux GVA</strong> <a href="../docs/exercices/CasPro_bateaux_gva_Exercice.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem;margin-left:.3rem">⬇ Exercice</a> · <a href="../docs/corriges/CasPro_bateaux_gva_Corrige.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem">⬇ Corrigé</a> · <a href="../jeux/cas_bateaux_gva/index.html" style="color:var(--gold);text-decoration:none;font-size:.7rem">▶ Interactif</a></div><div style="padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><strong>Boulangerie Luxe</strong> <a href="../docs/exercices/CasPro_boulangerie_Exercice.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem;margin-left:.3rem">⬇ Exercice</a> · <a href="../docs/corriges/CasPro_boulangerie_Corrige.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem">⬇ Corrigé</a> · <a href="../jeux/cas_boulangerie/index.html" style="color:var(--gold);text-decoration:none;font-size:.7rem">▶ Interactif</a></div><div style="padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.03)"><strong>Assurance</strong> <a href="../docs/exercices/CasPro_assurance_Exercice.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem;margin-left:.3rem">⬇ Exercice</a> · <a href="../docs/corriges/CasPro_assurance_Corrige.docx" download target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.7rem">⬇ Corrigé</a> · <a href="../jeux/cas_assurance/index.html" style="color:var(--gold);text-decoration:none;font-size:.7rem">▶ Interactif</a></div>`;
-}
-
-renderDocs();
-
-  } else {
-    msg.innerHTML = `<span style="color:var(--error)">Erreur : ${JSON.stringify(result?.error || result?.message || 'inconnue')}</span>`;
+    
+  } catch(e) {
+    msg.innerHTML = `<span style="color:var(--error)">Erreur : ${e.message}</span>`;
   }
 }
 

@@ -113,7 +113,26 @@ async function handleSubmit() {
   
   try {
     {
-      const result = await supabase.signIn(email, pwd);
+      // Try login first
+    let result = await supabase.signIn(email, pwd);
+    
+    // If login fails, check if profile exists — maybe auth account doesn't exist yet
+    if (!result.access_token) {
+      const profiles = await supabase.query('cq_students', { select: 'id,email', filter: { 'email': 'eq.' + email } });
+      if (profiles && profiles.length > 0) {
+        // Profile exists but no auth — try to signup first (teacher created profile without auth)
+        const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: pwd })
+        }).then(r => r.json());
+        
+        // Now try login again
+        if (!signupRes.error) {
+          result = await supabase.signIn(email, pwd);
+        }
+      }
+    }
       if (result.access_token) {
         // Load or link student profile
         const students = await supabase.query('cq_students', { select: '*', filter: { 'email': `eq.${email}` } });
