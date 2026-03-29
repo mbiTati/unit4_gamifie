@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodeQuest — SQL Editor (Supabase Live)</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.5rem;align-items:center}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:1000px;margin:0 auto;padding:1.5rem}
+.live-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:700;color:var(--accent2);background:rgba(50,224,196,.08);border:1px solid rgba(50,224,196,.2);padding:.2rem .5rem;border-radius:5px;margin-bottom:1rem}
+.live-badge::before{content:'';width:8px;height:8px;background:var(--accent2);border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.editor{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.editor-header{background:var(--surface);padding:.5rem 1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.editor-header .title{font-size:.8rem;font-weight:700;color:var(--accent2)}
+.editor-header .info{font-size:.65rem;color:var(--muted)}
+textarea{width:100%;min-height:120px;background:transparent;color:var(--text);border:none;padding:1rem;font-family:'JetBrains Mono',Consolas,monospace;font-size:.85rem;resize:vertical;line-height:1.6}
+textarea:focus{outline:none}
+.btn-bar{padding:.5rem 1rem;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.btn{padding:.4rem .8rem;border:none;border-radius:6px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-run{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-run:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(50,224,196,.2)}
+.btn-run:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-example{background:rgba(245,158,11,.08);color:var(--gold);border:1px solid rgba(245,158,11,.15)}
+.btn-clear{background:rgba(239,68,68,.08);color:var(--error);border:1px solid rgba(239,68,68,.15)}
+.result{margin-top:1rem}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.result-header .count{font-size:.8rem;font-weight:600}
+.result-header .time{font-size:.7rem;color:var(--muted)}
+.result-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.result-table th{background:var(--accent);color:#fff;padding:.4rem .6rem;text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0}
+.result-table td{padding:.35rem .6rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.75rem}
+.result-table tr:hover{background:rgba(50,224,196,.03)}
+.result-table tr:nth-child(even){background:rgba(50,224,196,.015)}
+.result-wrap{max-height:400px;overflow:auto;border:1px solid var(--border);border-radius:8px}
+.error-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:.8rem 1rem;color:var(--error);font-size:.82rem;margin-top:1rem}
+.schema-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:1rem}
+.schema-toggle{width:100%;padding:.6rem 1rem;background:none;border:none;color:var(--text);font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;text-align:left}
+.schema-content{display:none;padding:.5rem 1rem .8rem}
+.schema-content.show{display:block}
+.schema-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem}
+.schema-table{font-size:.7rem}
+.schema-table .tname{font-weight:800;color:var(--accent2);margin-bottom:.2rem}
+.schema-table .cols{font-family:monospace;color:var(--muted);font-size:.65rem;line-height:1.5}
+.examples-bar{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:1rem}
+.ex-chip{font-size:.68rem;padding:.25rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--muted);font-family:monospace;transition:.2s}
+.ex-chip:hover{border-color:var(--accent2);color:var(--accent2)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>SQL Editor — Supabase Live</h1>
+  <div class="topbar-right">
+    <a href="home.html">← Accueil</a>
+    <a href="../index.html">Hub</a>
+  </div>
+</div>
+<div class="main">
+  <div class="live-badge">LIVE — Requêtes sur les vraies tables GESCOM + SwissSound (lecture seule)</div>
+  
+  <div class="schema-panel">
+    <button class="schema-toggle" onclick="document.getElementById('schemaC').classList.toggle('show');this.querySelector('.arr').textContent=document.getElementById('schemaC').classList.contains('show')?'▼':'▶'">
+      <span style="background:var(--accent);color:#fff;font-size:.55rem;padding:.1rem .3rem;border-radius:3px;font-weight:800">BDD</span>
+      <span class="arr">▶</span> Tables disponibles (GESCOM 17 tables + SwissSound 9 tables)
+    </button>
+    <div class="schema-content" id="schemaC">
+      <div class="schema-grid" id="schemaGrid">Chargement...</div>
+    </div>
+  </div>
+  
+  <div class="examples-bar">
+    <span style="font-size:.7rem;color:var(--muted);margin-right:.3rem">Exemples :</span>
+    <div class="ex-chip" onclick="setQuery('SELECT * FROM article LIMIT 10;')">article</div>
+    <div class="ex-chip" onclick="setQuery('SELECT * FROM client LIMIT 10;')">client</div>
+    <div class="ex-chip" onclick="setQuery('SELECT NOART, DESART, LIBFAM FROM article JOIN famille ON article.NOFAM = famille.NOFAM LIMIT 10;')">JOIN</div>
+    <div class="ex-chip" onclick="setQuery('SELECT NOFAM, COUNT(*), ROUND(AVG(CAART),2) FROM article GROUP BY NOFAM ORDER BY 2 DESC;')">GROUP BY</div>
+    <div class="ex-chip" onclick="setQuery('SELECT * FROM salle;')">salle (SwissSound)</div>
+    <div class="ex-chip" onclick="setQuery('SELECT a.nom_artiste, al.titre_album FROM artiste a JOIN album al ON a.id_artiste = al.id_artiste;')">artiste+album</div>
+  </div>
+  
+  <div class="editor">
+    <div class="editor-header">
+      <div class="title">Requête SQL</div>
+      <div class="info">Ctrl+Entrée pour exécuter</div>
+    </div>
+    <textarea id="sqlInput" placeholder="-- Écrivez votre requête SQL ici...&#10;SELECT * FROM article LIMIT 10;" spellcheck="false">SELECT * FROM article LIMIT 10;</textarea>
+    <div class="btn-bar">
+      <button class="btn btn-run" id="btnRun" onclick="runQuery()">▶ Exécuter</button>
+      <button class="btn btn-clear" onclick="document.getElementById('sqlInput').value='';document.getElementById('resultArea').innerHTML=''">Effacer</button>
+      <span style="font-size:.65rem;color:var(--muted);margin-left:auto" id="status"></span>
+    </div>
+  </div>
+  
+  <div id="resultArea"></div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script>
+// Keyboard shortcut
+document.getElementById('sqlInput').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runQuery();
+  }
+  // Tab = 2 spaces
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const start = ta.selectionStart;
+    ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = start + 2;
+  }
+});
+
+function setQuery(q) {
+  document.getElementById('sqlInput').value = q;
+  document.getElementById('sqlInput').focus();
+}
+
+async function runQuery() {
+  const sql = document.getElementById('sqlInput').value.trim();
+  const resultArea = document.getElementById('resultArea');
+  const status = document.getElementById('status');
+  const btn = document.getElementById('btnRun');
+  
+  if (!sql) return;
+  
+  btn.disabled = true;
+  status.textContent = 'Exécution...';
+  const t0 = performance.now();
+  
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/execute_readonly_sql`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sql_query: sql })
+    });
+    
+    const data = await res.json();
+    const elapsed = Math.round(performance.now() - t0);
+    
+    if (data.error) {
+      resultArea.innerHTML = `<div class="error-box">${data.error}</div>`;
+      status.textContent = `Erreur (${elapsed}ms)`;
+    } else if (Array.isArray(data)) {
+      const rows = data;
+      if (rows.length === 0) {
+        resultArea.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:1rem;text-align:center">Aucun résultat.</div>';
+        status.textContent = `0 ligne (${elapsed}ms)`;
+      } else {
+        const cols = Object.keys(rows[0]);
+        let html = `<div class="result-header">
+          <div class="count">${rows.length} ligne${rows.length > 1 ? 's' : ''}</div>
+          <div class="time">${elapsed}ms</div>
+        </div>
+        <div class="result-wrap"><table class="result-table"><thead><tr>`;
+        for (const col of cols) html += `<th>${col}</th>`;
+        html += '</tr></thead><tbody>';
+        for (const row of rows) {
+          html += '<tr>';
+          for (const col of cols) {
+            const v = row[col];
+            html += `<td>${v === null ? '<em style="color:var(--muted)">NULL</em>' : v}</td>`;
+          }
+          html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        resultArea.innerHTML = html;
+        status.textContent = `${rows.length} ligne${rows.length > 1 ? 's' : ''} (${elapsed}ms)`;
+      }
+    } else {
+      resultArea.innerHTML = `<div class="error-box">${JSON.stringify(data)}</div>`;
+      status.textContent = 'Erreur';
+    }
+  } catch (e) {
+    resultArea.innerHTML = `<div class="error-box">Erreur réseau : ${e.message}</div>`;
+    status.textContent = 'Erreur réseau';
+  }
+  
+  btn.disabled = false;
+}
+
+// Load schema
+async function loadSchema() {
+  const grid = document.getElementById('schemaGrid');
+  try {
+    // Get GESCOM tables
+    const gescom = await fetch(`${SUPABASE_URL}/rest/v1/rpc/execute_readonly_sql`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sql_query: "SELECT table_name, string_agg(column_name, ', ' ORDER BY ordinal_position) as cols FROM information_schema.columns WHERE table_schema = 'gescom' GROUP BY table_name ORDER BY table_name" })
+    }).then(r => r.json());
+    
+    const swisssound = await fetch(`${SUPABASE_URL}/rest/v1/rpc/execute_readonly_sql`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sql_query: "SELECT table_name, string_agg(column_name, ', ' ORDER BY ordinal_position) as cols FROM information_schema.columns WHERE table_schema = 'swisssound' GROUP BY table_name ORDER BY table_name" })
+    }).then(r => r.json());
+    
+    let html = '<div style="margin-bottom:.5rem;font-weight:700;color:var(--accent2);font-size:.75rem">GESCOM</div>';
+    if (Array.isArray(gescom)) {
+      for (const t of gescom) {
+        html += `<div class="schema-table"><div class="tname">${t.table_name}</div><div class="cols">${t.cols}</div></div>`;
+      }
+    }
+    html += '<div style="margin-top:.8rem;margin-bottom:.5rem;font-weight:700;color:var(--gold);font-size:.75rem">SWISSSOUND</div>';
+    if (Array.isArray(swisssound)) {
+      for (const t of swisssound) {
+        html += `<div class="schema-table"><div class="tname">${t.table_name}</div><div class="cols">${t.cols}</div></div>`;
+      }
+    }
+    grid.innerHTML = html;
+  } catch (e) {
+    grid.innerHTML = '<div style="color:var(--error);font-size:.8rem">Erreur chargement schéma</div>';
+  }
+}
+
+loadSchema();
+</script>
+</body>
+</html>
