@@ -58,10 +58,57 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   
   <div class="spinner" id="spinner"></div>
   
+  <div style="text-align:center;margin-top:1rem">
+    <button onclick="showForgot()" style="background:none;border:none;color:var(--accent2);font-family:inherit;font-size:.78rem;cursor:pointer;text-decoration:underline">Mot de passe oublié ?</button>
+  </div>
   <div class="note">Votre compte est créé par votre enseignant(e)</div>
+  
+  <!-- FORGOT PASSWORD MODAL -->
+  <div id="forgotModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;width:90%;max-width:380px">
+      <h3 style="font-size:.95rem;font-weight:700;margin-bottom:.5rem;color:var(--accent2)">Réinitialiser le mot de passe</h3>
+      <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Un email de réinitialisation sera envoyé à votre adresse.</p>
+      <div class="field">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--muted);margin-bottom:.3rem">Email</label>
+        <div class="wrap"><input type="email" id="resetEmail" placeholder="votre.email@example.com" style="width:100%;padding:.6rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem"></div>
+      </div>
+      <button onclick="sendReset()" style="width:100%;padding:.6rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:.8rem">Envoyer le lien</button>
+      <div id="resetMsg" style="font-size:.78rem;margin-top:.5rem;text-align:center;min-height:1.5rem"></div>
+    </div>
+  </div>
 </div>
 
-<script src="supabase-config.js"></script>
+<script src="supabase-config.js">
+function showForgot() {
+  document.getElementById('forgotModal').style.display = 'flex';
+  document.getElementById('resetEmail').value = document.getElementById('email').value || '';
+  document.getElementById('resetMsg').textContent = '';
+}
+
+async function sendReset() {
+  const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+  const msg = document.getElementById('resetMsg');
+  
+  if (!email) { msg.innerHTML = '<span style="color:var(--error)">Entrez votre email.</span>'; return; }
+  
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/recover', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    
+    if (res.ok) {
+      msg.innerHTML = '<span style="color:var(--lo1)">Email envoyé ! Vérifiez votre boîte de réception.</span>';
+    } else {
+      const data = await res.json();
+      msg.innerHTML = '<span style="color:var(--error)">' + (data.msg || 'Erreur. Vérifiez l\'email.') + '</span>';
+    }
+  } catch(e) {
+    msg.innerHTML = '<span style="color:var(--error)">Erreur réseau.</span>';
+  }
+}
+</script>
 <script>
 // If already logged in, redirect
 const existingStudent = JSON.parse(localStorage.getItem('cq_student') || 'null');
@@ -164,6 +211,36 @@ function showError(msg) {
   document.getElementById('form').style.display = 'block';
   document.getElementById('spinner').style.display = 'none';
   document.getElementById('msgArea').innerHTML = '<div class="msg error">' + msg + '</div>';
+}
+
+function showForgot() {
+  document.getElementById('forgotModal').style.display = 'flex';
+  document.getElementById('resetEmail').value = document.getElementById('email').value || '';
+  document.getElementById('resetMsg').textContent = '';
+}
+
+async function sendReset() {
+  const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+  const msg = document.getElementById('resetMsg');
+  
+  if (!email) { msg.innerHTML = '<span style="color:var(--error)">Entrez votre email.</span>'; return; }
+  
+  try {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/recover', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    
+    if (res.ok) {
+      msg.innerHTML = '<span style="color:var(--lo1)">Email envoyé ! Vérifiez votre boîte de réception.</span>';
+    } else {
+      const data = await res.json();
+      msg.innerHTML = '<span style="color:var(--error)">' + (data.msg || 'Erreur. Vérifiez l\'email.') + '</span>';
+    }
+  } catch(e) {
+    msg.innerHTML = '<span style="color:var(--error)">Erreur réseau.</span>';
+  }
 }
 </script>
 </body>
