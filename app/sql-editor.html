@@ -53,6 +53,10 @@ textarea:focus{outline:none}
 </style>
 </head>
 <body>
+<script>
+if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
+</script>
+
 <div class="topbar">
   <h1>SQL Editor — Supabase Live</h1>
   <div class="topbar-right">

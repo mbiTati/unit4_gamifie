@@ -13,6 +13,10 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line
 </style>
 </head>
 <body>
+<script>
+if (!localStorage.getItem('cq_student')) { window.location.href = 'app/login.html'; }
+</script>
+
 <header class="header"><div class="header-inner"><div class="brand"><div class="brand-icon">U4</div><div><h1>Unit 4 — Database Design & Development</h1><p>SwissSound Studios &middot; Mme MBI</p></div></div><nav class="nav-pills"><span class="nav-pill" onclick="s('top')">Hub</span><span class="nav-pill" onclick="s('m1')">LO1</span><span class="nav-pill" onclick="s('m2')">LO2</span><span class="nav-pill" onclick="s('m3')">LO3</span><span class="nav-pill" onclick="s('m4')">LO4</span><div style="width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:.3s" id="toggleDot"></div></div><a href="app/teacher.html" style="padding:.3rem .7rem;border-radius:6px;font-size:.72rem;font-weight:600;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);color:#a855f7;cursor:pointer;transition:.2s;text-decoration:none">Espace enseignant</a></nav>
 </div></header>
 <main class="main" id="top">

@@ -52,6 +52,10 @@ textarea.sql-input{width:100%;min-height:60px;background:var(--code-bg);color:va
 </style>
 </head>
 <body>
+<script>
+if (!localStorage.getItem('cq_student')) { window.location.href = '../../app/login.html'; }
+</script>
+
 <div class="header">
 <a href="../../index.html" style="font-size:.78rem;color:var(--muted);text-decoration:none;font-weight:600;padding:.3rem .6rem;border:1px solid rgba(148,163,184,.2);border-radius:5px">← Hub</a>
 <div><h1>Cas Pro — FootLocker</h1><div class="sub">Gestion magasin chaussures sport — Suisse romande</div></div>

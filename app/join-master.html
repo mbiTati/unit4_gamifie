@@ -46,6 +46,10 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 </style>
 </head>
 <body>
+<script>
+if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
+</script>
+
 <div class="topbar">
   <h1>Join Master</h1>
   <div class="topbar-right"><a href="home.html">← Accueil</a></div>

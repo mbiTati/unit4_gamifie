@@ -41,6 +41,10 @@ textarea:focus{outline:none;border-color:var(--accent2)}
 </style>
 </head>
 <body>
+<script>
+if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
+</script>
+
 <div class="topbar">
   <h1>Query Racer</h1>
   <div class="topbar-right"><a href="home.html">← Accueil</a></div>
