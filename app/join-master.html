@@ -323,6 +323,7 @@ function showResult(ex, joinType) {
 function nextExercise() {
   current++;
   if (current >= EXERCISES.length) {
+    saveGameScore('join-master', score, 0);
     document.querySelector('.main').innerHTML = `
       <div style="text-align:center;padding:3rem">
         <div style="font-size:3rem;margin-bottom:1rem">${score >= 50 ? '🏆' : score >= 30 ? '⭐' : '💪'}</div>
@@ -338,5 +339,6 @@ function nextExercise() {
 
 renderExercise();
 </script>
+<script src="progress-saver.js"></script>
 </body>
 </html>

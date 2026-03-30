@@ -41,13 +41,12 @@
           'apikey': SUPABASE_ANON_KEY,
           'Content-Type': 'application/json',
           'Prefer': 'return=representation',
-          'Authorization': `Bearer ${localStorage.getItem('cq_token') || SUPABASE_ANON_KEY}`,
+          
         },
         body: JSON.stringify({
           student_id: student.id,
-          content: text,
+          message: text,
           page_context: document.title,
-          unit_id: 4,
         })
       });
       

@@ -216,6 +216,7 @@ function skip() {
 }
 
 function endGame() {
+  saveGameScore("query-racer", score, 0);
   clearInterval(timer);
   document.getElementById('car').style.left = '85%';
   document.querySelector('.main').innerHTML = `
@@ -237,5 +238,6 @@ document.getElementById('sqlInput').addEventListener('keydown', e => {
 
 init();
 </script>
+<script src="progress-saver.js"></script>
 </body>
 </html>

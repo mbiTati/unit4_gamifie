@@ -242,6 +242,7 @@ function validateAnswer() {
 }
 
 function endGame() {
+  saveGameScore("constraint-catcher", score, 0);
   const pct = Math.round(correct / SCHEMAS.length * 100);
   document.getElementById('gameArea').innerHTML = `
     <div style="text-align:center;padding:3rem">
@@ -259,5 +260,6 @@ function endGame() {
 
 renderSchema();
 </script>
+<script src="progress-saver.js"></script>
 </body>
 </html>

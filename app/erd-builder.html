@@ -235,6 +235,7 @@ function checkERD() {
 }
 
 function endGame() {
+  saveGameScore("erd-builder", score, 0);
   document.getElementById('gameArea').innerHTML = `
     <div style="text-align:center;padding:3rem">
       <div style="font-size:3rem;margin-bottom:1rem">🏆</div>
@@ -247,5 +248,6 @@ function endGame() {
 
 renderChallenge();
 </script>
+<script src="progress-saver.js"></script>
 </body>
 </html>

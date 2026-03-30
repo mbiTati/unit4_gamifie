@@ -313,6 +313,7 @@ function checkDFs() {
 }
 
 function endGame() {
+  saveGameScore("df-explorer", score, 0);
   document.getElementById('gameArea').innerHTML = `
     <div style="text-align:center;padding:3rem">
       <div style="font-size:3rem;margin-bottom:1rem">🏆</div>
@@ -325,5 +326,6 @@ function endGame() {
 
 renderExercise();
 </script>
+<script src="progress-saver.js"></script>
 </body>
 </html>

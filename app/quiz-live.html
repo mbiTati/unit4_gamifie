@@ -192,6 +192,7 @@ function revealAnswer(idx) {
 }
 
 function showFinal() {
+  saveGameScore("quiz-live", score, 0);
   const maxScore = questions.length * 250;
   const pct = Math.round(score / maxScore * 100);
   
@@ -209,5 +210,6 @@ function showFinal() {
   `;
 }
 </script>
+<script src="progress-saver.js"></script>
 </body>
 </html>
