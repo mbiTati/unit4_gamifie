@@ -1018,5 +1018,33 @@ renderDocs();
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>
+
+<script>
+// Hide corriges from students accessing ?tab=docs
+(function() {
+  var stu = JSON.parse(localStorage.getItem('cq_student') || '{}');
+  if (stu.role !== 'teacher') {
+    // Hide all links containing "Corrig" or "corrig"
+    var links = document.querySelectorAll('a[href*="orrig"], a[href*="CORRIG"]');
+    for (var i = 0; i < links.length; i++) {
+      links[i].style.display = 'none';
+    }
+    // Also hide sections titled "Corrigés"
+    var headers = document.querySelectorAll('h3, h4, .section-title');
+    for (var j = 0; j < headers.length; j++) {
+      if (headers[j].textContent.indexOf('orrigé') > -1 || headers[j].textContent.indexOf('ORRIGÉ') > -1) {
+        // Hide the header and its parent section
+        var parent = headers[j].parentElement;
+        if (parent) parent.style.display = 'none';
+      }
+    }
+    // Hide guide enseignante and plan
+    var teacherDocs = document.querySelectorAll('a[href*="GUIDE_ENSEIGNANTE"], a[href*="PLAN_COMPLET"]');
+    for (var k = 0; k < teacherDocs.length; k++) {
+      teacherDocs[k].style.display = 'none';
+    }
+  }
+})();
+</script>
 </body>
 </html>

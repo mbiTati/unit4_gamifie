@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Documents</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;background:none;cursor:pointer;font-family:inherit}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+.section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.section h3{font-size:.85rem;font-weight:700;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.section .tag{font-size:.55rem;font-weight:800;padding:.1rem .4rem;border-radius:3px}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.4rem}
+.doc-link{display:flex;align-items:center;gap:.4rem;padding:.3rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;text-decoration:none;color:var(--text);font-size:.72rem;transition:all .15s}
+.doc-link:hover{border-color:var(--accent2);background:rgba(50,224,196,.03)}
+.doc-icon{font-size:.6rem;font-weight:800;padding:.15rem .3rem;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
+<div class="topbar">
+  <h1>Documents</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+    <a href="scores.html">Classement</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="localStorage.clear();window.location.href='login.html'">Déconnexion</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- FICHES MEMO -->
+  <div class="section">
+    <h3><span class="tag" style="background:rgba(50,224,196,.1);color:var(--accent2)">MÉMO</span> Fiches mémo (20 chapitres)</h3>
+    <div class="doc-grid" id="memos"></div>
+  </div>
+  
+  <!-- EXERCICES -->
+  <div class="section">
+    <h3><span class="tag" style="background:rgba(59,130,246,.1);color:var(--lo2)">EXERCICES</span> Exercices par module</h3>
+    <div class="doc-grid" id="exercices"></div>
+  </div>
+  
+  <!-- CAS PRO EXERCICES -->
+  <div class="section">
+    <h3><span class="tag" style="background:rgba(245,158,11,.1);color:var(--gold)">CAS PRO</span> Exercices professionnels</h3>
+    <div class="doc-grid" id="caspro"></div>
+  </div>
+</div>
+
+<script>
+// Generate memo links
+var memos = '';
+for (var i = 1; i <= 20; i++) {
+  var n = i < 10 ? '0' + i : '' + i;
+  memos += '<a class="doc-link" href="../docs/fiches_memo/Memo_Module' + n + '.pdf" target="_blank"><span class="doc-icon" style="background:rgba(50,224,196,.1);color:var(--accent2)">PDF</span>Mémo Ch.' + i + '</a>';
+}
+document.getElementById('memos').innerHTML = memos;
+
+// Generate exercise links (NO corriges!)
+var exos = '';
+for (var j = 1; j <= 20; j++) {
+  var m = j < 10 ? '0' + j : '' + j;
+  exos += '<a class="doc-link" href="../docs/exercices/Module' + m + '_Exercices.docx" target="_blank"><span class="doc-icon" style="background:rgba(59,130,246,.1);color:var(--lo2)">DOC</span>Exercices Ch.' + j + '</a>';
+}
+document.getElementById('exercices').innerHTML = exos;
+
+// Cas pro exercises (NOT corriges)
+var cas = [
+  {name: 'FootLocker', file: 'CasPro_footlocker_Exercice.docx'},
+  {name: 'Bateaux GVA', file: 'CasPro_bateaux_gva_Exercice.docx'},
+  {name: 'Boulangerie', file: 'CasPro_boulangerie_Exercice.docx'},
+  {name: 'Assurance', file: 'CasPro_assurance_Exercice.docx'},
+];
+var casHtml = '';
+for (var k = 0; k < cas.length; k++) {
+  casHtml += '<a class="doc-link" href="../docs/exercices/' + cas[k].file + '" target="_blank"><span class="doc-icon" style="background:rgba(245,158,11,.1);color:var(--gold)">PRO</span>' + cas[k].name + '</a>';
+}
+document.getElementById('caspro').innerHTML = casHtml;
+</script>
+<script src="presence-tracker.js?v=1774960217"></script>
+<script src="duel-notify.js?v=1774960217"></script>
+</body>
+</html>
