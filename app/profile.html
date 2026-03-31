@@ -95,6 +95,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <div class="stat"><div class="n" id="sExo" style="color:var(--lo2)">0</div><div class="l">Exercices faits</div></div>
     <div class="stat"><div class="n" id="sScore" style="color:var(--gold)">0</div><div class="l">Score total</div></div>
     <div class="stat"><div class="n" id="sGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div>
+    <div class="stat"><div class="n" id="sDuels" style="color:var(--gold)">0</div><div class="l">Duels joués</div></div>
     <div class="stat"><div class="n" id="sBest" style="color:var(--lo1)">-</div><div class="l">Meilleur score</div></div>
   </div>
   
@@ -219,6 +220,8 @@ async function loadProfile() {
   document.getElementById('sExo').textContent = uniqueExercises;
   document.getElementById('sScore').textContent = totalGameScore;
   document.getElementById('sGames').textContent = scores.length;
+  const duelCount = scores.filter(g => g.game_id === 'duel-sql').length;
+  document.getElementById('sDuels').textContent = duelCount;
   document.getElementById('sBest').textContent = bestScore > 0 ? bestScore : '-';
   
   // LEVELS GALLERY

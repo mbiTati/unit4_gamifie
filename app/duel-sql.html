@@ -85,6 +85,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
     <div class="section-title">1. Choisissez l'exercice du duel</div>
     <div class="exercise-grid" id="exerciseGrid"></div>
     <div style="text-align:center;margin-top:.5rem">
+      <div id="duelCounter" style="font-size:.75rem;margin-bottom:.5rem"></div>
       <button class="btn btn-gold" onclick="goStep2()" id="btnStep2" disabled>Suivant → Choisir l'adversaire</button>
     </div>
   </div>
@@ -159,6 +160,25 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 <script>
 const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
 const isTeacher = student && student.role === 'teacher';
+
+// Daily duel limit
+const DUEL_MAX_PER_DAY = 3;
+function getDuelCount() {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = JSON.parse(localStorage.getItem('dq_duel_count') || '{}');
+  if (data.date !== today) return 0;
+  return data.count || 0;
+}
+function incrementDuelCount() {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = JSON.parse(localStorage.getItem('dq_duel_count') || '{}');
+  if (data.date !== today) { localStorage.setItem('dq_duel_count', JSON.stringify({date: today, count: 1})); return 1; }
+  data.count = (data.count || 0) + 1;
+  localStorage.setItem('dq_duel_count', JSON.stringify(data));
+  return data.count;
+}
+function canDuel() { return getDuelCount() < DUEL_MAX_PER_DAY; }
+
 const SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
 const AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
 
@@ -306,6 +326,20 @@ function renderExercises() {
       selectExercise(this.dataset.id);
     });
   });
+  
+  // Show duel counter
+  var dc = getDuelCount();
+  var remain = DUEL_MAX_PER_DAY - dc;
+  var counterEl = document.getElementById('duelCounter');
+  if (counterEl) {
+    if (remain <= 0 && !isTeacher) {
+      counterEl.innerHTML = '<span style="color:var(--error);font-weight:700">⚠ 0/' + DUEL_MAX_PER_DAY + ' duels restants aujourd\'hui. Revenez demain !</span>';
+      document.getElementById('btnStep2').disabled = true;
+      document.getElementById('btnStep2').style.opacity = '.3';
+    } else {
+      counterEl.innerHTML = '<span style="color:var(--accent2)">' + remain + '/' + DUEL_MAX_PER_DAY + ' duels restants aujourd\'hui</span>';
+    }
+  }
 }
 
 function selectExercise(id) {
@@ -409,6 +443,7 @@ function selectPlayer(id, first, last) {
 // ========== LAUNCH DUEL ==========
 async function launchDuel() {
   if (!selectedExercise || !selectedOpponent) return;
+  if (!isTeacher && !canDuel()) { alert('Maximum ' + DUEL_MAX_PER_DAY + ' duels par jour atteint !'); return; }
   
   const qs = [...selectedExercise.questions].sort(() => Math.random() - 0.5);
   oppName = selectedOpponent.name;
@@ -445,6 +480,7 @@ async function launchDuel() {
 
 function startSoloDuel() {
   if (!selectedExercise) return;
+  if (!isTeacher && !canDuel()) { alert('Maximum ' + DUEL_MAX_PER_DAY + ' duels par jour atteint !'); return; }
   oppName = 'Bot SQL';
   const qs = [...selectedExercise.questions].sort(() => Math.random() - 0.5);
   startArena(qs, 'Bot SQL');
@@ -461,6 +497,7 @@ function startArena(qs, opp) {
   questions = qs; currentQ = 0; myScore = 0; oppScore = 0; oppName = opp; timeLeft = 300; _amP1 = null;
   
   goStep(4);
+  if (!isTeacher) incrementDuelCount();
   document.getElementById('nameMe').textContent = student.first_name;
   document.getElementById('nameOpp').textContent = oppName;
   document.getElementById('exTitle').textContent = selectedExercise ? '⚔️ ' + selectedExercise.name : '';

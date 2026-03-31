@@ -553,8 +553,9 @@ function renderData() {
     const quizAvg = quizScores.length > 0 ? Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) : -1;
     const level = getLevel(xp);
     const pct = Math.round(completed / 20 * 100);
+    const duelCount = myGames.filter(g => g.game_id === 'duel-sql').length;
     const isActive = myGames.length > 0 || sp.length > 0;
-    return { ...s, completed, xp, quizAvg, level, pct, exercisesDone, totalGameScore, lastPlayed, isActive, atRisk: isActive && (pct < 20 || exercisesDone < 3) };
+    return { ...s, completed, xp, quizAvg, level, pct, exercisesDone, duelCount, totalGameScore, lastPlayed, isActive, atRisk: isActive && (pct < 20 || exercisesDone < 3) };
   }).sort((a, b) => b.xp - a.xp);
   
   // KPIs
@@ -580,7 +581,7 @@ function renderData() {
   else badge.style.display = 'none';
   
   // Table
-  document.getElementById('thead').innerHTML = '<tr><th>Élève</th><th>Classe</th><th>Niveau</th><th>XP</th><th>Exercices</th><th>Score jeux</th><th>Dernière activité</th><th>Actions</th></tr>';
+  document.getElementById('thead').innerHTML = '<tr><th>Élève</th><th>Classe</th><th>Niveau</th><th>XP</th><th>Exercices</th><th>Duels</th><th>Score jeux</th><th>Dernière activité</th><th>Actions</th></tr>';
   document.getElementById('tbody').innerHTML = stats.map(s => {
     const lastDate = s.lastPlayed ? new Date(s.lastPlayed).toLocaleDateString('fr-CH') : 'Jamais';
     return '<tr>' +
@@ -589,6 +590,7 @@ function renderData() {
       '<td><span class="level-chip" style="background:' + s.level.color + '15;color:' + s.level.color + '">' + s.level.name + '</span></td>' +
       '<td style="font-family:monospace;font-weight:600">' + s.xp + '</td>' +
       '<td style="font-weight:700;color:' + (s.exercisesDone > 5 ? 'var(--lo1)' : s.exercisesDone > 0 ? 'var(--gold)' : 'var(--muted)') + '">' + s.exercisesDone + ' jeux</td>' +
+      '<td style="font-weight:700;color:' + (s.duelCount > 0 ? 'var(--gold)' : 'var(--muted)') + '">' + s.duelCount + '</td>' +
       '<td style="font-family:monospace">' + s.totalGameScore + ' pts</td>' +
       '<td style="font-size:.7rem;color:var(--muted)">' + lastDate + '</td>' +
       '<td><button class="btn-sm btn-danger" onclick="resetStudent(\'' + s.id + '\')">Reset</button></td>' +

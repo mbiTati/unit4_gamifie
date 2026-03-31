@@ -77,6 +77,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <button class="tab active" onclick="showTab('xp',this)">Classement XP</button>
     <button class="tab" onclick="showTab('exercises',this)">Par exercices</button>
     <button class="tab" onclick="showTab('scores',this)">Par score total</button>
+    <button class="tab" onclick="showTab('duels',this)">Duels ⚔️</button>
   </div>
   
   <div id="tab-xp">
@@ -91,6 +92,10 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <div class="podium" id="podiumScore"></div>
     <div class="board" id="boardScore"></div>
   </div>
+  <div id="tab-duels" style="display:none">
+    <div class="podium" id="podiumDuels"></div>
+    <div class="board" id="boardDuels"></div>
+  </div>
 </div>
 
 <script src="characters.js"></script>
@@ -101,7 +106,7 @@ const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
 function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  ['xp','exercises','scores'].forEach(t => {
+  ['xp','exercises','scores','duels'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === id ? 'block' : 'none';
   });
@@ -186,9 +191,21 @@ async function loadScores() {
   const byExo = [...rankings].sort((a, b) => b.exercisesDone - a.exercisesDone || b.totalGameScore - a.totalGameScore);
   const byScore = [...rankings].sort((a, b) => b.totalGameScore - a.totalGameScore);
   
-  renderBoard('XP', byXP, 'totalXP', 'XP', 'exercisesDone', 'Exercices');
-  renderBoard('Exo', byExo, 'exercisesDone', 'Exercices', 'totalGameScore', 'Score');
-  renderBoard('Score', byScore, 'totalGameScore', 'Score', 'exercisesDone', 'Exercices');
+  // Add duel stats
+  const rankingsWithDuels = rankings.map(r => {
+    const duelGames = gsList.filter(g => g.student_id === r.id && g.game_id === 'duel-sql');
+    return { ...r, duelCount: duelGames.length, duelScore: duelGames.reduce((a,g) => a + (g.score||0), 0) };
+  });
+  
+  const byXP2 = [...rankingsWithDuels].sort((a, b) => b.totalXP - a.totalXP);
+  const byExo2 = [...rankingsWithDuels].sort((a, b) => b.exercisesDone - a.exercisesDone || b.totalGameScore - a.totalGameScore);
+  const byScore2 = [...rankingsWithDuels].sort((a, b) => b.totalGameScore - a.totalGameScore);
+  const byDuels = [...rankingsWithDuels].sort((a, b) => b.duelScore - a.duelScore || b.duelCount - a.duelCount);
+  
+  renderBoard('XP', byXP2, 'totalXP', 'XP', 'exercisesDone', 'Exercices');
+  renderBoard('Exo', byExo2, 'exercisesDone', 'Exercices', 'totalGameScore', 'Score');
+  renderBoard('Score', byScore2, 'totalGameScore', 'Score', 'exercisesDone', 'Exercices');
+  renderBoard('Duels', byDuels, 'duelScore', 'Pts duel', 'duelCount', 'Duels');
 }
 
 function renderBoard(suffix, data, mainKey, mainLabel, secKey, secLabel) {
