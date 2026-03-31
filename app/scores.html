@@ -1,105 +1,220 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DataQuest — Classement</title>
 <style>
-:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444}
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
-.main{max-width:700px;margin:0 auto;padding:1.5rem}
-.podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin:2rem 0;height:200px}
-.podium-slot{text-align:center;border-radius:10px 10px 0 0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:.8rem;min-width:100px}
-.podium-slot .name{font-weight:700;font-size:.85rem;margin-bottom:.3rem}
-.podium-slot .xp{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.1rem}
-.podium-slot .rank{font-size:1.5rem;margin-bottom:.3rem}
-.p1{height:180px;background:linear-gradient(to top,rgba(245,158,11,.15),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.3)}
-.p2{height:140px;background:linear-gradient(to top,rgba(148,163,184,.1),rgba(148,163,184,.03));border:1px solid rgba(148,163,184,.2)}
-.p3{height:110px;background:linear-gradient(to top,rgba(205,127,50,.1),rgba(205,127,50,.03));border:1px solid rgba(205,127,50,.2)}
-.leaderboard{margin-top:1rem}
-.lb-row{display:flex;align-items:center;gap:1rem;padding:.6rem .8rem;border-bottom:1px solid var(--border);transition:background .2s}
-.lb-row:hover{background:rgba(50,224,196,.03)}
-.lb-row.me{background:rgba(50,224,196,.06);border-left:3px solid var(--accent2)}
-.lb-rank{width:30px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--muted);text-align:center}
-.lb-name{flex:1;font-weight:600;font-size:.85rem}
-.lb-level{font-size:.65rem;font-weight:700;padding:.1rem .4rem;border-radius:3px}
-.lb-xp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;color:var(--accent2)}
+.topbar-right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.main{max-width:800px;margin:0 auto;padding:1.5rem}
+
+/* TABS */
+.tabs{display:flex;gap:.3rem;margin-bottom:1.2rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.tab{padding:.4rem .8rem;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:none;font-family:inherit;border-radius:6px 6px 0 0}
+.tab.active{color:var(--accent2);border-bottom:2px solid var(--accent2)}
+
+/* PODIUM */
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin-bottom:2rem;min-height:200px}
+.podium-item{text-align:center;position:relative}
+.podium-bar{border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:.8rem .6rem;min-width:100px}
+.podium-rank{font-size:1.5rem;font-weight:900;margin-bottom:.3rem}
+.podium-char{width:50px;height:65px;margin:0 auto}
+.podium-name{font-size:.75rem;font-weight:700;margin-top:.4rem;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium-score{font-size:.7rem;color:var(--muted)}
+.podium-xp{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem}
+
+/* LEADERBOARD */
+.board{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.board-row{display:flex;align-items:center;padding:.6rem 1rem;border-bottom:1px solid var(--border);gap:.8rem;transition:background .2s}
+.board-row:last-child{border-bottom:none}
+.board-row:hover{background:rgba(50,224,196,.02)}
+.board-row.me{background:rgba(50,224,196,.05);border-left:3px solid var(--accent2)}
+.rank{font-size:.9rem;font-weight:800;min-width:28px;text-align:center;font-family:'JetBrains Mono',monospace}
+.rank-1{color:#fbbf24}.rank-2{color:#d1d5db}.rank-3{color:#d97706}
+.board-char{width:36px;height:46px;flex-shrink:0}
+.board-info{flex:1;min-width:0}
+.board-name{font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-level{font-size:.62rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;display:inline-block}
+.board-stats{display:flex;gap:1rem;align-items:center;flex-shrink:0}
+.board-stat{text-align:right}
+.board-stat .n{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem}
+.board-stat .l{font-size:.55rem;color:var(--muted);text-transform:uppercase}
+
+/* EMPTY */
+.empty{text-align:center;padding:3rem;color:var(--muted)}
 </style>
 </head>
 <body>
 <script>
 if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
 </script>
-
 <div class="topbar">
-  <h1>Classement — Unit 4</h1>
-  <div class="topbar-right"><a href="profile.html">Mon Profil</a>
-    <a href="home.html">← Accueil</a></div>
-</div>
-<div class="main">
-  <div class="podium" id="podium"></div>
-  <div class="leaderboard" id="leaderboard"><div style="text-align:center;color:var(--muted);padding:2rem">Chargement...</div></div>
+  <h1>Classement</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html" style="color:var(--accent2)">Mon Profil</a>
+    <a href="settings.html">Paramètres</a>
+  </div>
 </div>
 
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('xp',this)">Classement XP</button>
+    <button class="tab" onclick="showTab('exercises',this)">Par exercices</button>
+    <button class="tab" onclick="showTab('scores',this)">Par score total</button>
+  </div>
+  
+  <div id="tab-xp">
+    <div class="podium" id="podiumXP"></div>
+    <div class="board" id="boardXP"></div>
+  </div>
+  <div id="tab-exercises" style="display:none">
+    <div class="podium" id="podiumExo"></div>
+    <div class="board" id="boardExo"></div>
+  </div>
+  <div id="tab-scores" style="display:none">
+    <div class="podium" id="podiumScore"></div>
+    <div class="board" id="boardScore"></div>
+  </div>
+</div>
+
+<script src="characters.js"></script>
 <script src="supabase-config.js"></script>
 <script>
-const currentStudent = JSON.parse(localStorage.getItem('cq_student') || 'null');
+const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
 
-async function loadLeaderboard() {
-  const students = await supabase.query('cq_students', {
-    select: '*',
-    filter: { 'role': 'eq.student', 'class_name': 'eq.BI1' }
+function showTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  ['xp','exercises','scores'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.style.display = t === id ? 'block' : 'none';
   });
-  
-  const allProgress = await supabase.query('cq_student_progress', {
-    select: '*',
-    filter: { 'module_id': 'gte.401' }
-  }) || [];
-  
-  // Calculate XP per student
-  const rankings = students.map(s => {
-    const sp = allProgress.filter(p => p.student_id === s.id && p.module_id >= 401 && p.module_id <= 420);
-    let xp = 0;
-    for (const p of sp) xp += (p.credits_earned || 0) + (p.game_score || 0);
-    const level = getLevel(xp);
-    return { ...s, xp, level };
-  }).sort((a, b) => b.xp - a.xp);
-  
-  // Podium
-  const podium = document.getElementById('podium');
-  const top3 = rankings.slice(0, 3);
-  const medals = ['🥇', '🥈', '🥉'];
-  const pClasses = ['p2', 'p1', 'p3'];
-  const order = [1, 0, 2]; // Display order: 2nd, 1st, 3rd
-  
-  podium.innerHTML = order.map(i => {
-    const s = top3[i];
-    if (!s) return '';
-    return `<div class="podium-slot ${pClasses[i]}">
-      <div class="rank">${medals[i]}</div>
-      <div class="name">${s.first_name}</div>
-      <div class="xp" style="color:${s.level.color}">${s.xp} XP</div>
-      <div style="font-size:.65rem;color:var(--muted)">${s.level.name}</div>
-    </div>`;
-  }).join('');
-  
-  // Full leaderboard
-  const lb = document.getElementById('leaderboard');
-  lb.innerHTML = rankings.map((s, i) => {
-    const isMe = currentStudent && s.id === currentStudent.id;
-    return `<div class="lb-row ${isMe ? 'me' : ''}">
-      <div class="lb-rank">${i + 1}</div>
-      <div class="lb-name">${s.first_name} ${s.last_name}${isMe ? ' (vous)' : ''}</div>
-      <span class="lb-level" style="background:${s.level.color}15;color:${s.level.color}">${s.level.name}</span>
-      <div class="lb-xp">${s.xp} XP</div>
-    </div>`;
-  }).join('');
 }
 
-loadLeaderboard();
+async function loadScores() {
+  const students = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
+  const allStudents = Array.isArray(students) ? students.filter(s => s.role !== 'teacher') : [];
+  
+  const progress = await supabase.query('cq_student_progress', { select: '*' }) || [];
+  const progressList = Array.isArray(progress) ? progress : [];
+  
+  const gameScores = await supabase.query('cq_game_scores', { select: '*' }) || [];
+  const gsList = Array.isArray(gameScores) ? gameScores : [];
+  
+  // Calculate per-student stats
+  const rankings = allStudents.map(s => {
+    const sp = progressList.filter(p => p.student_id === s.id);
+    let xpFromProgress = 0;
+    for (const p of sp) xpFromProgress += (p.credits_earned || 0) + (p.game_score || 0);
+    
+    const myGames = gsList.filter(g => g.student_id === s.id);
+    const totalGameScore = myGames.reduce((a, g) => a + (g.score || 0), 0);
+    const exercisesDone = new Set(myGames.map(g => g.game_id)).size;
+    const totalXP = xpFromProgress + Math.floor(totalGameScore / 10);
+    const level = getLevel(totalXP);
+    
+    return {
+      ...s,
+      totalXP,
+      totalGameScore,
+      exercisesDone,
+      gamesPlayed: myGames.length,
+      level,
+    };
+  });
+  
+  // Sort for each tab
+  const byXP = [...rankings].sort((a, b) => b.totalXP - a.totalXP);
+  const byExo = [...rankings].sort((a, b) => b.exercisesDone - a.exercisesDone || b.totalGameScore - a.totalGameScore);
+  const byScore = [...rankings].sort((a, b) => b.totalGameScore - a.totalGameScore);
+  
+  renderBoard('XP', byXP, 'totalXP', 'XP', 'exercisesDone', 'Exercices');
+  renderBoard('Exo', byExo, 'exercisesDone', 'Exercices', 'totalGameScore', 'Score');
+  renderBoard('Score', byScore, 'totalGameScore', 'Score', 'exercisesDone', 'Exercices');
+}
+
+function renderBoard(suffix, data, mainKey, mainLabel, secKey, secLabel) {
+  const podium = document.getElementById('podium' + suffix);
+  const board = document.getElementById('board' + suffix);
+  
+  if (data.length === 0) {
+    podium.innerHTML = '';
+    board.innerHTML = '<div class="empty">Aucune donnée pour le moment.</div>';
+    return;
+  }
+  
+  // Podium — top 3
+  const podiumColors = ['#fbbf24', '#d1d5db', '#d97706'];
+  const podiumHeights = [160, 130, 110];
+  const podiumOrder = data.length >= 3 ? [1, 0, 2] : data.length >= 2 ? [1, 0] : [0];
+  
+  let pHtml = '';
+  for (const pos of podiumOrder) {
+    if (pos >= data.length) continue;
+    const s = data[pos];
+    const color = podiumColors[pos];
+    const h = podiumHeights[pos];
+    pHtml += '<div class="podium-item">';
+    pHtml += '<div class="podium-char" id="podchar' + suffix + pos + '"></div>';
+    pHtml += '<div class="podium-bar" style="height:' + h + 'px;background:' + color + '12;border:1px solid ' + color + '30">';
+    pHtml += '<div class="podium-rank" style="color:' + color + '">' + (pos === 0 ? '🥇' : pos === 1 ? '🥈' : '🥉') + '</div>';
+    pHtml += '<div class="podium-xp" style="color:' + color + '">' + s[mainKey] + '</div>';
+    pHtml += '<div class="podium-score" style="font-size:.6rem">' + mainLabel + '</div>';
+    pHtml += '</div>';
+    pHtml += '<div class="podium-name">' + s.first_name + ' ' + s.last_name.charAt(0) + '.</div>';
+    pHtml += '</div>';
+  }
+  podium.innerHTML = pHtml;
+  
+  // Create characters on podium
+  for (const pos of podiumOrder) {
+    if (pos >= data.length) continue;
+    const container = document.getElementById('podchar' + suffix + pos);
+    if (container) {
+      const ch = createCharacter(data[pos].level.index, container, 40);
+      ch.classList.add(pos === 0 ? 'dancing' : 'bouncing');
+    }
+  }
+  
+  // Full leaderboard
+  let bHtml = '';
+  for (let i = 0; i < data.length; i++) {
+    const s = data[i];
+    const isMe = student && s.id === student.id;
+    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+    
+    bHtml += '<div class="board-row ' + (isMe ? 'me' : '') + '">';
+    bHtml += '<div class="rank ' + rankClass + '">' + (i + 1) + '</div>';
+    bHtml += '<div class="board-char" id="bchar' + suffix + i + '"></div>';
+    bHtml += '<div class="board-info">';
+    bHtml += '<div class="board-name">' + s.first_name + ' ' + s.last_name + (isMe ? ' (vous)' : '') + '</div>';
+    bHtml += '<span class="board-level" style="background:' + s.level.color + '15;color:' + s.level.color + '">' + s.level.name + '</span>';
+    bHtml += '</div>';
+    bHtml += '<div class="board-stats">';
+    bHtml += '<div class="board-stat"><div class="n" style="color:var(--accent2)">' + s[mainKey] + '</div><div class="l">' + mainLabel + '</div></div>';
+    bHtml += '<div class="board-stat"><div class="n">' + s[secKey] + '</div><div class="l">' + secLabel + '</div></div>';
+    bHtml += '</div>';
+    bHtml += '</div>';
+  }
+  board.innerHTML = bHtml;
+  
+  // Create mini characters in leaderboard
+  for (let i = 0; i < Math.min(data.length, 20); i++) {
+    const container = document.getElementById('bchar' + suffix + i);
+    if (container) {
+      const ch = createCharacter(data[i].level.index, container, 30);
+      if (student && data[i].id === student.id) ch.classList.add('bouncing');
+    }
+  }
+}
+
+loadScores();
 </script>
 </body>
 </html>
