@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Projets en équipe</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,var(--lo1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.4rem;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:600;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:inherit}
+.main{max-width:950px;margin:0 auto;padding:1rem}
+.btn{padding:.4rem .8rem;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:.78rem}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff}
+.btn-sm{font-size:.68rem;padding:.25rem .5rem}
+
+/* PROJECT CARDS */
+.projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem;margin-bottom:1.5rem}
+.project-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;position:relative;transition:all .2s}
+.project-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.project-card.locked{opacity:.4;pointer-events:none}
+.project-card.locked::after{content:'🔒 Verrouillé — le prof débloque';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.75rem;color:var(--gold);font-weight:700;background:rgba(10,15,26,.9);padding:.5rem 1rem;border-radius:6px;white-space:nowrap}
+.project-card.active{border-color:var(--lo1);box-shadow:0 0 20px rgba(16,185,129,.1)}
+.pc-tag{font-size:.5rem;font-weight:800;padding:.15rem .4rem;border-radius:3px;display:inline-block;margin-bottom:.4rem}
+.pc-title{font-size:.95rem;font-weight:800;margin-bottom:.3rem}
+.pc-desc{font-size:.7rem;color:var(--muted);line-height:1.4;margin-bottom:.5rem}
+.pc-meta{display:flex;gap:.5rem;flex-wrap:wrap;font-size:.6rem;color:var(--muted)}
+.pc-meta span{background:var(--surface);padding:.15rem .3rem;border-radius:3px}
+.pc-team{margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);font-size:.68rem}
+.pc-team .member{display:inline-block;background:rgba(50,224,196,.06);border:1px solid rgba(50,224,196,.15);padding:.1rem .4rem;border-radius:3px;margin:.1rem;font-size:.6rem}
+.pc-progress{margin-top:.5rem;height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
+.pc-progress-fill{height:100%;border-radius:3px;transition:width .5s}
+
+/* STEPS */
+.steps{margin-top:1rem}
+.step{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.5rem}
+.step.done{border-color:var(--lo1);background:rgba(16,185,129,.02)}
+.step.current{border-color:var(--gold);background:rgba(245,158,11,.02)}
+.step.locked{opacity:.35}
+.step-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;cursor:pointer}
+.step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;border:2px solid var(--border);color:var(--muted);flex-shrink:0}
+.step.done .step-num{background:var(--lo1);border-color:var(--lo1);color:#fff}
+.step.current .step-num{background:var(--gold);border-color:var(--gold);color:#fff}
+.step-title{font-size:.8rem;font-weight:700;flex:1}
+.step-badge{font-size:.5rem;font-weight:700;padding:.1rem .3rem;border-radius:3px}
+.step-body{display:none;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.step.current .step-body,.step.done .step-body{display:block}
+.step-instructions{font-size:.72rem;color:var(--muted);line-height:1.6;margin-bottom:.5rem}
+.step-instructions strong{color:var(--text)}
+.step-deliverable{font-size:.68rem;color:var(--gold);font-weight:600;margin-bottom:.5rem}
+.step-input{width:100%;min-height:80px;padding:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;resize:vertical}
+.step-input:focus{outline:none;border-color:var(--accent2)}
+.step-submit{margin-top:.4rem;display:flex;gap:.3rem;align-items:center}
+.step-feedback{font-size:.7rem;margin-top:.3rem;min-height:1.5rem}
+
+/* PROF PANEL */
+.prof-panel{background:rgba(245,158,11,.04);border:1px dashed var(--gold);border-radius:10px;padding:1rem;margin-bottom:1.5rem;display:none}
+.prof-panel h3{font-size:.85rem;font-weight:700;color:var(--gold);margin-bottom:.5rem}
+</style>
+</head>
+<body>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
+<div class="topbar">
+  <h1>Projets en équipe</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+    <a href="scores.html">Classement</a>
+    <a href="docs.html">Documents</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="localStorage.clear();window.location.href='login.html'">Déconnexion</button>
+  </div>
+</div>
+<div class="main">
+  <!-- PROF PANEL: Create teams + unlock projects -->
+  <div class="prof-panel" id="profPanel">
+    <h3>👑 Gestion des projets (prof)</h3>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+      <select id="profProjectSelect" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.3rem;font-size:.72rem;font-family:inherit"></select>
+      <button class="btn btn-gold btn-sm" onclick="unlockProject()">Débloquer ce projet</button>
+      <button class="btn btn-sm" style="background:var(--error);color:#fff" onclick="lockProject()">Verrouiller</button>
+    </div>
+    <div style="font-size:.72rem;margin-bottom:.5rem">
+      <strong>Créer les équipes :</strong>
+      <div style="display:flex;gap:.3rem;margin-top:.3rem;flex-wrap:wrap">
+        <select id="teamSize" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem;font-size:.68rem">
+          <option value="2">Équipes de 2</option>
+          <option value="3" selected>Équipes de 3</option>
+          <option value="4">Équipes de 4</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="autoTeams()">Créer les équipes automatiquement</button>
+      </div>
+    </div>
+    <div id="profMsg" style="font-size:.7rem;min-height:1.5rem"></div>
+  </div>
+
+  <!-- PROJECT CARDS -->
+  <div class="projects" id="projectsGrid"></div>
+  
+  <!-- PROJECT DETAIL VIEW -->
+  <div id="projectDetail" style="display:none">
+    <button class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);margin-bottom:.8rem" onclick="showProjects()">← Retour aux projets</button>
+    <div id="projectInfo"></div>
+    <div class="steps" id="projectSteps"></div>
+  </div>
+</div>
+
+<script src="supabase-config.js?v=1774960217"></script>
+<script src="progress-saver.js?v=1774960217"></script>
+<script>
+var student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+var isTeacher = student && student.role === 'teacher';
+var SB_URL = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+
+// ===================== 6 PROJETS =====================
+var PROJECTS = [
+{
+  id:'veloshop',
+  name:'VéloShop Genève',
+  sector:'Commerce vélos',
+  color:'var(--lo1)',
+  difficulty:1,
+  teams:'2-3',
+  desc:'Un magasin de vélos à Genève veut informatiser sa gestion : clients, vélos (neufs et occasions), réparations, et ventes. Le gérant veut pouvoir suivre le stock, les réparations en cours, et le chiffre d\'affaires par mois.',
+  context:'Le gérant a tout sur papier et Excel. Il vous mandate pour créer une base de données complète et fonctionnelle.',
+  tables:['CLIENT','VELO','CATEGORIE','REPARATION','VENTE','LIGNE_VENTE'],
+  steps:[
+    {name:'Recueil des besoins',type:'text',
+      instructions:'<strong>Lisez le cahier des charges ci-dessus.</strong> Identifiez et listez :<br>• Les données à stocker (dictionnaire de données)<br>• Les utilisateurs et leurs besoins<br>• Les règles de gestion (un vélo a une seule catégorie, un client peut avoir plusieurs réparations, etc.)',
+      deliverable:'Dictionnaire de données + liste des règles de gestion',
+      keywords:['client','vélo','catégorie','réparation','vente','stock','prix','date']},
+    {name:'MCD (Modèle Conceptuel)',type:'text',
+      instructions:'<strong>Dessinez le MCD Merise</strong> (sur papier ou outil) puis décrivez-le ici :<br>• Listez les entités avec leurs attributs<br>• Listez les associations avec les cardinalités<br>• Identifiez les clés primaires',
+      deliverable:'MCD : entités, associations, cardinalités',
+      keywords:['entité','association','cardinalité','1,N','1,1','0,N','clé primaire','CLIENT','VELO']},
+    {name:'MLD (Modèle Logique)',type:'text',
+      instructions:'<strong>Transformez le MCD en MLD :</strong><br>• Appliquez les 4 règles de passage MCD→MLD<br>• Créez les tables avec PK et FK<br>• Gérez les relations N:M (table de liaison)<br>• Notation : TABLE(col1 PK, col2 FK→TABLE2, col3)',
+      deliverable:'Schéma relationnel complet avec PK et FK',
+      keywords:['PK','FK','table','REFERENCES','liaison','clé étrangère']},
+    {name:'MPD + Code SQL',type:'code',
+      instructions:'<strong>Écrivez le code SQL CREATE TABLE</strong> pour MySQL :<br>• Types corrects (INT, VARCHAR, DATE, DECIMAL...)<br>• Contraintes (NOT NULL, UNIQUE, CHECK, DEFAULT)<br>• Clés étrangères avec ON DELETE/UPDATE<br>• Ordre de création (tables référencées en premier)',
+      deliverable:'Code SQL CREATE TABLE complet et fonctionnel',
+      keywords:['CREATE TABLE','INT','VARCHAR','DATE','DECIMAL','PRIMARY KEY','FOREIGN KEY','REFERENCES','NOT NULL','AUTO_INCREMENT']},
+    {name:'Peuplement + Requêtes',type:'code',
+      instructions:'<strong>Peuplez la base et écrivez des requêtes :</strong><br>• Minimum 5 INSERT par table (données réalistes suisses)<br>• 10 requêtes SELECT variées : filtrage, tri, agrégation, jointures<br>• 2 requêtes UPDATE et 1 DELETE<br>• 1 vue (CREATE VIEW) utile pour le gérant',
+      deliverable:'INSERT + 10 SELECT + 2 UPDATE + 1 DELETE + 1 VIEW',
+      keywords:['INSERT INTO','VALUES','SELECT','WHERE','JOIN','GROUP BY','ORDER BY','COUNT','SUM','AVG','UPDATE','DELETE','CREATE VIEW']},
+    {name:'Tests + Documentation',type:'text',
+      instructions:'<strong>Testez et documentez :</strong><br>• Plan de tests : 5 cas de test (normal, limite, erroné)<br>• Résultats attendus vs obtenus<br>• Corrections apportées<br>• Guide utilisateur (2-3 pages) : comment utiliser la BDD, requêtes principales, exemples',
+      deliverable:'Plan de tests + résultats + guide utilisateur',
+      keywords:['test','normal','limite','erroné','résultat attendu','correction','guide','utilisateur','documentation']},
+  ]
+},
+{
+  id:'clinique',
+  name:'Clinique Léman Santé',
+  sector:'Santé',
+  color:'var(--lo2)',
+  difficulty:2,
+  teams:'2-3',
+  desc:'Une clinique privée à Lausanne veut gérer ses patients, médecins, consultations, prescriptions et factures. Le directeur veut des statistiques sur les consultations par spécialité et le chiffre d\'affaires.',
+  context:'La clinique utilise des dossiers papier. Vous devez concevoir une BDD qui respecte la confidentialité des données (RGPD) tout en étant efficace.',
+  tables:['PATIENT','MEDECIN','SPECIALITE','CONSULTATION','PRESCRIPTION','FACTURE'],
+  steps:[
+    {name:'Recueil des besoins',type:'text',
+      instructions:'<strong>Analysez le cas :</strong><br>• Dictionnaire de données complet<br>• Règles de gestion (un médecin a une spécialité, une consultation génère une facture, etc.)<br>• Contraintes RGPD à respecter (données sensibles)',
+      deliverable:'Dictionnaire + règles de gestion + contraintes RGPD',
+      keywords:['patient','médecin','spécialité','consultation','prescription','facture','RGPD','confidentiel']},
+    {name:'MCD',type:'text',
+      instructions:'Même processus : entités, associations, cardinalités. Attention aux relations entre CONSULTATION, PRESCRIPTION et FACTURE.',
+      deliverable:'MCD complet',
+      keywords:['entité','association','cardinalité','PATIENT','MEDECIN','CONSULTATION']},
+    {name:'MLD',type:'text',instructions:'Passage MCD→MLD avec toutes les FK.',deliverable:'Schéma relationnel',keywords:['PK','FK','table']},
+    {name:'MPD + Code SQL',type:'code',instructions:'CREATE TABLE complet avec types et contraintes.',deliverable:'Code SQL',keywords:['CREATE TABLE','PRIMARY KEY','FOREIGN KEY','REFERENCES']},
+    {name:'Peuplement + Requêtes',type:'code',instructions:'INSERT (données fictives) + 10 SELECT + UPDATE/DELETE + VIEW + statistiques par spécialité.',deliverable:'SQL complet',keywords:['INSERT','SELECT','JOIN','GROUP BY','VIEW']},
+    {name:'Tests + Documentation',type:'text',instructions:'Plan de tests + guide utilisateur pour le personnel médical.',deliverable:'Tests + guide',keywords:['test','documentation','guide']},
+  ]
+},
+{
+  id:'festival',
+  name:'Festival Jazz Montreux',
+  sector:'Événementiel',
+  color:'var(--gold)',
+  difficulty:2,
+  teams:'3',
+  desc:'Un festival de musique veut gérer ses artistes, concerts, scènes, billets et sponsors. L\'organisateur veut savoir combien de billets sont vendus par concert, le revenu par sponsor, et planifier les scènes.',
+  context:'Le festival grossit chaque année. Les spreadsheets ne suffisent plus. Vous créez la BDD qui servira pendant 3 jours de festival.',
+  tables:['ARTISTE','CONCERT','SCENE','BILLET','SPECTATEUR','SPONSOR','SPONSORING'],
+  steps:[
+    {name:'Recueil des besoins',type:'text',instructions:'Dictionnaire + règles (un concert = 1 scène + 1 artiste, un spectateur peut acheter plusieurs billets, un sponsor peut sponsoriser plusieurs concerts).',deliverable:'Dictionnaire + règles',keywords:['artiste','concert','scène','billet','spectateur','sponsor']},
+    {name:'MCD',type:'text',instructions:'MCD avec attention à la relation N:M entre SPONSOR et CONCERT (table SPONSORING).',deliverable:'MCD',keywords:['entité','N:M','SPONSORING','cardinalité']},
+    {name:'MLD',type:'text',instructions:'Passage MCD→MLD. La table SPONSORING aura une clé composite.',deliverable:'MLD',keywords:['PK','FK','composite','SPONSORING']},
+    {name:'MPD + Code SQL',type:'code',instructions:'CREATE TABLE avec DATETIME pour les horaires de concerts.',deliverable:'SQL',keywords:['CREATE TABLE','DATETIME','DECIMAL','FOREIGN KEY']},
+    {name:'Peuplement + Requêtes',type:'code',instructions:'Données réalistes (artistes suisses/internationaux) + requêtes : billets vendus par concert, revenu par sponsor, planning par scène.',deliverable:'INSERT + SELECT avancés',keywords:['INSERT','SELECT','JOIN','GROUP BY','HAVING','ORDER BY']},
+    {name:'Tests + Documentation',type:'text',instructions:'Tests + guide pour l\'équipe du festival (comment ajouter un concert, vérifier les ventes).',deliverable:'Tests + guide',keywords:['test','guide','documentation']},
+  ]
+},
+{
+  id:'ecole',
+  name:'École Internationale',
+  sector:'Éducation',
+  color:'var(--lo4)',
+  difficulty:2,
+  teams:'2-3',
+  desc:'Une école internationale à Genève veut gérer ses élèves, professeurs, cours, inscriptions, notes et absences. Le directeur veut des moyennes par classe et un suivi des absences.',
+  context:'L\'école utilise 15 fichiers Excel différents. Vous devez unifier tout dans une seule base de données cohérente.',
+  tables:['ELEVE','PROFESSEUR','COURS','CLASSE','INSCRIPTION','NOTE','ABSENCE'],
+  steps:[
+    {name:'Recueil des besoins',type:'text',instructions:'Dictionnaire + règles (un élève est dans une classe, un prof enseigne plusieurs cours, une note = élève + cours + date).',deliverable:'Dictionnaire + règles',keywords:['élève','professeur','cours','classe','note','absence']},
+    {name:'MCD',type:'text',instructions:'MCD avec les relations N:M (élève-cours via INSCRIPTION, élève-cours-note).',deliverable:'MCD',keywords:['entité','INSCRIPTION','NOTE','N:M']},
+    {name:'MLD',type:'text',instructions:'MLD complet avec tables de liaison.',deliverable:'MLD',keywords:['PK','FK','INSCRIPTION','NOTE']},
+    {name:'MPD + Code SQL',type:'code',instructions:'CREATE TABLE. Attention : NOTE a une clé composite (id_eleve, id_cours, date_eval).',deliverable:'SQL',keywords:['CREATE TABLE','COMPOSITE','FOREIGN KEY']},
+    {name:'Peuplement + Requêtes',type:'code',instructions:'Données + requêtes : moyenne par élève, moyenne par classe, top 3, élèves avec >3 absences, emploi du temps d\'un prof.',deliverable:'SQL complet',keywords:['INSERT','AVG','GROUP BY','HAVING','JOIN','COUNT']},
+    {name:'Tests + Documentation',type:'text',instructions:'Tests + guide pour le secrétariat (inscrire un élève, saisir une note, voir les absences).',deliverable:'Tests + guide',keywords:['test','guide','documentation']},
+  ]
+},
+{
+  id:'hotel',
+  name:'Hôtel Alpin Zermatt',
+  sector:'Hôtellerie',
+  color:'#ec4899',
+  difficulty:3,
+  teams:'3',
+  desc:'Un hôtel 4 étoiles à Zermatt veut gérer ses chambres, réservations, clients, services (spa, restaurant, ski), factures et avis. Le directeur veut optimiser le taux d\'occupation et analyser les avis.',
+  context:'L\'hôtel a 50 chambres de 4 types, un restaurant, un spa. Haute saison en hiver. Vous créez le système de gestion complet.',
+  tables:['CHAMBRE','TYPE_CHAMBRE','CLIENT','RESERVATION','SERVICE','CONSOMMATION','FACTURE','AVIS'],
+  steps:[
+    {name:'Recueil des besoins',type:'text',instructions:'Dictionnaire complet (8 tables potentielles) + règles complexes (une réservation = 1 client + 1 chambre + dates, un client peut consommer des services, une facture regroupe chambre + services).',deliverable:'Dictionnaire + règles',keywords:['chambre','réservation','service','facture','avis','type','client']},
+    {name:'MCD',type:'text',instructions:'MCD complexe avec 8 entités. CONSOMMATION est une relation N:M entre RESERVATION et SERVICE.',deliverable:'MCD',keywords:['entité','N:M','CONSOMMATION','8 entités']},
+    {name:'MLD',type:'text',instructions:'MLD complet. Attention à FACTURE qui référence RESERVATION.',deliverable:'MLD',keywords:['PK','FK','CONSOMMATION','FACTURE']},
+    {name:'MPD + Code SQL',type:'code',instructions:'CREATE TABLE complet. Utilisez CHECK pour les prix, ENUM/CHECK pour les statuts de réservation.',deliverable:'SQL',keywords:['CREATE TABLE','CHECK','ENUM','DECIMAL','DATE']},
+    {name:'Peuplement + Requêtes',type:'code',instructions:'Données + requêtes business : taux d\'occupation par mois, revenu par type de chambre, moyenne des avis, clients fidèles (>2 séjours).',deliverable:'SQL avancé',keywords:['INSERT','SELECT','JOIN','GROUP BY','HAVING','AVG','COUNT','BETWEEN']},
+    {name:'Tests + Documentation',type:'text',instructions:'Tests + guide réceptionniste (check-in, check-out, facturation, avis).',deliverable:'Tests + guide',keywords:['test','guide','check-in','facturation']},
+  ]
+},
+{
+  id:'startup',
+  name:'TechFlow — Startup SaaS',
+  sector:'Tech / SaaS',
+  color:'var(--accent2)',
+  difficulty:3,
+  teams:'3',
+  desc:'Une startup tech à Lausanne développe un SaaS de gestion de projets. Elle veut une BDD pour gérer : les entreprises clientes, les utilisateurs, les abonnements (plans), les projets, les tâches, les factures mensuelles et le support client (tickets).',
+  context:'La startup lève des fonds et doit montrer aux investisseurs un système de données solide. Vous êtes l\'équipe data. Les données doivent permettre des KPIs : MRR, churn rate, satisfaction client.',
+  tables:['ENTREPRISE','UTILISATEUR','PLAN','ABONNEMENT','PROJET','TACHE','FACTURE','TICKET'],
+  steps:[
+    {name:'Recueil des besoins',type:'text',instructions:'Dictionnaire (8 tables) + règles SaaS (une entreprise a un abonnement à un plan, un utilisateur appartient à une entreprise, un projet contient des tâches, les factures sont mensuelles).',deliverable:'Dictionnaire + règles + KPIs à calculer',keywords:['entreprise','utilisateur','plan','abonnement','projet','tâche','facture','ticket','MRR','KPI']},
+    {name:'MCD',type:'text',instructions:'MCD complet avec 8 entités. Attention : ABONNEMENT lie ENTREPRISE et PLAN. TACHE appartient à un PROJET et est assignée à un UTILISATEUR.',deliverable:'MCD',keywords:['entité','ABONNEMENT','TACHE','UTILISATEUR','8 entités']},
+    {name:'MLD',type:'text',instructions:'MLD complet. FACTURE référence ABONNEMENT. TICKET référence UTILISATEUR.',deliverable:'MLD',keywords:['PK','FK','ABONNEMENT','FACTURE','TICKET']},
+    {name:'MPD + Code SQL',type:'code',instructions:'CREATE TABLE avec ENUM pour les statuts (tâche: todo/doing/done, ticket: open/resolved, abonnement: active/cancelled).',deliverable:'SQL',keywords:['CREATE TABLE','ENUM','CHECK','DECIMAL','TIMESTAMP']},
+    {name:'Peuplement + Requêtes',type:'code',instructions:'Données réalistes + requêtes KPI : MRR (Monthly Recurring Revenue), nombre de clients actifs, taux de résolution tickets, tâches en retard, projets par entreprise.',deliverable:'SQL + KPIs',keywords:['INSERT','SELECT','SUM','COUNT','AVG','JOIN','GROUP BY','HAVING','WHERE']},
+    {name:'Tests + Documentation',type:'text',instructions:'Tests + documentation technique (diagramme de flux, API endpoints prévus) + guide pour le CEO (dashboard KPIs).',deliverable:'Tests + doc technique + guide KPI',keywords:['test','documentation','technique','KPI','guide']},
+  ]
+},
+];
+
+// ===================== STATE =====================
+var projectStates = JSON.parse(localStorage.getItem('dq_team_projects') || '{}');
+var currentProject = null;
+
+// ===================== RENDER =====================
+function renderProjects() {
+  if (isTeacher) {
+    document.getElementById('profPanel').style.display = 'block';
+    var sel = document.getElementById('profProjectSelect');
+    sel.innerHTML = PROJECTS.map(function(p) { return '<option value="' + p.id + '">' + p.name + '</option>'; }).join('');
+  }
+  
+  var html = '';
+  for (var i = 0; i < PROJECTS.length; i++) {
+    var p = PROJECTS[i];
+    var state = projectStates[p.id] || {};
+    var isUnlocked = state.unlocked || isTeacher;
+    var completedSteps = 0;
+    for (var s = 0; s < p.steps.length; s++) {
+      if (state['step_' + s + '_done']) completedSteps++;
+    }
+    var pct = Math.round(completedSteps / p.steps.length * 100);
+    var teamMembers = state.team || [];
+    
+    html += '<div class="project-card ' + (!isUnlocked ? 'locked' : completedSteps > 0 ? 'active' : '') + '" data-id="' + p.id + '">';
+    html += '<span class="pc-tag" style="background:' + p.color + '20;color:' + p.color + '">' + p.sector + '</span>';
+    html += '<div class="pc-title">' + p.name + '</div>';
+    html += '<div class="pc-desc">' + p.desc.substring(0, 120) + '...</div>';
+    html += '<div class="pc-meta">';
+    html += '<span>⭐'.repeat(p.difficulty) + '</span>';
+    html += '<span>' + p.tables.length + ' tables</span>';
+    html += '<span>Équipes de ' + p.teams + '</span>';
+    html += '<span>6 étapes</span>';
+    html += '</div>';
+    if (teamMembers.length > 0) {
+      html += '<div class="pc-team">Équipe : ' + teamMembers.map(function(m) { return '<span class="member">' + m + '</span>'; }).join('') + '</div>';
+    }
+    if (isUnlocked && completedSteps > 0) {
+      html += '<div class="pc-progress"><div class="pc-progress-fill" style="width:' + pct + '%;background:' + p.color + '"></div></div>';
+      html += '<div style="font-size:.55rem;color:var(--muted);margin-top:.2rem">' + completedSteps + '/' + p.steps.length + ' étapes (' + pct + '%)</div>';
+    }
+    html += '</div>';
+  }
+  
+  document.getElementById('projectsGrid').innerHTML = html;
+  
+  // Add click handlers
+  document.querySelectorAll('.project-card:not(.locked)').forEach(function(card) {
+    card.addEventListener('click', function() { openProject(this.dataset.id); });
+  });
+}
+
+function openProject(id) {
+  currentProject = PROJECTS.find(function(p) { return p.id === id; });
+  if (!currentProject) return;
+  
+  document.getElementById('projectsGrid').parentElement.querySelector('.projects').style.display = 'none';
+  if (document.getElementById('profPanel')) document.getElementById('profPanel').style.display = 'none';
+  document.getElementById('projectDetail').style.display = 'block';
+  
+  var state = projectStates[currentProject.id] || {};
+  
+  var info = '<div style="margin-bottom:1rem">';
+  info += '<span class="pc-tag" style="background:' + currentProject.color + '20;color:' + currentProject.color + '">' + currentProject.sector + '</span>';
+  info += '<h2 style="font-size:1.1rem;font-weight:800;margin:.3rem 0">' + currentProject.name + '</h2>';
+  info += '<div style="font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:.5rem">' + currentProject.desc + '</div>';
+  info += '<div style="font-size:.72rem;color:var(--text);line-height:1.5;padding:.5rem;background:var(--surface);border-radius:6px;border-left:3px solid ' + currentProject.color + '">' + currentProject.context + '</div>';
+  info += '<div style="font-size:.65rem;color:var(--muted);margin-top:.5rem">Tables attendues : <strong>' + currentProject.tables.join(', ') + '</strong></div>';
+  info += '</div>';
+  document.getElementById('projectInfo').innerHTML = info;
+  
+  // Render steps
+  var stepsHtml = '';
+  for (var i = 0; i < currentProject.steps.length; i++) {
+    var step = currentProject.steps[i];
+    var isDone = state['step_' + i + '_done'];
+    var isCurrent = !isDone && (i === 0 || state['step_' + (i-1) + '_done']);
+    var isLocked = !isDone && !isCurrent;
+    
+    stepsHtml += '<div class="step ' + (isDone ? 'done' : isCurrent ? 'current' : 'locked') + '" data-step="' + i + '">';
+    stepsHtml += '<div class="step-header" onclick="toggleStep(' + i + ')">';
+    stepsHtml += '<div class="step-num">' + (isDone ? '✓' : (i + 1)) + '</div>';
+    stepsHtml += '<div class="step-title">' + step.name + '</div>';
+    stepsHtml += '<span class="step-badge" style="background:' + (isDone ? 'rgba(16,185,129,.1);color:var(--lo1)' : isCurrent ? 'rgba(245,158,11,.1);color:var(--gold)' : 'var(--surface);color:var(--muted)') + '">' + (isDone ? 'Terminé' : isCurrent ? 'En cours' : 'Verrouillé') + '</span>';
+    stepsHtml += '</div>';
+    stepsHtml += '<div class="step-body">';
+    stepsHtml += '<div class="step-instructions">' + step.instructions + '</div>';
+    stepsHtml += '<div class="step-deliverable">Livrable : ' + step.deliverable + '</div>';
+    
+    var savedWork = state['step_' + i + '_work'] || '';
+    if (step.type === 'code') {
+      stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="Écrivez votre code SQL ici..." style="min-height:150px">' + savedWork + '</textarea>';
+    } else {
+      stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="Écrivez votre réponse ici...">' + savedWork + '</textarea>';
+    }
+    stepsHtml += '<div class="step-submit">';
+    stepsHtml += '<button class="btn btn-primary btn-sm" onclick="saveStep(' + i + ')">Sauvegarder</button>';
+    stepsHtml += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">Soumettre ✓</button>';
+    stepsHtml += '</div>';
+    stepsHtml += '<div class="step-feedback" id="fb_' + i + '"></div>';
+    stepsHtml += '</div>';
+    stepsHtml += '</div>';
+  }
+  
+  document.getElementById('projectSteps').innerHTML = stepsHtml;
+}
+
+function toggleStep(idx) {
+  var step = document.querySelectorAll('.step')[idx];
+  if (step && !step.classList.contains('locked')) {
+    var body = step.querySelector('.step-body');
+    body.style.display = body.style.display === 'none' ? 'block' : (body.style.display === 'block' ? 'none' : 'block');
+  }
+}
+
+function saveStep(idx) {
+  var work = document.getElementById('work_' + idx);
+  if (!work) return;
+  if (!projectStates[currentProject.id]) projectStates[currentProject.id] = {};
+  projectStates[currentProject.id]['step_' + idx + '_work'] = work.value;
+  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
+  var fb = document.getElementById('fb_' + idx);
+  fb.innerHTML = '<span style="color:var(--lo1)">💾 Sauvegardé !</span>';
+  setTimeout(function() { fb.innerHTML = ''; }, 2000);
+}
+
+function submitStep(idx) {
+  var work = document.getElementById('work_' + idx);
+  if (!work || !work.value.trim()) {
+    document.getElementById('fb_' + idx).innerHTML = '<span style="color:var(--error)">Écrivez quelque chose avant de soumettre.</span>';
+    return;
+  }
+  
+  var step = currentProject.steps[idx];
+  var input = work.value.toUpperCase();
+  var found = 0;
+  for (var k = 0; k < step.keywords.length; k++) {
+    if (input.indexOf(step.keywords[k].toUpperCase()) > -1) found++;
+  }
+  var pct = Math.round(found / step.keywords.length * 100);
+  
+  if (!projectStates[currentProject.id]) projectStates[currentProject.id] = {};
+  projectStates[currentProject.id]['step_' + idx + '_work'] = work.value;
+  projectStates[currentProject.id]['step_' + idx + '_done'] = true;
+  projectStates[currentProject.id]['step_' + idx + '_score'] = pct;
+  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
+  
+  var fb = document.getElementById('fb_' + idx);
+  fb.innerHTML = '<span style="color:var(--lo1)">✅ Étape soumise ! (' + found + '/' + step.keywords.length + ' éléments détectés)</span>';
+  
+  // Save score
+  if (typeof saveGameScore === 'function') {
+    saveGameScore('team-' + currentProject.id, pct, 0);
+  }
+  
+  // Refresh
+  setTimeout(function() { openProject(currentProject.id); }, 1000);
+}
+
+function showProjects() {
+  document.getElementById('projectDetail').style.display = 'none';
+  document.querySelector('.projects').style.display = '';
+  if (isTeacher) document.getElementById('profPanel').style.display = 'block';
+  currentProject = null;
+  renderProjects();
+}
+
+// ===================== PROF FUNCTIONS =====================
+function unlockProject() {
+  var id = document.getElementById('profProjectSelect').value;
+  if (!projectStates[id]) projectStates[id] = {};
+  projectStates[id].unlocked = true;
+  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
+  // Also save to Supabase for all students
+  saveToSupabase(id, 'unlocked', true);
+  document.getElementById('profMsg').innerHTML = '<span style="color:var(--lo1)">✅ Projet ' + id + ' débloqué !</span>';
+  renderProjects();
+}
+
+function lockProject() {
+  var id = document.getElementById('profProjectSelect').value;
+  if (!projectStates[id]) projectStates[id] = {};
+  projectStates[id].unlocked = false;
+  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
+  saveToSupabase(id, 'unlocked', false);
+  document.getElementById('profMsg').innerHTML = '<span style="color:var(--gold)">🔒 Projet ' + id + ' verrouillé.</span>';
+  renderProjects();
+}
+
+async function autoTeams() {
+  var size = parseInt(document.getElementById('teamSize').value);
+  var projectId = document.getElementById('profProjectSelect').value;
+  
+  // Load class students
+  var students = await supabase.query('cq_students', { select: 'first_name,last_name,id', filter: { 'role': 'eq.student', 'class_name': 'eq.' + (student.class_name || 'BI1') } });
+  var sList = Array.isArray(students) ? students : [];
+  
+  // Shuffle
+  for (var i = sList.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = sList[i]; sList[i] = sList[j]; sList[j] = t;
+  }
+  
+  // Create teams
+  var teams = [];
+  for (var k = 0; k < sList.length; k += size) {
+    teams.push(sList.slice(k, k + size));
+  }
+  
+  var msg = '<strong>Équipes créées pour ' + projectId + ' :</strong><br>';
+  for (var ti = 0; ti < teams.length; ti++) {
+    var names = teams[ti].map(function(s) { return s.first_name + ' ' + s.last_name.charAt(0) + '.'; });
+    msg += 'Équipe ' + (ti + 1) + ' : ' + names.join(', ') + '<br>';
+    
+    // Save team for each student
+    for (var si = 0; si < teams[ti].length; si++) {
+      var key = 'team_' + projectId + '_' + teams[ti][si].id;
+      localStorage.setItem(key, JSON.stringify(names));
+    }
+  }
+  
+  document.getElementById('profMsg').innerHTML = '<span style="color:var(--lo1)">' + msg + '</span>';
+}
+
+function saveToSupabase(projectId, key, value) {
+  // Save project state to game_scores for persistence
+  if (typeof saveGameScore === 'function') {
+    saveGameScore('project-state-' + projectId, value ? 1 : 0, 0);
+  }
+}
+
+// Load project states from Supabase on init
+async function loadProjectStates() {
+  try {
+    var scores = await supabase.query('cq_game_scores', {
+      select: 'game_id,score',
+      filter: { 'game_id': 'like.project-state-%' }
+    });
+    if (Array.isArray(scores)) {
+      for (var i = 0; i < scores.length; i++) {
+        var pid = scores[i].game_id.replace('project-state-', '');
+        if (!projectStates[pid]) projectStates[pid] = {};
+        projectStates[pid].unlocked = scores[i].score > 0;
+      }
+    }
+  } catch(e) {}
+  renderProjects();
+}
+
+loadProjectStates();
+</script>
+<script src="presence-tracker.js?v=1774960217"></script>
+<script src="duel-notify.js?v=1774960217"></script>
+</body>
+</html>
