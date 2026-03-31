@@ -292,8 +292,13 @@ function renderProjects() {
     html += '<span>Équipes de ' + p.teams + '</span>';
     html += '<span>6 étapes</span>';
     html += '</div>';
-    if (teamMembers.length > 0) {
-      html += '<div class="pc-team">Équipe : ' + teamMembers.map(function(m) { return '<span class="member">' + m + '</span>'; }).join('') + '</div>';
+    var myTeamNum = state.myTeam;
+    var teamData = state.teamData || [];
+    if (myTeamNum && teamData.length >= myTeamNum) {
+      var myTeamMembers = teamData[myTeamNum - 1] || [];
+      html += '<div class="pc-team">Mon équipe (#' + myTeamNum + ') : ' + myTeamMembers.map(function(m) { return '<span class="member">' + m + '</span>'; }).join('') + '</div>';
+    } else if (isTeacher && teamData.length > 0) {
+      html += '<div class="pc-team">' + teamData.length + ' équipes créées</div>';
     }
     if (isUnlocked && completedSteps > 0) {
       html += '<div class="pc-progress"><div class="pc-progress-fill" style="width:' + pct + '%;background:' + p.color + '"></div></div>';
@@ -426,84 +431,145 @@ function showProjects() {
 }
 
 // ===================== PROF FUNCTIONS =====================
-function unlockProject() {
+async function unlockProject() {
   var id = document.getElementById('profProjectSelect').value;
-  if (!projectStates[id]) projectStates[id] = {};
+  var msg = document.getElementById('profMsg');
+  msg.innerHTML = '<span style="color:var(--muted)">Déblocage en cours...</span>';
+  
+  // Upsert in cq_team_projects via REST API
+  // First try to update
+  var res = await fetch(SB_URL + '/cq_team_projects?project_id=eq.' + id + '&unit_id=eq.4', {
+    method: 'PATCH',
+    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    body: JSON.stringify({ status: 'unlocked', updated_at: new Date().toISOString() })
+  });
+  var data = await res.json();
+  
+  if (!Array.isArray(data) || data.length === 0) {
+    // Insert new
+    await fetch(SB_URL + '/cq_team_projects', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project_id: id, status: 'unlocked', unit_id: 4 })
+    });
+  }
+  
+  projectStates[id] = projectStates[id] || {};
   projectStates[id].unlocked = true;
-  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
-  // Also save to Supabase for all students
-  saveToSupabase(id, 'unlocked', true);
-  document.getElementById('profMsg').innerHTML = '<span style="color:var(--lo1)">✅ Projet ' + id + ' débloqué !</span>';
+  msg.innerHTML = '<span style="color:var(--lo1)">✅ Projet <strong>' + id + '</strong> débloqué pour tous les élèves !</span>';
   renderProjects();
 }
 
-function lockProject() {
+async function lockProject() {
   var id = document.getElementById('profProjectSelect').value;
-  if (!projectStates[id]) projectStates[id] = {};
+  var msg = document.getElementById('profMsg');
+  
+  await fetch(SB_URL + '/cq_team_projects?project_id=eq.' + id + '&unit_id=eq.4', {
+    method: 'PATCH',
+    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'locked', updated_at: new Date().toISOString() })
+  });
+  
+  projectStates[id] = projectStates[id] || {};
   projectStates[id].unlocked = false;
-  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
-  saveToSupabase(id, 'unlocked', false);
-  document.getElementById('profMsg').innerHTML = '<span style="color:var(--gold)">🔒 Projet ' + id + ' verrouillé.</span>';
+  msg.innerHTML = '<span style="color:var(--gold)">🔒 Projet <strong>' + id + '</strong> verrouillé.</span>';
   renderProjects();
 }
 
 async function autoTeams() {
   var size = parseInt(document.getElementById('teamSize').value);
   var projectId = document.getElementById('profProjectSelect').value;
+  var msg = document.getElementById('profMsg');
+  msg.innerHTML = '<span style="color:var(--muted)">Création des équipes...</span>';
   
   // Load class students
   var students = await supabase.query('cq_students', { select: 'first_name,last_name,id', filter: { 'role': 'eq.student', 'class_name': 'eq.' + (student.class_name || 'BI1') } });
   var sList = Array.isArray(students) ? students : [];
   
-  // Shuffle
+  // Shuffle (Fisher-Yates)
   for (var i = sList.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var t = sList[i]; sList[i] = sList[j]; sList[j] = t;
   }
   
-  // Create teams
+  // Delete existing team assignments for this project
+  await fetch(SB_URL + '/cq_team_members?project_id=eq.' + projectId + '&unit_id=eq.4', {
+    method: 'DELETE', headers: { 'apikey': SB_KEY }
+  });
+  
+  // Create teams and save to Supabase
   var teams = [];
   for (var k = 0; k < sList.length; k += size) {
     teams.push(sList.slice(k, k + size));
   }
   
-  var msg = '<strong>Équipes créées pour ' + projectId + ' :</strong><br>';
+  var html = '<strong>Équipes pour ' + projectId + ' :</strong><br>';
   for (var ti = 0; ti < teams.length; ti++) {
-    var names = teams[ti].map(function(s) { return s.first_name + ' ' + s.last_name.charAt(0) + '.'; });
-    msg += 'Équipe ' + (ti + 1) + ' : ' + names.join(', ') + '<br>';
-    
-    // Save team for each student
+    var names = [];
     for (var si = 0; si < teams[ti].length; si++) {
-      var key = 'team_' + projectId + '_' + teams[ti][si].id;
-      localStorage.setItem(key, JSON.stringify(names));
+      var s = teams[ti][si];
+      names.push(s.first_name + ' ' + s.last_name.charAt(0) + '.');
+      // Save to Supabase
+      await fetch(SB_URL + '/cq_team_members', {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId, team_number: ti + 1, student_id: s.id, unit_id: 4 })
+      });
     }
+    html += '<span style="color:var(--accent2)">Équipe ' + (ti + 1) + '</span> : ' + names.join(', ') + '<br>';
   }
   
-  document.getElementById('profMsg').innerHTML = '<span style="color:var(--lo1)">' + msg + '</span>';
+  // Save team data to project
+  await fetch(SB_URL + '/cq_team_projects?project_id=eq.' + projectId + '&unit_id=eq.4', {
+    method: 'PATCH',
+    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ team_data: teams.map(function(t) { return t.map(function(s){ return s.first_name + ' ' + s.last_name; }); }), updated_at: new Date().toISOString() })
+  });
+  
+  msg.innerHTML = '<span style="color:var(--lo1)">' + html + '</span>';
+  renderProjects();
 }
 
-function saveToSupabase(projectId, key, value) {
-  // Save project state to game_scores for persistence
-  if (typeof saveGameScore === 'function') {
-    saveGameScore('project-state-' + projectId, value ? 1 : 0, 0);
-  }
-}
+
 
 // Load project states from Supabase on init
 async function loadProjectStates() {
   try {
-    var scores = await supabase.query('cq_game_scores', {
-      select: 'game_id,score',
-      filter: { 'game_id': 'like.project-state-%' }
-    });
-    if (Array.isArray(scores)) {
-      for (var i = 0; i < scores.length; i++) {
-        var pid = scores[i].game_id.replace('project-state-', '');
-        if (!projectStates[pid]) projectStates[pid] = {};
-        projectStates[pid].unlocked = scores[i].score > 0;
+    // Load unlock status from cq_team_projects
+    var projects = await supabase.query('cq_team_projects', { select: '*', filter: { 'unit_id': 'eq.4' } });
+    if (Array.isArray(projects)) {
+      for (var i = 0; i < projects.length; i++) {
+        var p = projects[i];
+        if (!projectStates[p.project_id]) projectStates[p.project_id] = {};
+        projectStates[p.project_id].unlocked = p.status === 'unlocked';
+        if (p.team_data) projectStates[p.project_id].teamData = p.team_data;
       }
     }
-  } catch(e) {}
+    
+    // Load my team assignment
+    if (!isTeacher) {
+      var myTeams = await supabase.query('cq_team_members', { select: '*', filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' } });
+      if (Array.isArray(myTeams)) {
+        for (var j = 0; j < myTeams.length; j++) {
+          var m = myTeams[j];
+          if (!projectStates[m.project_id]) projectStates[m.project_id] = {};
+          projectStates[m.project_id].myTeam = m.team_number;
+        }
+      }
+    }
+  } catch(e) {
+    console.log('Team projects: tables might not exist yet');
+  }
+  
+  // Merge with localStorage (saved work)
+  var local = JSON.parse(localStorage.getItem('dq_team_projects') || '{}');
+  for (var k in local) {
+    if (!projectStates[k]) projectStates[k] = {};
+    for (var key in local[k]) {
+      if (key.indexOf('step_') === 0) projectStates[k][key] = local[k][key];
+    }
+  }
+  
   renderProjects();
 }
 
