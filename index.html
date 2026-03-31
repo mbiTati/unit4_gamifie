@@ -17,6 +17,32 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line
 if (!localStorage.getItem('cq_student')) { window.location.href = 'app/login.html'; }
 </script>
 
+<div id="dqNavBar" style="background:#0a0f1a;border-bottom:1px solid #1e3a5f;padding:.5rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:999">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <span style="font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;background:linear-gradient(135deg,#32E0C4,#0D7377);-webkit-background-clip:text;-webkit-text-fill-color:transparent">DataQuest</span>
+    <span style="font-size:.6rem;color:#94a3b8" id="dqStudentName"></span>
+  </div>
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+    <a href="app/home.html" style="color:#e2e8f0;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Accueil</a>
+    <a href="app/profile.html" style="color:#32E0C4;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #0D7377;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Mon Profil</a>
+    <a href="app/scores.html" style="color:#e2e8f0;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Classement</a>
+    <a href="app/settings.html" style="color:#e2e8f0;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Paramètres</a>
+    <button onclick="dqLogout()" style="color:#94a3b8;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:Outfit,sans-serif">Déconnexion</button>
+  </div>
+</div>
+<script>
+// Show student name in nav
+var _s = JSON.parse(localStorage.getItem('cq_student') || 'null');
+if (_s) document.getElementById('dqStudentName').textContent = _s.first_name + ' ' + _s.last_name;
+function dqLogout() {
+  localStorage.removeItem('cq_student');
+  localStorage.removeItem('cq_token');
+  localStorage.removeItem('cq_refresh');
+  localStorage.removeItem('cq_user');
+  window.location.href = 'app/login.html';
+}
+</script>
+
 <header class="header"><div class="header-inner"><div class="brand"><div class="brand-icon">U4</div><div><h1>Unit 4 — Database Design & Development</h1><p>SwissSound Studios &middot; Mme MBI</p></div></div><nav class="nav-pills"><span class="nav-pill" onclick="s('top')">Hub</span><span class="nav-pill" onclick="s('m1')">LO1</span><span class="nav-pill" onclick="s('m2')">LO2</span><span class="nav-pill" onclick="s('m3')">LO3</span><span class="nav-pill" onclick="s('m4')">LO4</span><div style="width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:.3s" id="toggleDot"></div></div><a href="app/teacher.html" style="padding:.3rem .7rem;border-radius:6px;font-size:.72rem;font-weight:600;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);color:#a855f7;cursor:pointer;transition:.2s;text-decoration:none">Espace enseignant</a></nav>
 </div></header>
 <main class="main" id="top">
