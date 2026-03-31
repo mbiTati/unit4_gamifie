@@ -745,7 +745,7 @@ async function addClass() {
     loadData(); // Refresh filters
   } else {
     const errMsg = result?.message || JSON.stringify(result?.error || '');
-    if (errMsg.includes('duplicate') || errMsg.includes('unique')) {
+    if (errMsg.indexOf('duplicate') > -1 || errMsg.indexOf('unique') > -1) {
       msg.innerHTML = `<span style="color:var(--error)">La classe ${name} existe déjà.</span>`;
     } else {
       msg.innerHTML = `<span style="color:var(--error)">Erreur : ${errMsg}</span>`;
@@ -882,7 +882,7 @@ async function addStudent() {
       authId = signupData.user.id;
     } else if (signupData.error) {
       // User might already exist in auth
-      if (signupData.msg && signupData.msg.includes('already')) {
+      if (signupData.msg && signupData.msg.indexOf('already') > -1) {
         msg.innerHTML = '<span style="color:var(--error)">Cet email existe déjà dans le système auth.</span>';
         return;
       }
@@ -895,7 +895,7 @@ async function addStudent() {
       auth_id: authId,
     });
     
-    if (profileResult && profileResult.message && (profileResult.message.includes('duplicate') || profileResult.message.includes('unique'))) {
+    if (profileResult && profileResult.message && (profileResult.message.indexOf('duplicate') > -1 || profileResult.message.indexOf('unique') > -1)) {
       msg.innerHTML = '<span style="color:var(--error)">Cet email existe déjà dans les profils.</span>';
       return;
     }
@@ -1009,8 +1009,8 @@ renderDocs();
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

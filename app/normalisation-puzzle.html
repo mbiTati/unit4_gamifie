@@ -252,7 +252,7 @@ function checkNorm() {
     const match = userTables.find(u => 
       u.cols.length === exp.cols.length && 
       u.cols.every((c, i) => c === exp.cols[i]) &&
-      !matched.includes(userTables.indexOf(u))
+      !matched.indexOf(userTables.indexOf(u) > -1)
     );
     if (match) {
       matched.push(userTables.indexOf(match));
@@ -321,8 +321,8 @@ function doLogout() {
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

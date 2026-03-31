@@ -209,7 +209,7 @@ function renderExercises() {
   el.innerHTML = exercises.map((ex, i) => `
     <div class="ex">
       <div class="ex-q">${i+1}. ${ex.q}</div>
-      <div class="ex-hint" onclick="this.textContent=this.textContent.includes('Indice')?'${ex.hint}':'Indice'">Indice</div>
+      <div class="ex-hint" onclick="this.textContent=this.textContent.indexOf('Indice') > -1?'${ex.hint}':'Indice'">Indice</div>
       <textarea class="editor" id="exInput${i}" style="min-height:60px" placeholder="-- Votre requete ici">${i===0?ex.answer.replace(';',';\n-- Modifiez et testez !'):''}</textarea>
       <div class="actions">
         <button class="btn btn-run" onclick="runEx(${i})">RUN Executer</button>
@@ -358,8 +358,8 @@ initDB();
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

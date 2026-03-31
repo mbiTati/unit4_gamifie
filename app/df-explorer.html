@@ -191,7 +191,7 @@ function renderExercise() {
 
 function toggleSrc(el, attr) {
   el.classList.toggle('src');
-  if (srcSelected.includes(attr)) {
+  if (srcSelected.indexOf(attr) > -1) {
     srcSelected = srcSelected.filter(a => a !== attr);
   } else {
     srcSelected.push(attr);
@@ -200,7 +200,7 @@ function toggleSrc(el, attr) {
 
 function toggleDst(el, attr) {
   el.classList.toggle('dst');
-  if (dstSelected.includes(attr)) {
+  if (dstSelected.indexOf(attr) > -1) {
     dstSelected = dstSelected.filter(a => a !== attr);
   } else {
     dstSelected.push(attr);
@@ -261,7 +261,7 @@ function drawSVG() {
   // Draw attribute nodes
   attrs.forEach((a, i) => {
     const x = gap * (i + 1);
-    const isSrc = userDFs.some(d => d.src.includes(a));
+    const isSrc = userDFs.some(d => d.src.indexOf(a) > -1);
     const isDst = userDFs.some(d => d.dst === a);
     const fill = isSrc ? 'rgba(245,158,11,.15)' : isDst ? 'rgba(50,224,196,.15)' : 'rgba(255,255,255,.05)';
     const stroke = isSrc ? '#f59e0b' : isDst ? '#32E0C4' : '#334155';
@@ -295,7 +295,7 @@ function checkDFs() {
   for (const exp of ex.expected) {
     const found = userDFs.some(d =>
       JSON.stringify(d.src.sort()) === JSON.stringify([...exp.src].sort()) &&
-      exp.dst.includes(d.dst)
+      exp.dst.indexOf(d.dst) > -1
     );
     if (found) matched++;
     results.push({ df: `${exp.src.join(',')} → ${exp.dst}`, ok: found });
@@ -354,8 +354,8 @@ function doLogout() {
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

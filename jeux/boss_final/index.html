@@ -132,8 +132,8 @@ function end(){document.getElementById('quiz').classList.add('hidden');const f=d
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

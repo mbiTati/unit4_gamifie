@@ -112,12 +112,12 @@ const CHALLENGES = [
     check: (sql) => {
       const upper = sql.toUpperCase();
       const checks = [
-        [upper.includes('CLIENT'), 'Nom de table CLIENT'],
-        [upper.includes('ID_CLIENT') && upper.includes('PRIMARY KEY'), 'PK sur id_client'],
-        [upper.includes('NOM') && upper.includes('NOT NULL'), 'NOT NULL sur nom'],
-        [upper.includes('EMAIL') && upper.includes('UNIQUE'), 'UNIQUE sur email'],
-        [upper.includes('VARCHAR'), 'Types VARCHAR'],
-        [upper.includes('DATE'), 'Type DATE pour date_inscription'],
+        [upper.indexOf('CLIENT') > -1, 'Nom de table CLIENT'],
+        [upper.indexOf('ID_CLIENT') > -1 && upper.indexOf('PRIMARY KEY') > -1, 'PK sur id_client'],
+        [upper.indexOf('NOM') > -1 && upper.indexOf('NOT NULL') > -1, 'NOT NULL sur nom'],
+        [upper.indexOf('EMAIL') > -1 && upper.indexOf('UNIQUE') > -1, 'UNIQUE sur email'],
+        [upper.indexOf('VARCHAR') > -1, 'Types VARCHAR'],
+        [upper.indexOf('DATE') > -1, 'Type DATE pour date_inscription'],
       ];
       return checks;
     }
@@ -135,11 +135,11 @@ const CHALLENGES = [
     check: (sql) => {
       const upper = sql.toUpperCase();
       return [
-        [upper.includes('RESERVATION'), 'Nom RESERVATION'],
-        [upper.includes('PRIMARY KEY'), 'PK présente'],
-        [upper.includes('REFERENCES') || upper.includes('FOREIGN KEY'), 'FK vers client'],
-        [upper.includes('CHECK'), 'CHECK sur montant'],
-        [upper.includes('DEFAULT'), 'DEFAULT sur statut'],
+        [upper.indexOf('RESERVATION') > -1, 'Nom RESERVATION'],
+        [upper.indexOf('PRIMARY KEY') > -1, 'PK présente'],
+        [upper.indexOf('REFERENCES') > -1 || upper.indexOf('FOREIGN KEY') > -1, 'FK vers client'],
+        [upper.indexOf('CHECK') > -1, 'CHECK sur montant'],
+        [upper.indexOf('DEFAULT') > -1, 'DEFAULT sur statut'],
         [(upper.match(/NOT NULL/g) || []).length >= 3, 'Au moins 3 NOT NULL'],
       ];
     }
@@ -154,10 +154,10 @@ const CHALLENGES = [
     check: (sql) => {
       const upper = sql.toUpperCase();
       return [
-        [upper.includes('PRODUIT_INGREDIENT'), 'Nom table N:M'],
+        [upper.indexOf('PRODUIT_INGREDIENT') > -1, 'Nom table N:M'],
         [(upper.match(/REFERENCES/g) || []).length >= 2, 'Deux FK (REFERENCES)'],
-        [upper.includes('PRIMARY KEY') && upper.includes('ID_PRODUIT') && upper.includes('ID_INGREDIENT'), 'PK composite'],
-        [upper.includes('QUANTITE') && upper.includes('NOT NULL'), 'quantite NOT NULL'],
+        [upper.indexOf('PRIMARY KEY') > -1 && upper.indexOf('ID_PRODUIT') > -1 && upper.indexOf('ID_INGREDIENT') > -1, 'PK composite'],
+        [upper.indexOf('QUANTITE') > -1 && upper.indexOf('NOT NULL') > -1, 'quantite NOT NULL'],
       ];
     }
   }
@@ -325,8 +325,8 @@ function doLogout() {
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

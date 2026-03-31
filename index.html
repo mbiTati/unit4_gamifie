@@ -101,7 +101,7 @@ const C=[
 {id:19,lo:4,n:"Ch.19",t:"Documentation technique",d:"DFD niveaux 0-2, flowcharts, dictionnaire",b:"P5 M5",tp:"Quiz",g:"jeux/module19_cartographe/index.html",e:null,mm:"docs/fiches_memo/Memo_Module19.pdf"},
 {id:20,lo:4,n:"Ch.20",t:"Documentation utilisateur + D3",d:"Guide utilisateur, FAQ, ameliorations continues",b:"P5 M5 D3",tp:"Redaction",g:"jeux/module20_guide_parfait/index.html",e:null,mm:"docs/fiches_memo/Memo_Module20.pdf"},
 ];
-const bc=b=>b.includes('D')?'d':b.includes('M')&&b.includes('P')?'pm':b.includes('M')?'m':'p';
+const bc=b=>b.indexOf('D') > -1?'d':b.indexOf('M') > -1&&b.indexOf('P') > -1?'pm':b.indexOf('M') > -1?'m':'p';
 const lc={1:'l1',2:'l2',3:'l3',4:'l4'};
 function r(lo,id){document.getElementById(id).innerHTML=C.filter(c=>c.lo===lo).map(c=>`<div class="ch ${lc[lo]}"><div class="ch-top"><span class="ch-n">${c.n}</span><span class="ch-b ${bc(c.b)}">${c.b}</span><span class="ch-tp">${c.tp}</span></div><div class="ch-tt">${c.t}</div><div class="ch-d">${c.d}</div><div style="font-size:.6rem;font-weight:700;color:#32E0C4;margin:.3rem 0">📗 Cours: 25 XP · 🎮 Mini-jeu: 20 XP max</div><div class="ch-lk"><a class="ch-l pr" href="${c.g}">Mini-jeu <span style="font-size:.5rem;color:#10b981;font-weight:700">+XP</span></a>${c.e?`<a class="ch-l" href="${c.e}">Bac SQL <span style="font-size:.5rem;color:#10b981;font-weight:700">+XP</span></a>`:``}${c.s1?`<a class="ch-l" href="${c.s1}" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#2563eb;font-weight:700">SQL 1</a>`:``}${c.s2?`<a class="ch-l" href="${c.s2}" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#2563eb;font-weight:700">SQL 2</a>`:``}<a class="ch-l" href="${c.mm}" target="_blank">Memo</a></div></div>`).join('')}
 r(1,'c1');r(2,'c2');r(3,'c3');r(4,'c4');
@@ -178,8 +178,8 @@ function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',blo
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
 })();
 </script>

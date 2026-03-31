@@ -101,8 +101,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   </div>
   
   <!-- GAMES -->
-  <div class="section-title"><span class="lo-badge" style="background:var(--gold)">DÉFI</span> Défis & conception</div>
-  
+    
   
   <div class="section-title"><span class="lo-badge" style="background:var(--gold)">DÉFI</span> Défis & conception</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">
@@ -255,8 +254,8 @@ loadDashboard();
   if (!b) return;
   var path = (window.location && window.location.pathname) || '';
   if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.includes('/jeux/')) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.includes('/app/')) b.setAttribute('data-href', 'duel-sql.html');
+  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
+  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
   else b.setAttribute('data-href', 'app/duel-sql.html');
   } catch(e) { console.error('DuelBtn:', e); }
 })();

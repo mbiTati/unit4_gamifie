@@ -556,7 +556,7 @@ function submitAnswer() {
   if (!input) { fb.textContent = 'Écrivez une réponse !'; fb.className = 'feedback no'; return; }
   
   let matched = 0;
-  for (const kw of q.kw) { if (input.includes(kw.toUpperCase())) matched++; }
+  for (const kw of q.kw) { if (input.indexOf(kw.toUpperCase() > -1)) matched++; }
   
   if (matched / q.kw.length >= 0.7) {
     const pts = 10 + Math.max(0, Math.floor(timeLeft / 30));
