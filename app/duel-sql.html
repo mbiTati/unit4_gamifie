@@ -195,6 +195,70 @@ let duelId = null;
 let pollInterval = null;
 
 // ===================== LOBBY =====================
+
+// Check if we're joining an existing duel via URL
+async function checkJoinDuel() {
+  const params = new URLSearchParams(window.location.search);
+  const joinId = params.get('duel');
+  if (!joinId) return false;
+  
+  // Load the duel from Supabase
+  const res = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + joinId + '&select=*', {
+    headers: { 'apikey': ANON }
+  }).then(r => r.json());
+  
+  if (!Array.isArray(res) || res.length === 0) return false;
+  
+  const duel = res[0];
+  duelId = duel.id;
+  
+  // Get opponent name
+  const oppId = duel.player1_id === student.id ? duel.player2_id : duel.player1_id;
+  const oppRes = await fetch(SUPABASE_REST + '/cq_students?id=eq.' + oppId + '&select=first_name,last_name', {
+    headers: { 'apikey': ANON }
+  }).then(r => r.json());
+  
+  const oppData = Array.isArray(oppRes) && oppRes[0] ? oppRes[0] : { first_name: 'Adversaire', last_name: '' };
+  oppName = oppData.first_name + ' ' + oppData.last_name.charAt(0) + '.';
+  
+  // Convert questions
+  const qs = (duel.questions || []).map(q => ({
+    q: q.q, schema: q.schema, keywords: q.keywords, answer: [q.answer]
+  }));
+  
+  // Start duel directly
+  startDuel(qs, oppName, 3);
+  
+  // Start polling opponent score
+  startScorePolling(duel);
+  
+  return true;
+}
+
+function startScorePolling(duel) {
+  const amPlayer1 = duel.player1_id === student.id;
+  const oppScoreField = amPlayer1 ? 'player2_score' : 'player1_score';
+  const myScoreField = amPlayer1 ? 'player1_score' : 'player2_score';
+  
+  // Poll opponent score every 3 seconds
+  setInterval(async () => {
+    const res = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId + '&select=' + oppScoreField, {
+      headers: { 'apikey': ANON }
+    }).then(r => r.json()).catch(() => []);
+    
+    if (Array.isArray(res) && res[0]) {
+      const newOppScore = res[0][oppScoreField] || 0;
+      if (newOppScore !== oppScore) {
+        oppScore = newOppScore;
+        document.getElementById('scoreOpp').textContent = oppScore;
+        // Flash effect
+        document.getElementById('scoreOpp').style.textShadow = '0 0 10px var(--gold)';
+        setTimeout(() => document.getElementById('scoreOpp').style.textShadow = 'none', 500);
+      }
+    }
+  }, 3000);
+}
+
 async function loadLobby() {
   // Load online players from presence
   const presence = await supabase.query('cq_presence', {
@@ -305,6 +369,22 @@ async function challengePlayer(id, first, last, levelIdx) {
     }
   }, 2000);
 }
+
+
+  var _amPlayer1 = null;
+  async function syncMyScore() {
+    if (!duelId) return;
+    if (_amPlayer1 === null) {
+      var d = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId + '&select=player1_id', {headers:{'apikey':ANON}}).then(r=>r.json()).catch(()=>[]);
+      if (Array.isArray(d) && d[0]) _amPlayer1 = d[0].player1_id === student.id;
+    }
+    var field = _amPlayer1 ? 'player1_score' : 'player2_score';
+    var body = {}; body[field] = myScore; body['updated_at'] = new Date().toISOString();
+    fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId, {
+      method: 'PATCH', headers: {'apikey':ANON,'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    }).catch(function(){});
+  }
 
 function startSolo() {
   duelMode = 'solo';
@@ -456,14 +536,9 @@ function submitAnswer() {
       document.getElementById('scoreOpp').textContent = oppScore;
     }
     
-        // Sync score to Supabase
+        // Sync MY score to Supabase
     if (duelId) {
-      var scoreField = student.id === (duelId.player1_id || '') ? 'player1_score' : 'player2_score';
-      fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId, {
-        method: 'PATCH',
-        headers: { 'apikey': ANON, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [scoreField]: myScore, updated_at: new Date().toISOString() })
-      }).catch(function(){});
+      syncMyScore();
     }
     
     setTimeout(() => { currentQ++; showDuelQuestion(); }, 1200);
@@ -547,8 +622,12 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Init
-loadLobby();
+(async () => {
+  const joined = await checkJoinDuel();
+  if (!joined) loadLobby();
+})();
 </script>
 <script src="presence-tracker.js"></script>
+<script src="duel-notify.js"></script>
 </body>
 </html>
