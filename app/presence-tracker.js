@@ -41,13 +41,18 @@
                      pageUrl.includes('/jeux/boss_');
   
   if (isCoursePage) {
-    // Track this page view as a game score (small XP for engagement)
+    // Track cumulative course page views → XP
     var viewKey = 'dq_viewed_' + pageUrl;
     if (!localStorage.getItem(viewKey)) {
       localStorage.setItem(viewKey, '1');
-      // Award 5 points for first visit to this page
+      // Count total pages viewed
+      var totalViewed = 0;
+      for (var k in localStorage) {
+        if (k.indexOf('dq_viewed_') === 0) totalViewed++;
+      }
+      // Save cumulative score: total pages × 5 pts
       if (typeof saveGameScore === 'function') {
-        saveGameScore('course_view', 5, 0);
+        saveGameScore('course_pages', totalViewed * 5, 0);
       }
     }
   }
