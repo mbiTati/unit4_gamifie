@@ -185,10 +185,11 @@ async function loadDashboard() {
   }) || [];
   
   const progressList = Array.isArray(progress) ? progress : [];
-  let totalXP = 0;
+  // XP from course modules
+  let xpFromCourse = 0;
   let modulesCompleted = 0;
   for (const p of progressList) {
-    totalXP += (p.credits_earned || 0) + (p.game_score || 0);
+    xpFromCourse += (p.credits_earned || 0) + (p.game_score || 0);
     if (p.completed_at) modulesCompleted++;
   }
   
@@ -198,6 +199,14 @@ async function loadDashboard() {
     filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
   }) || [];
   const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
+  
+  // XP from exercises/games (each point = 1 XP)
+  const xpFromGames = Array.isArray(gameScores) 
+    ? gameScores.reduce((a, g) => a + (g.score || 0), 0) 
+    : 0;
+  
+  // TOTAL XP = course + games (both count!)
+  const totalXP = xpFromCourse + xpFromGames;
   
   // Count unique exercises done
   const exercisesDone = Array.isArray(gameScores) ? new Set(gameScores.map(g => g.game_id)).size : 0;
@@ -244,7 +253,7 @@ async function loadDashboard() {
     char.classList.add('dancing');
     document.getElementById('wName').textContent = student.first_name + ' ' + student.last_name;
     document.getElementById('wLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:700">' + level.name + '</span> <span style="font-size:.7rem;color:var(--muted)">(Nv. ' + (level.index + 1) + '/9)</span>';
-    document.getElementById('wXP').textContent = totalXP + ' XP' + (level.nextMin > level.xp ? ' — prochain niveau à ' + level.nextMin + ' XP' : ' — NIVEAU MAX!');
+    document.getElementById('wXP').textContent = totalXP + ' XP (cours: ' + xpFromCourse + ' + exos: ' + xpFromGames + ')' + (level.nextMin > level.xp ? ' — prochain à ' + level.nextMin + ' XP' : ' — MAX!');
     document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';
     document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';
     document.querySelector('.welcome').style.borderColor = level.color + '30';

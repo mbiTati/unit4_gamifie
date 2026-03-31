@@ -74,38 +74,38 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
 <script>
 const BANKS = {
   "SQL Basics": [
-    {q:"Quel mot-clé permet de filtrer les résultats d'un SELECT ?",a:["WHERE","FILTER","HAVING","LIMIT"],c:0},
-    {q:"Comment trier les résultats par ordre décroissant ?",a:["ORDER BY ... DESC","SORT BY ... DESC","ORDER BY ... REVERSE","GROUP BY ... DESC"],c:0},
-    {q:"Quel opérateur vérifie si une valeur est dans une liste ?",a:["IN","BETWEEN","LIKE","EXISTS"],c:0},
-    {q:"SELECT DISTINCT sert à :",a:["Éliminer les doublons","Sélectionner une seule ligne","Trier les résultats","Compter les valeurs"],c:0},
-    {q:"Quelle fonction compte le nombre de lignes ?",a:["COUNT()","SUM()","TOTAL()","NUMBER()"],c:0},
-    {q:"LIKE '%ville%' recherche :",a:["Les valeurs contenant 'ville'","Les valeurs commençant par 'ville'","Les valeurs égales à 'ville'","Les valeurs finissant par 'ville'"],c:0},
-    {q:"NULL signifie :",a:["Valeur inconnue/absente","Zéro","Chaîne vide","Faux"],c:0},
-    {q:"BETWEEN 10 AND 20 inclut-il 10 et 20 ?",a:["Oui, les deux bornes","Non, aucune","Seulement 10","Seulement 20"],c:0},
+    {q:"Quel mot-clé permet de filtrer les résultats d'un SELECT ?",a:["WHERE","FILTER","HAVING","LIMIT"],correct:"WHERE"},
+    {q:"Comment trier les résultats par ordre décroissant ?",a:["ORDER BY ... DESC","SORT BY ... DESC","ORDER BY ... REVERSE","GROUP BY ... DESC"],correct:"ORDER BY ... DESC"},
+    {q:"Quel opérateur vérifie si une valeur est dans une liste ?",a:["IN","BETWEEN","LIKE","EXISTS"],correct:"IN"},
+    {q:"SELECT DISTINCT sert à :",a:["Éliminer les doublons","Sélectionner une seule ligne","Trier les résultats","Compter les valeurs"],correct:"Éliminer les doublons"},
+    {q:"Quelle fonction compte le nombre de lignes ?",a:["COUNT()","SUM()","TOTAL()","NUMBER()"],correct:"COUNT()"},
+    {q:"LIKE '%ville%' recherche :",a:["Contenant 'ville'","Commençant par 'ville'","Égal à 'ville'","Finissant par 'ville'"],correct:"Contenant 'ville'"},
+    {q:"NULL signifie :",a:["Valeur inconnue/absente","Zéro","Chaîne vide","Faux"],correct:"Valeur inconnue/absente"},
+    {q:"BETWEEN 10 AND 20 inclut-il 10 et 20 ?",a:["Oui, les deux bornes","Non, aucune","Seulement 10","Seulement 20"],correct:"Oui, les deux bornes"},
   ],
   "Jointures": [
-    {q:"INNER JOIN retourne :",a:["Les lignes avec correspondance dans les 2 tables","Toutes les lignes des 2 tables","Seulement la table gauche","La différence entre 2 tables"],c:0},
-    {q:"LEFT JOIN affiche :",a:["Toutes les lignes de gauche + correspondances droite","Seulement les correspondances","Toutes les lignes de droite","Les lignes sans correspondance"],c:0},
-    {q:"Une clé étrangère (FK) sert à :",a:["Référencer une PK d'une autre table","Identifier de manière unique","Chiffrer les données","Trier automatiquement"],c:0},
-    {q:"ON a.id = b.id dans un JOIN définit :",a:["La condition de jointure","Le tri des résultats","Le filtre WHERE","L'alias de la table"],c:0},
-    {q:"Combien de tables peut-on joindre dans une requête ?",a:["Autant que nécessaire","Maximum 2","Maximum 5","Maximum 10"],c:0},
-    {q:"Si LEFT JOIN ne trouve pas de correspondance, les colonnes de droite sont :",a:["NULL","Vides","0","Supprimées"],c:0},
+    {q:"INNER JOIN retourne :",a:["Correspondances des 2 tables","Toutes les lignes des 2 tables","Seulement la table gauche","La différence entre 2 tables"],correct:"Correspondances des 2 tables"},
+    {q:"LEFT JOIN affiche :",a:["Tout à gauche + correspondances droite","Seulement les correspondances","Toutes les lignes de droite","Les lignes sans correspondance"],correct:"Tout à gauche + correspondances droite"},
+    {q:"Une clé étrangère (FK) sert à :",a:["Référencer une PK d'une autre table","Identifier de manière unique","Chiffrer les données","Trier automatiquement"],correct:"Référencer une PK d'une autre table"},
+    {q:"ON a.id = b.id dans un JOIN définit :",a:["La condition de jointure","Le tri des résultats","Le filtre WHERE","L'alias de la table"],correct:"La condition de jointure"},
+    {q:"Combien de tables peut-on joindre ?",a:["Autant que nécessaire","Maximum 2","Maximum 5","Maximum 10"],correct:"Autant que nécessaire"},
+    {q:"Si LEFT JOIN ne trouve pas de correspondance :",a:["Colonnes de droite = NULL","Colonnes vides","Colonnes = 0","Ligne supprimée"],correct:"Colonnes de droite = NULL"},
   ],
   "Conception MCD": [
-    {q:"Dans un MCD Merise, une entité est représentée par :",a:["Un rectangle","Un losange","Un ovale","Un cercle"],c:0},
-    {q:"La cardinalité (0,N) signifie :",a:["0 ou plusieurs occurrences","Exactement N","Au moins 1","0 ou 1"],c:0},
-    {q:"Une relation N:M nécessite :",a:["Une table de liaison/association","Rien de spécial","Une vue SQL","Un trigger"],c:0},
-    {q:"Un identifiant (clé primaire) doit être :",a:["Unique et non nul","Unique mais nullable","Numérique obligatoirement","Composé de 2 colonnes minimum"],c:0},
-    {q:"CIF signifie :",a:["Contrainte d'Intégrité Fonctionnelle","Clé Interne Fonctionnelle","Contrainte d'Identification Forte","Code d'Intégrité des FK"],c:0},
-    {q:"Un attribut multivalué viole quelle forme normale ?",a:["1NF","2NF","3NF","BCNF"],c:0},
+    {q:"Dans un MCD, une entité est :",a:["Un rectangle","Un losange","Un ovale","Un cercle"],correct:"Un rectangle"},
+    {q:"La cardinalité (0,N) signifie :",a:["0 ou plusieurs","Exactement N","Au moins 1","0 ou 1"],correct:"0 ou plusieurs"},
+    {q:"Une relation N:M nécessite :",a:["Une table de liaison","Rien de spécial","Une vue SQL","Un trigger"],correct:"Une table de liaison"},
+    {q:"Un identifiant (PK) doit être :",a:["Unique et non nul","Unique mais nullable","Numérique obligatoirement","Composé de 2 colonnes"],correct:"Unique et non nul"},
+    {q:"CIF signifie :",a:["Contrainte d'Intégrité Fonctionnelle","Clé Interne Fonctionnelle","Contrainte d'Identification Forte","Code d'Intégrité FK"],correct:"Contrainte d'Intégrité Fonctionnelle"},
+    {q:"Un attribut multivalué viole :",a:["1NF","2NF","3NF","BCNF"],correct:"1NF"},
   ],
   "Normalisation": [
-    {q:"La 1NF exige :",a:["Des valeurs atomiques (pas de groupes répétitifs)","Pas de dépendances partielles","Pas de dépendances transitives","Des clés primaires composites"],c:0},
-    {q:"La 2NF élimine :",a:["Les dépendances partielles","Les groupes répétitifs","Les dépendances transitives","Les valeurs NULL"],c:0},
-    {q:"La 3NF élimine :",a:["Les dépendances transitives","Les dépendances partielles","Les doublons","Les clés étrangères"],c:0},
-    {q:"A → B → C est une dépendance :",a:["Transitive","Partielle","Fonctionnelle directe","Multivaluée"],c:0},
-    {q:"Si NOART → NOFAM et NOFAM → LIBFAM, que faut-il faire en 3NF ?",a:["Créer une table FAMILLE séparée","Supprimer LIBFAM","Fusionner les tables","Ajouter un index"],c:0},
-    {q:"Une clé primaire composite existe quand :",a:["La clé est formée de plusieurs colonnes","Il y a plusieurs PK","La table a plus de 5 colonnes","C'est une relation N:M"],c:0},
+    {q:"La 1NF exige :",a:["Des valeurs atomiques","Pas de dépendances partielles","Pas de dépendances transitives","Des clés composites"],correct:"Des valeurs atomiques"},
+    {q:"La 2NF élimine :",a:["Les dépendances partielles","Les groupes répétitifs","Les dépendances transitives","Les valeurs NULL"],correct:"Les dépendances partielles"},
+    {q:"La 3NF élimine :",a:["Les dépendances transitives","Les dépendances partielles","Les doublons","Les clés étrangères"],correct:"Les dépendances transitives"},
+    {q:"A → B → C est une dépendance :",a:["Transitive","Partielle","Fonctionnelle directe","Multivaluée"],correct:"Transitive"},
+    {q:"NOART → NOFAM → LIBFAM, que faire en 3NF ?",a:["Créer une table FAMILLE","Supprimer LIBFAM","Fusionner les tables","Ajouter un index"],correct:"Créer une table FAMILLE"},
+    {q:"Une clé primaire composite existe quand :",a:["La clé = plusieurs colonnes","Il y a plusieurs PK","La table a 5+ colonnes","C'est une relation N:M"],correct:"La clé = plusieurs colonnes"},
   ],
 };
 
@@ -154,20 +154,16 @@ function startQuiz() {
   localStorage.setItem(attemptsKey, attempts + 1);
   
   // Shuffle questions randomly
-  questions = [...BANKS[selectedBank]].sort(() => Math.random() - 0.5);
+  const bank = [...BANKS[selectedBank]].sort(() => Math.random() - 0.5);
   
-  // Also shuffle the answers for each question (keeping track of correct)
-  questions = questions.map(q => {
-    const indices = q.a.map((_, i) => i);
-    // Fisher-Yates shuffle
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
+  // Shuffle answers for each question — correct answer moves to random position
+  questions = bank.map(q => {
+    const correctText = q.correct;
+    const shuffled = [...q.a].sort(() => Math.random() - 0.5);
     return {
       q: q.q,
-      a: indices.map(i => q.a[i]),
-      c: indices.indexOf(q.c),
+      a: shuffled,
+      c: shuffled.indexOf(correctText),
     };
   });
   

@@ -128,7 +128,7 @@ async function loadScores() {
     const myGames = gsList.filter(g => g.student_id === s.id);
     const totalGameScore = myGames.reduce((a, g) => a + (g.score || 0), 0);
     const exercisesDone = new Set(myGames.map(g => g.game_id)).size;
-    const totalXP = xpFromProgress + Math.floor(totalGameScore / 10);
+    const totalXP = xpFromProgress + totalGameScore; // Both count equally
     const level = getLevel(totalXP);
     
     return {
