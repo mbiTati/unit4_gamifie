@@ -99,6 +99,31 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   </div>
   
   <!-- LEVELS GALLERY -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1.5rem">
+    <h2 style="font-size:.9rem;font-weight:700;margin-bottom:.6rem">Comment gagner des XP</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.75rem">
+      <div style="padding:.3rem .5rem;background:var(--surface);border-radius:5px;display:flex;justify-content:space-between">
+        <span>Modules du cours (×20)</span><span style="color:var(--lo1);font-weight:700">~25 XP chacun</span>
+      </div>
+      <div style="padding:.3rem .5rem;background:var(--surface);border-radius:5px;display:flex;justify-content:space-between">
+        <span>Exercices GESCOM</span><span style="color:var(--lo1);font-weight:700">max 20 XP</span>
+      </div>
+      <div style="padding:.3rem .5rem;background:var(--surface);border-radius:5px;display:flex;justify-content:space-between">
+        <span>Join Master, Query Racer...</span><span style="color:var(--lo1);font-weight:700">max 20 XP/jeu</span>
+      </div>
+      <div style="padding:.3rem .5rem;background:var(--surface);border-radius:5px;display:flex;justify-content:space-between">
+        <span>Quiz Live (4 banques)</span><span style="color:var(--lo1);font-weight:700">max 20 XP/banque</span>
+      </div>
+      <div style="padding:.3rem .5rem;background:var(--surface);border-radius:5px;display:flex;justify-content:space-between">
+        <span>Cas pro (FootLocker...)</span><span style="color:var(--lo1);font-weight:700">max 20 XP/cas</span>
+      </div>
+      <div style="padding:.3rem .5rem;background:var(--surface);border-radius:5px;display:flex;justify-content:space-between">
+        <span>Block Animations, SQL Editor</span><span style="color:var(--muted)">0 XP (démos)</span>
+      </div>
+    </div>
+    <div style="margin-top:.5rem;font-size:.7rem;color:var(--gold);font-weight:600">Le cours représente ~70% de la progression. Les jeux sont un bonus (~30%).</div>
+  </div>
+  
   <div class="gallery">
     <h2>Collection des niveaux</h2>
     <div class="gallery-grid" id="galleryGrid"></div>

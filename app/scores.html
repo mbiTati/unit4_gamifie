@@ -67,7 +67,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   <!-- CLASS FILTER -->
   <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
     <span style="font-size:.78rem;font-weight:700;color:var(--accent2)">Classe :</span>
-    <select id="classFilter" onchange="loadScores()" style="background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.3rem .6rem;font-family:inherit;font-size:.78rem">
+    <select id="classFilter" onchange="this.dataset.userChanged='1';loadScores()" style="background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.3rem .6rem;font-family:inherit;font-size:.78rem">
       <option value="all">Toutes les classes</option>
     </select>
     <span id="filterInfo" style="font-size:.7rem;color:var(--muted);margin-left:auto"></span>
@@ -114,8 +114,16 @@ async function loadScores() {
   // Populate class filter
   const classFilter = document.getElementById('classFilter');
   const classes = [...new Set(allStudentsFull.map(s => s.class_name).filter(Boolean))].sort();
+  // Default to student's own class (never show "all")
+  const studentData = JSON.parse(localStorage.getItem('cq_student') || 'null');
+  const myClass = studentData?.class_name || 'BI1';
+  if (classFilter.value === 'all' && !classFilter.dataset.userChanged) {
+    classFilter.value = myClass;
+  }
   const currentClass = classFilter.value;
-  classFilter.innerHTML = '<option value="all">Toutes les classes</option>' + 
+  // Teachers see "Toutes", students only see their class by default
+  const isTeacher = studentData?.role === 'teacher';
+  classFilter.innerHTML = (isTeacher ? '<option value="all">Toutes les classes</option>' : '') + 
     classes.map(cl => '<option value="' + cl + '"' + (cl === currentClass ? ' selected' : '') + '>' + cl + '</option>').join('');
   
   // Filter by selected class
