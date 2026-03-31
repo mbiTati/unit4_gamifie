@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Mon Avatar</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.4rem;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:600;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:inherit}
+.main{max-width:900px;margin:0 auto;padding:1rem}
+.preview-zone{display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap}
+.avatar-preview{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center;min-width:180px;flex-shrink:0}
+.avatar-preview .char{margin:0 auto;width:100px;height:130px}
+.avatar-preview .name{font-size:.85rem;font-weight:800;margin-top:.5rem}
+.avatar-preview .level{font-size:.65rem;color:var(--gold)}
+.info-panel{flex:1;min-width:250px}
+.coins{display:flex;align-items:center;gap:.4rem;font-size:1.1rem;font-weight:800;color:var(--gold);margin-bottom:.8rem}
+.coins .label{font-size:.7rem;color:var(--muted);font-weight:600}
+
+/* TABS */
+.shop-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:1rem}
+.shop-tab{padding:.4rem .8rem;font-size:.75rem;font-weight:700;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit}
+.shop-tab.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+
+/* ITEMS GRID */
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5rem}
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.item-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.item-card.equipped{border-color:var(--lo1);background:rgba(16,185,129,.04)}
+.item-card.equipped::after{content:'✓';position:absolute;top:.2rem;right:.3rem;font-size:.6rem;color:var(--lo1);font-weight:800;background:rgba(16,185,129,.15);border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
+.item-card.locked{opacity:.35;cursor:not-allowed}
+.item-card.locked::after{content:'🔒';position:absolute;top:.2rem;right:.3rem;font-size:.55rem}
+.item-visual{width:50px;height:50px;margin:0 auto .3rem;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.item-name{font-size:.65rem;font-weight:700;margin-bottom:.15rem}
+.item-cost{font-size:.55rem;font-weight:700;color:var(--gold)}
+.item-req{font-size:.5rem;color:var(--muted)}
+
+/* COLORS */
+.color-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:.4rem}
+.color-swatch{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;margin:0 auto}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.selected{border-color:var(--accent2);box-shadow:0 0 12px rgba(50,224,196,.3)}
+</style>
+</head>
+<body>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
+<div class="topbar">
+  <h1>Mon Avatar</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+    <a href="scores.html">Classement</a>
+    <a href="docs.html">Documents</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="localStorage.clear();window.location.href='login.html'">Déconnexion</button>
+  </div>
+</div>
+<div class="main">
+  <div class="preview-zone">
+    <div class="avatar-preview">
+      <div class="char" id="avatarPreview"></div>
+      <div class="name" id="avatarName">Mon avatar</div>
+      <div class="level" id="avatarLevel"></div>
+    </div>
+    <div class="info-panel">
+      <div class="coins">🪙 <span id="coinCount">0</span> <span class="label">DataCoins</span></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Gagnez des DataCoins en jouant ! Chaque exercice complété = 5 🪙, chaque duel gagné = 10 🪙, chaque module terminé = 20 🪙</div>
+      <div style="font-size:.68rem;color:var(--text)">
+        <div style="margin-bottom:.2rem"><strong>Objets débloqués :</strong> <span id="unlockedCount">0</span> / <span id="totalCount">0</span></div>
+        <div><strong>Niveau requis :</strong> Plus votre niveau monte, plus d'objets disponibles !</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="shop-tabs">
+    <button class="shop-tab active" onclick="showShopTab('colors')">Couleurs</button>
+    <button class="shop-tab" onclick="showShopTab('hats')">Chapeaux</button>
+    <button class="shop-tab" onclick="showShopTab('accessories')">Accessoires</button>
+    <button class="shop-tab" onclick="showShopTab('effects')">Effets</button>
+    <button class="shop-tab" onclick="showShopTab('titles')">Titres</button>
+  </div>
+  
+  <div id="shopContent"></div>
+</div>
+
+<script src="characters.js?v=1774960217"></script>
+<script src="supabase-config.js?v=1774960217"></script>
+<script>
+var student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+var avatar = JSON.parse(localStorage.getItem('dq_avatar') || '{}');
+var coins = parseInt(localStorage.getItem('dq_coins') || '0');
+
+// Calculate coins from game scores
+async function loadCoins() {
+  try {
+    var gs = await supabase.query('cq_game_scores', { select: 'game_id,score', filter: { 'student_id': 'eq.' + student.id } });
+    if (Array.isArray(gs)) {
+      var c = 0;
+      var seen = {};
+      for (var i = 0; i < gs.length; i++) {
+        var key = gs[i].game_id;
+        if (!seen[key]) { c += 5; seen[key] = true; } // 5 coins per unique exercise
+        if (key === 'duel-sql' && gs[i].score > 30) c += 10; // 10 bonus for duel wins
+      }
+      coins = c;
+      localStorage.setItem('dq_coins', coins);
+    }
+  } catch(e) {}
+  document.getElementById('coinCount').textContent = coins;
+}
+
+// ITEMS DATABASE
+var SHOP = {
+  colors: {
+    label: 'Couleurs du corps',
+    items: [
+      {id:'c_blue',name:'Bleu classic',color:'#3b82f6',cost:0,level:0},
+      {id:'c_green',name:'Vert nature',color:'#10b981',cost:0,level:0},
+      {id:'c_purple',name:'Violet royal',color:'#8b5cf6',cost:10,level:1},
+      {id:'c_red',name:'Rouge feu',color:'#ef4444',cost:10,level:1},
+      {id:'c_gold',name:'Or champion',color:'#f59e0b',cost:20,level:3},
+      {id:'c_pink',name:'Rose bonbon',color:'#ec4899',cost:15,level:2},
+      {id:'c_cyan',name:'Cyan néon',color:'#06b6d4',cost:20,level:2},
+      {id:'c_lime',name:'Lime acide',color:'#84cc16',cost:15,level:2},
+      {id:'c_orange',name:'Orange sunset',color:'#f97316',cost:15,level:2},
+      {id:'c_white',name:'Blanc pur',color:'#f1f5f9',cost:25,level:4},
+      {id:'c_dark',name:'Sombre mystère',color:'#1e293b',cost:30,level:5},
+      {id:'c_rainbow',name:'Arc-en-ciel',color:'linear-gradient(135deg,#ef4444,#f59e0b,#10b981,#3b82f6,#8b5cf6)',cost:50,level:6},
+    ]
+  },
+  hats: {
+    label: 'Chapeaux',
+    items: [
+      {id:'h_none',name:'Aucun',emoji:'',cost:0,level:0},
+      {id:'h_cap',name:'Casquette',emoji:'🧢',cost:10,level:1},
+      {id:'h_tophat',name:'Haut-de-forme',emoji:'🎩',cost:20,level:3},
+      {id:'h_crown',name:'Couronne',emoji:'👑',cost:40,level:5},
+      {id:'h_wizard',name:'Chapeau magique',emoji:'🧙',cost:35,level:4},
+      {id:'h_santa',name:'Bonnet Noël',emoji:'🎅',cost:15,level:2},
+      {id:'h_helmet',name:'Casque viking',emoji:'⛑️',cost:25,level:3},
+      {id:'h_grad',name:'Diplômé',emoji:'🎓',cost:50,level:7},
+    ]
+  },
+  accessories: {
+    label: 'Accessoires',
+    items: [
+      {id:'a_none',name:'Aucun',emoji:'',cost:0,level:0},
+      {id:'a_glasses',name:'Lunettes',emoji:'👓',cost:10,level:1},
+      {id:'a_sunglasses',name:'Lunettes soleil',emoji:'🕶️',cost:15,level:2},
+      {id:'a_shield',name:'Bouclier',emoji:'🛡️',cost:20,level:3},
+      {id:'a_sword',name:'Épée SQL',emoji:'⚔️',cost:25,level:3},
+      {id:'a_laptop',name:'Laptop',emoji:'💻',cost:15,level:2},
+      {id:'a_coffee',name:'Café',emoji:'☕',cost:10,level:1},
+      {id:'a_star',name:'Étoile dorée',emoji:'⭐',cost:30,level:4},
+      {id:'a_diamond',name:'Diamant',emoji:'💎',cost:50,level:6},
+      {id:'a_fire',name:'Flammes',emoji:'🔥',cost:40,level:5},
+    ]
+  },
+  effects: {
+    label: 'Effets',
+    items: [
+      {id:'e_none',name:'Aucun',emoji:'',cost:0,level:0},
+      {id:'e_sparkle',name:'Étincelles',emoji:'✨',cost:15,level:2},
+      {id:'e_glow',name:'Aura lumineuse',emoji:'💫',cost:25,level:3},
+      {id:'e_lightning',name:'Éclairs',emoji:'⚡',cost:30,level:4},
+      {id:'e_heart',name:'Cœurs',emoji:'💖',cost:20,level:2},
+      {id:'e_snow',name:'Neige',emoji:'❄️',cost:20,level:3},
+      {id:'e_music',name:'Notes musique',emoji:'🎵',cost:15,level:2},
+    ]
+  },
+  titles: {
+    label: 'Titres',
+    items: [
+      {id:'t_newbie',name:'Débutant',emoji:'🌱',cost:0,level:0},
+      {id:'t_coder',name:'Codeur SQL',emoji:'💻',cost:10,level:1},
+      {id:'t_architect',name:'Architecte BDD',emoji:'🏗️',cost:25,level:3},
+      {id:'t_master',name:'Maître des données',emoji:'🧙',cost:40,level:5},
+      {id:'t_legend',name:'Légende SQL',emoji:'🏆',cost:60,level:7},
+      {id:'t_overlord',name:'SQL Overlord',emoji:'👑',cost:100,level:8},
+    ]
+  }
+};
+
+function getPlayerLevel() {
+  var xp = parseInt(localStorage.getItem('dq_total_xp') || '0');
+  for (var i = XP_LEVELS.length - 1; i >= 0; i--) {
+    if (xp >= XP_LEVELS[i].min) return i;
+  }
+  return 0;
+}
+
+function showShopTab(tab) {
+  document.querySelectorAll('.shop-tab').forEach(function(t) { t.classList.remove('active'); });
+  event.target.classList.add('active');
+  
+  var data = SHOP[tab];
+  var lvl = getPlayerLevel();
+  var el = document.getElementById('shopContent');
+  
+  if (tab === 'colors') {
+    var html = '<div class="color-grid">';
+    for (var i = 0; i < data.items.length; i++) {
+      var item = data.items[i];
+      var unlocked = lvl >= item.level && coins >= item.cost;
+      var owned = avatar.ownedItems && avatar.ownedItems.indexOf(item.id) > -1;
+      var equipped = avatar.color === item.id;
+      var free = item.cost === 0;
+      
+      html += '<div style="text-align:center">';
+      html += '<div class="color-swatch ' + (equipped ? 'selected' : '') + ((!unlocked && !free && !owned) ? ' locked' : '') + '" style="background:' + item.color + '" data-id="' + item.id + '" onclick="selectColor(\'' + item.id + '\')"></div>';
+      html += '<div style="font-size:.55rem;margin-top:.2rem;color:' + (equipped ? 'var(--accent2)' : 'var(--muted)') + '">' + item.name + '</div>';
+      if (!free && !owned) html += '<div style="font-size:.5rem;color:var(--gold)">🪙 ' + item.cost + ' · Niv.' + (item.level + 1) + '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  } else {
+    var html = '<div class="items-grid">';
+    for (var i = 0; i < data.items.length; i++) {
+      var item = data.items[i];
+      var unlocked = lvl >= item.level && coins >= item.cost;
+      var owned = avatar.ownedItems && avatar.ownedItems.indexOf(item.id) > -1;
+      var eqKey = tab === 'hats' ? 'hat' : tab === 'accessories' ? 'accessory' : tab === 'effects' ? 'effect' : 'title';
+      var equipped = avatar[eqKey] === item.id;
+      var free = item.cost === 0;
+      
+      html += '<div class="item-card ' + (equipped ? 'equipped' : '') + ((!unlocked && !free && !owned) ? ' locked' : '') + '" data-id="' + item.id + '" data-tab="' + tab + '" onclick="selectItem(\'' + item.id + '\',\'' + tab + '\')">';
+      html += '<div class="item-visual" style="background:var(--surface)">' + (item.emoji || '—') + '</div>';
+      html += '<div class="item-name">' + item.name + '</div>';
+      if (!free && !owned) html += '<div class="item-cost">🪙 ' + item.cost + '</div>';
+      if (item.level > 0) html += '<div class="item-req">Niveau ' + (item.level + 1) + '+</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  }
+  
+  updateCounts();
+}
+
+function selectColor(id) {
+  var item = SHOP.colors.items.find(function(i) { return i.id === id; });
+  if (!item) return;
+  if (!buyItem(item)) return;
+  avatar.color = id;
+  avatar.colorHex = item.color;
+  saveAvatar();
+  showShopTab('colors');
+  updatePreview();
+}
+
+function selectItem(id, tab) {
+  var items = SHOP[tab].items;
+  var item = items.find(function(i) { return i.id === id; });
+  if (!item) return;
+  if (!buyItem(item)) return;
+  
+  var key = tab === 'hats' ? 'hat' : tab === 'accessories' ? 'accessory' : tab === 'effects' ? 'effect' : 'title';
+  avatar[key] = id;
+  saveAvatar();
+  showShopTab(tab);
+  updatePreview();
+}
+
+function buyItem(item) {
+  if (item.cost === 0) return true;
+  if (!avatar.ownedItems) avatar.ownedItems = [];
+  if (avatar.ownedItems.indexOf(item.id) > -1) return true; // already owned
+  
+  var lvl = getPlayerLevel();
+  if (lvl < item.level) { alert('Niveau ' + (item.level + 1) + ' requis !'); return false; }
+  if (coins < item.cost) { alert('Pas assez de DataCoins ! (' + coins + '/' + item.cost + ')'); return false; }
+  
+  coins -= item.cost;
+  localStorage.setItem('dq_coins', coins);
+  document.getElementById('coinCount').textContent = coins;
+  avatar.ownedItems.push(item.id);
+  return true;
+}
+
+function saveAvatar() {
+  localStorage.setItem('dq_avatar', JSON.stringify(avatar));
+}
+
+function updatePreview() {
+  var el = document.getElementById('avatarPreview');
+  var lvl = getPlayerLevel();
+  
+  // Build the avatar display
+  var colorHex = avatar.colorHex || XP_LEVELS[lvl].color;
+  var hat = SHOP.hats.items.find(function(i) { return i.id === avatar.hat; });
+  var acc = SHOP.accessories.items.find(function(i) { return i.id === avatar.accessory; });
+  var eff = SHOP.effects.items.find(function(i) { return i.id === avatar.effect; });
+  var title = SHOP.titles.items.find(function(i) { return i.id === avatar.title; });
+  
+  el.innerHTML = '<div style="position:relative;width:80px;height:110px;margin:0 auto">' +
+    // Effect top
+    (eff && eff.emoji ? '<div style="position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:1rem;animation:float 2s infinite">' + eff.emoji + '</div>' : '') +
+    // Hat
+    (hat && hat.emoji ? '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:1.3rem">' + hat.emoji + '</div>' : '') +
+    // Head
+    '<div style="width:36px;height:36px;border-radius:50%;background:' + colorHex + ';margin:8px auto 0;position:relative">' +
+    '<div style="position:absolute;top:12px;left:8px;width:5px;height:5px;background:#000;border-radius:50%"></div>' +
+    '<div style="position:absolute;top:12px;right:8px;width:5px;height:5px;background:#000;border-radius:50%"></div>' +
+    '<div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:8px;height:3px;border-radius:0 0 4px 4px;background:#000;opacity:.3"></div>' +
+    '</div>' +
+    // Body
+    '<div style="width:28px;height:30px;background:' + colorHex + ';margin:2px auto 0;border-radius:4px 4px 0 0;opacity:.85"></div>' +
+    // Arms
+    '<div style="position:absolute;top:48px;left:6px;width:8px;height:22px;background:' + colorHex + ';border-radius:4px;opacity:.7;transform:rotate(10deg)"></div>' +
+    '<div style="position:absolute;top:48px;right:6px;width:8px;height:22px;background:' + colorHex + ';border-radius:4px;opacity:.7;transform:rotate(-10deg)"></div>' +
+    // Accessory
+    (acc && acc.emoji ? '<div style="position:absolute;bottom:20px;right:-5px;font-size:.9rem">' + acc.emoji + '</div>' : '') +
+    // Legs
+    '<div style="display:flex;justify-content:center;gap:4px;margin-top:0">' +
+    '<div style="width:10px;height:18px;background:' + colorHex + ';border-radius:0 0 4px 4px;opacity:.6"></div>' +
+    '<div style="width:10px;height:18px;background:' + colorHex + ';border-radius:0 0 4px 4px;opacity:.6"></div>' +
+    '</div>' +
+    '</div>';
+  
+  document.getElementById('avatarName').textContent = (title && title.name) ? title.emoji + ' ' + title.name : student.first_name;
+  document.getElementById('avatarLevel').textContent = XP_LEVELS[lvl].name;
+  
+  // Add float animation
+  if (!document.getElementById('floatAnim')) {
+    var style = document.createElement('style');
+    style.id = 'floatAnim';
+    style.textContent = '@keyframes float{0%,100%{transform:translateY(0) translateX(-50%)}50%{transform:translateY(-5px) translateX(-50%)}}';
+    document.head.appendChild(style);
+  }
+}
+
+function updateCounts() {
+  var total = 0, unlocked = 0;
+  for (var cat in SHOP) {
+    total += SHOP[cat].items.length;
+    for (var i = 0; i < SHOP[cat].items.length; i++) {
+      var it = SHOP[cat].items[i];
+      if (it.cost === 0 || (avatar.ownedItems && avatar.ownedItems.indexOf(it.id) > -1)) unlocked++;
+    }
+  }
+  document.getElementById('unlockedCount').textContent = unlocked;
+  document.getElementById('totalCount').textContent = total;
+}
+
+// INIT
+loadCoins();
+updatePreview();
+showShopTab('colors');
+</script>
+<script src="presence-tracker.js?v=1774960217"></script>
+<script src="duel-notify.js?v=1774960217"></script>
+</body>
+</html>
