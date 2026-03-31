@@ -167,48 +167,48 @@ function doLogout(){ localStorage.clear(); window.location.href='login.html'; }
 // ========== EXERCISE BANKS ==========
 const EXERCISES = [
   { id:'sql_select', name:'SELECT & WHERE', tag:'SQL', color:'var(--lo2)', desc:'Filtrage, tri, LIKE, BETWEEN, DISTINCT', questions:[
-    {q:"Tous les modèles de la marque 1",schema:"modele(id_modele, id_marque, nom_modele, prix_vente)",kw:["SELECT","modele","WHERE","id_marque","1"],hint:"SELECT ... FROM ... WHERE ..."},
-    {q:"Clients de Genève triés par nom",schema:"client(id_client, nom, prenom, ville)",kw:["SELECT","client","WHERE","ville","Genève","ORDER BY","nom"],hint:"WHERE ville = '...' ORDER BY ..."},
-    {q:"Les 5 modèles les plus chers",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","modele","ORDER BY","prix_vente","DESC","LIMIT","5"],hint:"ORDER BY ... DESC LIMIT ..."},
-    {q:"Modèles entre 50 et 150 CHF",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","modele","WHERE","prix_vente","BETWEEN","50","150"],hint:"BETWEEN ... AND ..."},
-    {q:"Clients dont le nom commence par 'D'",schema:"client(id_client, nom, prenom)",kw:["SELECT","client","WHERE","nom","LIKE","D%"],hint:"WHERE nom LIKE '...'"},
-    {q:"Villes distinctes des clients",schema:"client(id_client, nom, ville)",kw:["SELECT","DISTINCT","ville","client"],hint:"SELECT DISTINCT ..."},
-    {q:"Modèles qui ne sont PAS de la catégorie 'Running'",schema:"modele(id_modele, nom_modele, categorie)",kw:["SELECT","modele","WHERE","categorie","NOT","Running"],hint:"WHERE categorie != '...' ou NOT"},
-    {q:"10 dernières ventes par date",schema:"vente(id_vente, date_vente, prix_paye)",kw:["SELECT","vente","ORDER BY","date_vente","DESC","LIMIT","10"],hint:"ORDER BY ... DESC LIMIT ..."},
+    {q:"Tous les modèles de la marque 1",schema:"modele(id_modele, id_marque, nom_modele, prix_vente)",kw:["SELECT","modele","WHERE","id_marque","1"],hint:"Utilisez WHERE pour filtrer",answer:"SELECT * FROM modele WHERE id_marque = 1"},
+    {q:"Clients de Genève triés par nom",schema:"client(id_client, nom, prenom, ville)",kw:["SELECT","client","WHERE","ville","Genève","ORDER BY","nom"],hint:"Filtrez par ville puis triez",answer:"SELECT * FROM client WHERE ville = 'Genève' ORDER BY nom"},
+    {q:"Les 5 modèles les plus chers",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","modele","ORDER BY","prix_vente","DESC","LIMIT","5"],hint:"Triez du plus cher au moins cher et limitez",answer:"SELECT * FROM modele ORDER BY prix_vente DESC LIMIT 5"},
+    {q:"Modèles entre 50 et 150 CHF",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","modele","WHERE","prix_vente","BETWEEN","50","150"],hint:"Utilisez BETWEEN pour un intervalle",answer:"SELECT * FROM modele WHERE prix_vente BETWEEN 50 AND 150"},
+    {q:"Clients dont le nom commence par 'D'",schema:"client(id_client, nom, prenom)",kw:["SELECT","client","WHERE","nom","LIKE","D%"],hint:"Utilisez LIKE avec un joker",answer:"SELECT * FROM client WHERE nom LIKE 'D%'"},
+    {q:"Villes distinctes des clients",schema:"client(id_client, nom, ville)",kw:["SELECT","DISTINCT","ville","client"],hint:"Éliminez les doublons",answer:"SELECT DISTINCT ville FROM client"},
+    {q:"Modèles qui ne sont PAS de la catégorie 'Running'",schema:"modele(id_modele, nom_modele, categorie)",kw:["SELECT","modele","WHERE","categorie","NOT","Running"],hint:"Excluez une valeur avec != ou NOT",answer:"SELECT * FROM modele WHERE categorie != 'Running'"},
+    {q:"10 dernières ventes par date",schema:"vente(id_vente, date_vente, prix_paye)",kw:["SELECT","vente","ORDER BY","date_vente","DESC","LIMIT","10"],hint:"Triez par date décroissante et limitez",answer:"SELECT * FROM vente ORDER BY date_vente DESC LIMIT 10"},
   ]},
   { id:'sql_aggregation', name:'Agrégation & GROUP BY', tag:'SQL', color:'var(--lo4)', desc:'COUNT, SUM, AVG, MAX, GROUP BY, HAVING', questions:[
-    {q:"Nombre total de clients",schema:"client(id_client, nom, prenom)",kw:["SELECT","COUNT","client"],hint:"SELECT COUNT(*) FROM ..."},
-    {q:"Chiffre d'affaires total",schema:"vente(id_vente, prix_paye)",kw:["SELECT","SUM","prix_paye","vente"],hint:"SELECT SUM(...) FROM ..."},
-    {q:"Prix moyen des modèles",schema:"modele(id_modele, prix_vente)",kw:["SELECT","AVG","prix_vente","modele"],hint:"SELECT AVG(...) FROM ..."},
-    {q:"Nombre de ventes par mode de paiement",schema:"vente(id_vente, mode_paiement)",kw:["SELECT","mode_paiement","COUNT","vente","GROUP BY"],hint:"GROUP BY mode_paiement"},
-    {q:"Nombre de modèles par catégorie",schema:"modele(id_modele, categorie)",kw:["SELECT","categorie","COUNT","modele","GROUP BY"],hint:"SELECT ..., COUNT(*) ... GROUP BY ..."},
-    {q:"Catégories ayant plus de 3 modèles",schema:"modele(id_modele, categorie)",kw:["SELECT","categorie","COUNT","GROUP BY","HAVING","3"],hint:"GROUP BY ... HAVING COUNT(*) > ..."},
-    {q:"Chiffre d'affaires par client",schema:"vente(id_vente, id_client, prix_paye)",kw:["SELECT","id_client","SUM","prix_paye","vente","GROUP BY"],hint:"SELECT id_client, SUM(...) ... GROUP BY ..."},
-    {q:"Modèle le plus cher (avec MAX)",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","MAX","prix_vente","modele"],hint:"SELECT MAX(...) FROM ..."},
+    {q:"Nombre total de clients",schema:"client(id_client, nom, prenom)",kw:["SELECT","COUNT","client"],hint:"Comptez les lignes",answer:"SELECT COUNT(*) FROM client"},
+    {q:"Chiffre d'affaires total",schema:"vente(id_vente, prix_paye)",kw:["SELECT","SUM","prix_paye","vente"],hint:"Additionnez les montants",answer:"SELECT SUM(prix_paye) FROM vente"},
+    {q:"Prix moyen des modèles",schema:"modele(id_modele, prix_vente)",kw:["SELECT","AVG","prix_vente","modele"],hint:"Calculez la moyenne",answer:"SELECT AVG(prix_vente) FROM modele"},
+    {q:"Nombre de ventes par mode de paiement",schema:"vente(id_vente, mode_paiement)",kw:["SELECT","mode_paiement","COUNT","vente","GROUP BY"],hint:"Regroupez par catégorie de paiement",answer:"SELECT mode_paiement, COUNT(*) FROM vente GROUP BY mode_paiement"},
+    {q:"Nombre de modèles par catégorie",schema:"modele(id_modele, categorie)",kw:["SELECT","categorie","COUNT","modele","GROUP BY"],hint:"Comptez par catégorie",answer:"SELECT categorie, COUNT(*) FROM modele GROUP BY categorie"},
+    {q:"Catégories ayant plus de 3 modèles",schema:"modele(id_modele, categorie)",kw:["SELECT","categorie","COUNT","GROUP BY","HAVING","3"],hint:"Filtrez les groupes avec HAVING",answer:"SELECT categorie, COUNT(*) FROM modele GROUP BY categorie HAVING COUNT(*) > 3"},
+    {q:"Chiffre d'affaires par client",schema:"vente(id_vente, id_client, prix_paye)",kw:["SELECT","id_client","SUM","prix_paye","vente","GROUP BY"],hint:"Sommez par client",answer:"SELECT id_client, SUM(prix_paye) FROM vente GROUP BY id_client"},
+    {q:"Modèle le plus cher (avec MAX)",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","MAX","prix_vente","modele"],hint:"Trouvez la valeur maximale",answer:"SELECT MAX(prix_vente) FROM modele"},
   ]},
   { id:'sql_join', name:'Jointures (JOIN)', tag:'JOIN', color:'var(--lo1)', desc:'INNER JOIN, LEFT JOIN, multi-tables', questions:[
-    {q:"Modèles avec le nom de leur marque",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque, nom_modele)",kw:["SELECT","JOIN","modele","marque","ON","id_marque"],hint:"... JOIN marque ON ..."},
-    {q:"Ventes avec le nom du client",schema:"client(id_client, nom) · vente(id_vente, id_client, prix_paye)",kw:["SELECT","JOIN","vente","client","ON","id_client"],hint:"... JOIN client ON ..."},
-    {q:"Marques sans aucun modèle (LEFT JOIN)",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque)",kw:["SELECT","LEFT JOIN","marque","modele","ON","NULL","IS NULL"],hint:"LEFT JOIN ... WHERE ... IS NULL"},
-    {q:"Ventes avec nom du client ET nom du modèle",schema:"client(id_client, nom) · vente(id_vente, id_client, id_modele) · modele(id_modele, nom_modele)",kw:["SELECT","JOIN","vente","client","modele","ON"],hint:"Double JOIN : ... JOIN client ON ... JOIN modele ON ..."},
-    {q:"Chiffre d'affaires par marque",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque) · vente(id_vente, id_modele, prix_paye)",kw:["SELECT","nom_marque","SUM","JOIN","GROUP BY"],hint:"JOIN marque → modele → vente puis GROUP BY"},
-    {q:"Clients ayant acheté plus de 500 CHF au total",schema:"client(id_client, nom) · vente(id_vente, id_client, prix_paye)",kw:["SELECT","nom","SUM","JOIN","GROUP BY","HAVING","500"],hint:"JOIN + GROUP BY + HAVING SUM(...) > ..."},
+    {q:"Modèles avec le nom de leur marque",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque, nom_modele)",kw:["SELECT","JOIN","modele","marque","ON","id_marque"],hint:"Joignez deux tables sur la clé étrangère",answer:"SELECT m.nom_modele, ma.nom_marque FROM modele m JOIN marque ma ON m.id_marque = ma.id_marque"},
+    {q:"Ventes avec le nom du client",schema:"client(id_client, nom) · vente(id_vente, id_client, prix_paye)",kw:["SELECT","JOIN","vente","client","ON","id_client"],hint:"Joignez vente et client",answer:"SELECT c.nom, v.prix_paye FROM vente v JOIN client c ON v.id_client = c.id_client"},
+    {q:"Marques sans aucun modèle (LEFT JOIN)",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque)",kw:["SELECT","LEFT JOIN","marque","modele","ON","NULL","IS NULL"],hint:"Utilisez LEFT JOIN pour trouver les non-correspondances",answer:"SELECT ma.* FROM marque ma LEFT JOIN modele m ON ma.id_marque = m.id_marque WHERE m.id_modele IS NULL"},
+    {q:"Ventes avec nom du client ET nom du modèle",schema:"client(id_client, nom) · vente(id_vente, id_client, id_modele) · modele(id_modele, nom_modele)",kw:["SELECT","JOIN","vente","client","modele","ON"],hint:"Enchaînez deux jointures",answer:"SELECT c.nom, m.nom_modele, v.prix_paye FROM vente v JOIN client c ON v.id_client = c.id_client JOIN modele m ON v.id_modele = m.id_modele"},
+    {q:"Chiffre d'affaires par marque",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque) · vente(id_vente, id_modele, prix_paye)",kw:["SELECT","nom_marque","SUM","JOIN","GROUP BY"],hint:"Joignez 3 tables et regroupez",answer:"SELECT ma.nom_marque, SUM(v.prix_paye) FROM marque ma JOIN modele m ON ma.id_marque = m.id_marque JOIN vente v ON m.id_modele = v.id_modele GROUP BY ma.nom_marque"},
+    {q:"Clients ayant acheté plus de 500 CHF au total",schema:"client(id_client, nom) · vente(id_vente, id_client, prix_paye)",kw:["SELECT","nom","SUM","JOIN","GROUP BY","HAVING","500"],hint:"Joignez, regroupez et filtrez le total",answer:"SELECT c.nom, SUM(v.prix_paye) FROM client c JOIN vente v ON c.id_client = v.id_client GROUP BY c.nom HAVING SUM(v.prix_paye) > 500"},
   ]},
   { id:'sql_dml', name:'INSERT / UPDATE / DELETE', tag:'DML', color:'var(--error)', desc:'Manipulation des données', questions:[
-    {q:"Insérer un client 'Dupont' à Lausanne",schema:"client(id_client, nom, prenom, ville)",kw:["INSERT","INTO","client","VALUES","Dupont","Lausanne"],hint:"INSERT INTO ... VALUES (...)"},
-    {q:"Augmenter tous les prix de 10%",schema:"modele(id_modele, prix_vente)",kw:["UPDATE","modele","SET","prix_vente","1.1"],hint:"UPDATE ... SET prix_vente = prix_vente * 1.1"},
-    {q:"Supprimer les ventes de 2020",schema:"vente(id_vente, date_vente)",kw:["DELETE","FROM","vente","WHERE","date_vente","2020"],hint:"DELETE FROM ... WHERE ..."},
-    {q:"Modifier la ville du client 5 en 'Berne'",schema:"client(id_client, ville)",kw:["UPDATE","client","SET","ville","Berne","WHERE","id_client","5"],hint:"UPDATE ... SET ... WHERE id_client = ..."},
-    {q:"Insérer un modèle 'Air Max' pour la marque 2",schema:"modele(id_modele, id_marque, nom_modele)",kw:["INSERT","INTO","modele","VALUES","Air Max","2"],hint:"INSERT INTO modele ... VALUES ..."},
-    {q:"Supprimer les clients sans carte fidélité",schema:"client(id_client, carte_fidelite)",kw:["DELETE","FROM","client","WHERE","carte_fidelite","0"],hint:"DELETE FROM ... WHERE carte_fidelite = 0"},
+    {q:"Insérer un client 'Dupont' à Lausanne",schema:"client(id_client, nom, prenom, ville)",kw:["INSERT","INTO","client","VALUES","Dupont","Lausanne"],hint:"Insérez une nouvelle ligne",answer:"INSERT INTO client (nom, prenom, ville) VALUES ('Dupont', 'Jean', 'Lausanne')"},
+    {q:"Augmenter tous les prix de 10%",schema:"modele(id_modele, prix_vente)",kw:["UPDATE","modele","SET","prix_vente","1.1"],hint:"Modifiez toutes les lignes",answer:"UPDATE modele SET prix_vente = prix_vente * 1.1"},
+    {q:"Supprimer les ventes de 2020",schema:"vente(id_vente, date_vente)",kw:["DELETE","FROM","vente","WHERE","date_vente","2020"],hint:"Supprimez avec une condition sur la date",answer:"DELETE FROM vente WHERE date_vente < '2021-01-01'"},
+    {q:"Modifier la ville du client 5 en 'Berne'",schema:"client(id_client, ville)",kw:["UPDATE","client","SET","ville","Berne","WHERE","id_client","5"],hint:"Modifiez une ligne spécifique",answer:"UPDATE client SET ville = 'Berne' WHERE id_client = 5"},
+    {q:"Insérer un modèle 'Air Max' pour la marque 2",schema:"modele(id_modele, id_marque, nom_modele)",kw:["INSERT","INTO","modele","VALUES","Air Max","2"],hint:"Ajoutez un nouveau modèle",answer:"INSERT INTO modele (id_marque, nom_modele) VALUES (2, 'Air Max')"},
+    {q:"Supprimer les clients sans carte fidélité",schema:"client(id_client, carte_fidelite)",kw:["DELETE","FROM","client","WHERE","carte_fidelite","0"],hint:"Supprimez selon une condition",answer:"DELETE FROM client WHERE carte_fidelite = 0"},
   ]},
   { id:'mcd_quiz', name:'MCD & Normalisation', tag:'MCD', color:'var(--gold)', desc:'Questions théoriques sur la conception', questions:[
-    {q:"Quel est le résultat d'une relation N:M au passage MLD ?",schema:"MCD → MLD",kw:["table","liaison","associative","intermédiaire"],hint:"Pensez à la table qui fait le lien entre les deux"},
-    {q:"Qu'élimine la 2NF ?",schema:"Normalisation",kw:["dépendances","partielles","partielle"],hint:"Concerne les dépendances vis-à-vis d'une PARTIE de la clé"},
-    {q:"Qu'élimine la 3NF ?",schema:"Normalisation",kw:["dépendances","transitives","transitive"],hint:"A → B → C, que faire de C ?"},
-    {q:"Que signifie la cardinalité (0,N) ?",schema:"MCD Merise",kw:["zéro","plusieurs","0","optionnel","N"],hint:"Le minimum est 0, le maximum est illimité"},
-    {q:"Qu'est-ce qu'un attribut multivalué viole ?",schema:"Normalisation",kw:["1NF","première","forme","normale","atomique"],hint:"Les valeurs doivent être ..."},
-    {q:"PK signifie ?",schema:"Bases de données",kw:["primary","key","primaire","clé","unique","identifiant"],hint:"L'identifiant unique d'un enregistrement"},
+    {q:"Quel est le résultat d'une relation N:M au passage MLD ?",schema:"MCD → MLD",kw:["table","liaison","associative","intermédiaire"],hint:"Pensez à la table intermédiaire",answer:"Une table de liaison (table associative/intermédiaire)"},
+    {q:"Qu'élimine la 2NF ?",schema:"Normalisation",kw:["dépendances","partielles","partielle"],hint:"Concerne les dépendances partielles",answer:"Les dépendances partielles (attribut dépend d'une partie de la clé)"},
+    {q:"Qu'élimine la 3NF ?",schema:"Normalisation",kw:["dépendances","transitives","transitive"],hint:"Quand un attribut dépend d'un non-clé",answer:"Les dépendances transitives (A→B→C, extraire B→C dans une table)"},
+    {q:"Que signifie la cardinalité (0,N) ?",schema:"MCD Merise",kw:["zéro","plusieurs","0","optionnel","N"],hint:"Optionnel et multiple",answer:"Zéro ou plusieurs occurrences (participation optionnelle, cardinalité max N)"},
+    {q:"Qu'est-ce qu'un attribut multivalué viole ?",schema:"Normalisation",kw:["1NF","première","forme","normale","atomique"],hint:"Chaque cellule = une seule valeur",answer:"La 1NF (première forme normale) — valeurs atomiques"},
+    {q:"PK signifie ?",schema:"Bases de données",kw:["primary","key","primaire","clé","unique","identifiant"],hint:"L'identifiant unique",answer:"Primary Key (clé primaire) — identifiant unique et non nul"},
   ]},
 ];
 
@@ -445,9 +445,10 @@ function showQ() {
     }
     var kws = q.kw ? q.kw.join(', ') : '';
     var hint = q.hint || '';
-    ansPanel.innerHTML = '<div style="font-size:.6rem;font-weight:700;color:var(--gold);margin-bottom:.3rem">👑 RÉPONSE PROF (invisible pour l\'élève)</div>' +
-      '<div style="font-family:JetBrains Mono,monospace;font-size:.72rem;color:var(--accent2);background:var(--surface);padding:.4rem;border-radius:4px;margin-bottom:.3rem">' + hint + '</div>' +
-      '<div style="font-size:.6rem;color:var(--muted)">Mots-clés attendus: ' + kws + '</div>';
+    var fullAnswer = q.answer || 'Pas de réponse définie';
+    ansPanel.innerHTML = '<div style="font-size:.6rem;font-weight:700;color:var(--gold);margin-bottom:.3rem">👑 RÉPONSE COMPLÈTE (invisible pour l\'élève)</div>' +
+      '<div style="font-family:JetBrains Mono,monospace;font-size:.78rem;color:var(--accent2);background:var(--surface);padding:.5rem;border-radius:4px;margin-bottom:.3rem;white-space:pre-wrap">' + fullAnswer + '</div>' +
+      '<div style="font-size:.6rem;color:var(--muted)">Mots-clés: ' + kws + '</div>';
   } else if (ansPanel) {
     ansPanel.remove();
   }
@@ -474,9 +475,9 @@ function submitAnswer() {
     setTimeout(() => { currentQ++; showQ(); }, 1000);
   } else {
     if (isTeacher) {
-      fb.innerHTML = '❌ Mots-clés manquants : <span style="color:var(--gold)">' + q.kw.filter(k => !input.includes(k.toUpperCase())).join(', ') + '</span>';
+      fb.innerHTML = '❌ Réponse attendue : <span style="color:var(--accent2);font-family:JetBrains Mono,monospace">' + (q.answer || q.kw.join(' ')) + '</span>';
     } else {
-      fb.innerHTML = '❌ Indice : ' + (q.hint || 'Vérifiez les mots-clés SQL');
+      fb.innerHTML = '❌ ' + (q.hint || 'Réessayez...');
     }
     fb.className = 'feedback no';
     if (oppName === 'Bot SQL' && Math.random() < 0.25) { oppScore += 5 + Math.floor(Math.random() * 6); document.getElementById('scoreOpp').textContent = oppScore; }
@@ -486,9 +487,9 @@ function submitAnswer() {
 function skipQ() {
   const fb = document.getElementById('feedback');
   if (isTeacher) {
-    fb.innerHTML = 'Passée ! Mots-clés: <span style="color:var(--accent2)">' + questions[currentQ].kw.join(', ') + '</span>';
+    fb.innerHTML = 'Passée ! Réponse : <span style="color:var(--accent2);font-family:JetBrains Mono,monospace">' + (questions[currentQ].answer || '') + '</span>';
   } else {
-    fb.innerHTML = 'Passée ! Indice : ' + (questions[currentQ].hint || '');
+    fb.innerHTML = 'Passée ! ' + (questions[currentQ].hint || 'Question suivante...');
   }
   fb.className = 'feedback no';
   if (oppName === 'Bot SQL') { oppScore += 8; document.getElementById('scoreOpp').textContent = oppScore; }
