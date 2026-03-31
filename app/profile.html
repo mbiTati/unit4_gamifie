@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Mon Profil</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;cursor:pointer;font-family:inherit}
+.main{max-width:900px;margin:0 auto;padding:1.5rem}
+
+/* HERO CARD */
+.hero{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.hero-char{width:100px;height:120px;margin:0 auto 1rem;position:relative}
+.hero-name{font-size:1.3rem;font-weight:800}
+.hero-level{font-size:1rem;margin:.3rem 0}
+.hero-xp{font-size:.82rem;color:var(--muted)}
+.xp-bar{height:12px;background:var(--surface);border-radius:6px;margin:1rem auto;max-width:400px;overflow:hidden}
+.xp-fill{height:100%;border-radius:6px;transition:width 1.5s;position:relative}
+.xp-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:shimmer 2s infinite linear}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.xp-numbers{display:flex;justify-content:space-between;max-width:400px;margin:0 auto;font-size:.65rem;color:var(--muted)}
+
+/* STATS GRID */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-bottom:1.5rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem;text-align:center}
+.stat .n{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat .l{font-size:.58rem;color:var(--muted);text-transform:uppercase;margin-top:.1rem}
+
+/* LEVELS GALLERY */
+.gallery{margin-bottom:1.5rem}
+.gallery h2{font-size:.9rem;font-weight:700;margin-bottom:.8rem}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.6rem}
+.gallery-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.6rem;text-align:center;position:relative}
+.gallery-item.locked{opacity:.3;filter:grayscale(1)}
+.gallery-item.current{border-color:var(--accent2);box-shadow:0 0 15px rgba(50,224,196,.15)}
+.gallery-item .char-container{width:50px;height:65px;margin:0 auto .3rem;position:relative}
+.gallery-item .lvl-name{font-size:.6rem;font-weight:700;margin-top:.2rem}
+.gallery-item .lvl-xp{font-size:.5rem;color:var(--muted)}
+.gallery-item .check{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--lo1);border-radius:50%;font-size:.55rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+
+/* EXERCISES DONE */
+.exercises{margin-bottom:1.5rem}
+.exercises h2{font-size:.9rem;font-weight:700;margin-bottom:.8rem}
+.ex-list{display:flex;flex-direction:column;gap:.3rem}
+.ex-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem .8rem;display:flex;justify-content:space-between;align-items:center;font-size:.78rem}
+.ex-item .name{font-weight:600;flex:1}
+.ex-item .score{font-family:'JetBrains Mono',monospace;font-weight:700;min-width:50px;text-align:right}
+.ex-item .date{font-size:.65rem;color:var(--muted);min-width:70px;text-align:right}
+.ex-empty{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
+
+/* RECENT ACTIVITY */
+.activity{margin-bottom:1.5rem}
+.activity h2{font-size:.9rem;font-weight:700;margin-bottom:.8rem}
+.act-item{display:flex;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.75rem;align-items:center}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.act-name{flex:1;font-weight:600}
+.act-score{font-family:'JetBrains Mono',monospace;color:var(--accent2);font-weight:700}
+.act-date{color:var(--muted);font-size:.65rem}
+</style>
+</head>
+<body>
+<script>
+if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
+</script>
+<div class="topbar">
+  <h1>Mon Profil</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="scores.html">Classement</a>
+    <a href="settings.html">Paramètres</a>
+  </div>
+</div>
+
+<div class="main">
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="hero-char" id="heroChar"></div>
+    <div class="hero-name" id="heroName">Chargement...</div>
+    <div class="hero-level" id="heroLevel"></div>
+    <div class="hero-xp" id="heroXP"></div>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="xp-numbers"><span id="xpMin">0</span><span id="xpMax">50</span></div>
+  </div>
+  
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="n" id="sXP" style="color:var(--accent2)">0</div><div class="l">XP Total</div></div>
+    <div class="stat"><div class="n" id="sExo" style="color:var(--lo2)">0</div><div class="l">Exercices faits</div></div>
+    <div class="stat"><div class="n" id="sScore" style="color:var(--gold)">0</div><div class="l">Score total</div></div>
+    <div class="stat"><div class="n" id="sGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div>
+    <div class="stat"><div class="n" id="sBest" style="color:var(--lo1)">-</div><div class="l">Meilleur score</div></div>
+  </div>
+  
+  <!-- LEVELS GALLERY -->
+  <div class="gallery">
+    <h2>Collection des niveaux</h2>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+  
+  <!-- EXERCISES DONE -->
+  <div class="exercises">
+    <h2>Mes exercices</h2>
+    <div class="ex-list" id="exList"></div>
+  </div>
+  
+  <!-- RECENT ACTIVITY -->
+  <div class="activity">
+    <h2>Activité récente</h2>
+    <div id="actList"></div>
+  </div>
+</div>
+
+<script src="characters.js"></script>
+<script src="supabase-config.js"></script>
+<script>
+const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+if (!student) window.location.href = 'login.html';
+
+const GAME_LABELS = {
+  'join-master': 'Join Master',
+  'normalisation-puzzle': 'Normalisation Puzzle',
+  'query-racer': 'Query Racer',
+  'constraint-catcher': 'Constraint Catcher',
+  'table-designer': 'Table Designer',
+  'df-explorer': 'DF Explorer',
+  'erd-builder': 'ERD Builder',
+  'quiz-live': 'Quiz Live',
+  'sql-editor': 'SQL Editor',
+  'exercices_gescom': 'GESCOM P1 (29 exos)',
+  'exercices_gescom_avances': 'GESCOM P2 (28 exos)',
+  'cas_footlocker': 'Cas Pro FootLocker',
+  'cas_bateaux_gva': 'Cas Pro Bateaux GVA',
+  'cas_boulangerie': 'Cas Pro Boulangerie',
+  'cas_assurance': 'Cas Pro Assurance',
+};
+
+async function loadProfile() {
+  // Load game scores
+  const raw = await supabase.query('cq_game_scores', {
+    select: '*',
+    filter: { 'student_id': 'eq.' + student.id },
+    order: 'played_at.desc'
+  }) || [];
+  const scores = Array.isArray(raw) ? raw : [];
+  
+  // Load progress
+  const rawP = await supabase.query('cq_student_progress', {
+    select: '*',
+    filter: { 'student_id': 'eq.' + student.id }
+  }) || [];
+  const progress = Array.isArray(rawP) ? rawP : [];
+  
+  // Calculate XP
+  let xpFromProgress = 0;
+  for (const p of progress) xpFromProgress += (p.credits_earned || 0) + (p.game_score || 0);
+  const totalGameScore = scores.reduce((a, g) => a + (g.score || 0), 0);
+  const totalXP = xpFromProgress + Math.floor(totalGameScore / 10);
+  
+  const level = getLevel(totalXP);
+  const uniqueExercises = new Set(scores.map(g => g.game_id)).size;
+  const bestScore = scores.length > 0 ? Math.max(...scores.map(g => g.score || 0)) : 0;
+  
+  // HERO
+  const heroChar = document.getElementById('heroChar');
+  const char = createCharacter(level.index, heroChar, 80);
+  char.classList.add('dancing');
+  
+  document.getElementById('heroName').textContent = student.first_name + ' ' + student.last_name;
+  document.getElementById('heroLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:800;font-size:1.1rem">' + level.name + '</span>';
+  document.getElementById('heroXP').textContent = totalXP + ' XP — Niveau ' + (level.index + 1) + '/9';
+  document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';
+  document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';
+  document.getElementById('xpMin').textContent = level.min + ' XP';
+  document.getElementById('xpMax').textContent = level.nextMin + ' XP';
+  document.querySelector('.hero').style.borderColor = level.color + '30';
+  
+  // STATS
+  document.getElementById('sXP').textContent = totalXP;
+  document.getElementById('sExo').textContent = uniqueExercises;
+  document.getElementById('sScore').textContent = totalGameScore;
+  document.getElementById('sGames').textContent = scores.length;
+  document.getElementById('sBest').textContent = bestScore > 0 ? bestScore : '-';
+  
+  // LEVELS GALLERY
+  const gallery = document.getElementById('galleryGrid');
+  let gHtml = '';
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    const lvl = XP_LEVELS[i];
+    const reached = totalXP >= lvl.min;
+    const isCurrent = i === level.index;
+    gHtml += '<div class="gallery-item ' + (reached ? '' : 'locked') + (isCurrent ? ' current' : '') + '">';
+    if (reached) gHtml += '<div class="check">✓</div>';
+    gHtml += '<div class="char-container" id="gchar' + i + '"></div>';
+    gHtml += '<div class="lvl-name" style="color:' + (reached ? lvl.color : 'var(--muted)') + '">' + lvl.name + '</div>';
+    gHtml += '<div class="lvl-xp">' + lvl.min + ' XP</div>';
+    gHtml += '</div>';
+  }
+  gallery.innerHTML = gHtml;
+  
+  // Create characters in gallery
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    const container = document.getElementById('gchar' + i);
+    if (container) {
+      const ch = createCharacter(i, container, 40);
+      if (i === level.index) ch.classList.add('dancing');
+      else if (totalXP >= XP_LEVELS[i].min) ch.classList.add('bouncing');
+    }
+  }
+  
+  // EXERCISES — group by game, show best score
+  const byGame = {};
+  for (const g of scores) {
+    if (!byGame[g.game_id]) byGame[g.game_id] = { scores: [], best: 0, last: g.played_at };
+    byGame[g.game_id].scores.push(g);
+    if (g.score > byGame[g.game_id].best) byGame[g.game_id].best = g.score;
+  }
+  
+  const exList = document.getElementById('exList');
+  const sorted = Object.entries(byGame).sort((a, b) => b[1].best - a[1].best);
+  
+  if (sorted.length === 0) {
+    exList.innerHTML = '<div class="ex-empty">Aucun exercice enregistré. Joue à un jeu pour commencer !</div>';
+  } else {
+    exList.innerHTML = sorted.map(([gameId, data]) => {
+      const label = GAME_LABELS[gameId] || gameId.replace(/_/g, ' ').replace(/module\d+\s*/, 'M');
+      const scoreColor = data.best >= 50 ? 'var(--lo1)' : data.best >= 20 ? 'var(--gold)' : 'var(--muted)';
+      const dt = data.last ? new Date(data.last).toLocaleDateString('fr-CH') : '';
+      return '<div class="ex-item">' +
+        '<span class="name">' + label + '</span>' +
+        '<span style="font-size:.65rem;color:var(--muted)">' + data.scores.length + 'x</span>' +
+        '<span class="score" style="color:' + scoreColor + '">' + data.best + ' pts</span>' +
+        '<span class="date">' + dt + '</span>' +
+        '</div>';
+    }).join('');
+  }
+  
+  // RECENT ACTIVITY
+  const actList = document.getElementById('actList');
+  const recent = scores.slice(0, 12);
+  if (recent.length === 0) {
+    actList.innerHTML = '<div class="ex-empty">Pas encore d\'activité.</div>';
+  } else {
+    const colors = ['#32E0C4', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#10b981', '#ec4899'];
+    actList.innerHTML = recent.map((g, i) => {
+      const label = GAME_LABELS[g.game_id] || g.game_id;
+      const dt = g.played_at ? new Date(g.played_at) : null;
+      const dateStr = dt ? dt.toLocaleDateString('fr-CH') : '';
+      const timeStr = dt ? dt.toLocaleTimeString('fr-CH', {hour:'2-digit',minute:'2-digit'}) : '';
+      return '<div class="act-item">' +
+        '<div class="act-dot" style="background:' + colors[i % colors.length] + '"></div>' +
+        '<span class="act-name">' + label + '</span>' +
+        '<span class="act-score">' + (g.score || 0) + ' pts</span>' +
+        '<span class="act-date">' + dateStr + ' ' + timeStr + '</span>' +
+        '</div>';
+    }).join('');
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>
