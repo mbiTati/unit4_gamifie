@@ -93,6 +93,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
   <div id="step2" class="step">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
       <div class="section-title" style="margin:0">2. Choisissez votre adversaire</div>
+      <div id="teacherBadge" style="display:none;font-size:.65rem;color:var(--gold);background:rgba(245,158,11,.08);padding:.2rem .5rem;border-radius:4px">👑 Mode prof : vous voyez les réponses pendant le duel</div>
       <button class="btn-sm" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);cursor:pointer;font-family:inherit" onclick="goStep(1)">← Retour</button>
     </div>
     <div id="selectedExName" style="font-size:.78rem;color:var(--gold);margin-bottom:.8rem"></div>
@@ -157,6 +158,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 <script src="progress-saver.js"></script>
 <script>
 const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+const isTeacher = student && student.role === 'teacher';
 const SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
 const AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
 
@@ -252,6 +254,7 @@ function selectExercise(id) {
 
 // ========== STEP 2: OPPONENT SELECTION ==========
 async function loadPlayers() {
+  if (isTeacher) document.getElementById('teacherBadge').style.display = 'block';
   document.getElementById('selectedExName').textContent = '⚔️ Exercice : ' + selectedExercise.name;
   
   // Load class students + presence
@@ -386,6 +389,25 @@ function showQ() {
   document.getElementById('sqlInput').value = '';
   document.getElementById('feedback').textContent = '';
   document.getElementById('feedback').className = 'feedback';
+  
+  // Show answer panel for teachers
+  var ansPanel = document.getElementById('teacherAnswer');
+  if (isTeacher) {
+    if (!ansPanel) {
+      ansPanel = document.createElement('div');
+      ansPanel.id = 'teacherAnswer';
+      ansPanel.style.cssText = 'margin-top:.5rem;padding:.6rem;background:rgba(245,158,11,.06);border:1px dashed var(--gold);border-radius:6px';
+      document.querySelector('.q-card').appendChild(ansPanel);
+    }
+    var kws = q.kw ? q.kw.join(', ') : '';
+    var hint = q.hint || '';
+    ansPanel.innerHTML = '<div style="font-size:.6rem;font-weight:700;color:var(--gold);margin-bottom:.3rem">👑 RÉPONSE PROF (invisible pour l\'élève)</div>' +
+      '<div style="font-family:JetBrains Mono,monospace;font-size:.72rem;color:var(--accent2);background:var(--surface);padding:.4rem;border-radius:4px;margin-bottom:.3rem">' + hint + '</div>' +
+      '<div style="font-size:.6rem;color:var(--muted)">Mots-clés attendus: ' + kws + '</div>';
+  } else if (ansPanel) {
+    ansPanel.remove();
+  }
+  
   document.getElementById('sqlInput').focus();
 }
 
@@ -407,14 +429,24 @@ function submitAnswer() {
     if (oppName === 'Bot SQL' && Math.random() < 0.45) { oppScore += 5 + Math.floor(Math.random() * 8); document.getElementById('scoreOpp').textContent = oppScore; }
     setTimeout(() => { currentQ++; showQ(); }, 1000);
   } else {
-    fb.innerHTML = '❌ Indice : ' + (q.hint || 'Vérifiez les mots-clés SQL'); fb.className = 'feedback no';
+    if (isTeacher) {
+      fb.innerHTML = '❌ Mots-clés manquants : <span style="color:var(--gold)">' + q.kw.filter(k => !input.includes(k.toUpperCase())).join(', ') + '</span>';
+    } else {
+      fb.innerHTML = '❌ Indice : ' + (q.hint || 'Vérifiez les mots-clés SQL');
+    }
+    fb.className = 'feedback no';
     if (oppName === 'Bot SQL' && Math.random() < 0.25) { oppScore += 5 + Math.floor(Math.random() * 6); document.getElementById('scoreOpp').textContent = oppScore; }
   }
 }
 
 function skipQ() {
   const fb = document.getElementById('feedback');
-  fb.innerHTML = 'Passée ! Indice : ' + (questions[currentQ].hint || ''); fb.className = 'feedback no';
+  if (isTeacher) {
+    fb.innerHTML = 'Passée ! Mots-clés: <span style="color:var(--accent2)">' + questions[currentQ].kw.join(', ') + '</span>';
+  } else {
+    fb.innerHTML = 'Passée ! Indice : ' + (questions[currentQ].hint || '');
+  }
+  fb.className = 'feedback no';
   if (oppName === 'Bot SQL') { oppScore += 8; document.getElementById('scoreOpp').textContent = oppScore; }
   setTimeout(() => { currentQ++; showQ(); }, 1500);
 }
