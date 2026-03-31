@@ -285,6 +285,7 @@ function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',blo
 })();
 </script>
 
+<script src="app/lock-manager.js?v=1774967129"></script>
 <script>
 // LO4 Lock system
 (function() {
@@ -301,25 +302,9 @@ function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',blo
   
   // Check LO4 status
   function checkLO4() {
-    // Try Supabase first
-    fetch(SB + '/cq_team_projects?project_id=eq.lo4_lock&unit_id=eq.4&select=status', { headers: { 'apikey': AK } })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var isLocked = true;
-        if (Array.isArray(data) && data.length > 0) {
-          isLocked = data[0].status !== 'unlocked';
-        }
-        // Fallback to localStorage
-        var local = localStorage.getItem('dq_lo4_locked');
-        if (local !== null) isLocked = local === 'true';
-        
-        applyLO4Lock(isLocked);
-      })
-      .catch(function() {
-        // Supabase unavailable — use localStorage
-        var isLocked = localStorage.getItem('dq_lo4_locked') !== 'false';
-        applyLO4Lock(isLocked);
-      });
+    loadLocks(function() {
+      applyLO4Lock(window._dqLocks['lo4'] !== false);
+    });
   }
   
   function applyLO4Lock(isLocked) {
@@ -354,32 +339,10 @@ function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',blo
   // Toggle function (prof only)
   window.toggleLO4 = function() {
     if (!isProf) return;
-    
-    var currentlyLocked = localStorage.getItem('dq_lo4_locked') !== 'false';
-    var newStatus = !currentlyLocked;
-    
-    // Save to localStorage
-    localStorage.setItem('dq_lo4_locked', newStatus ? 'true' : 'false');
-    
-    // Save to Supabase (cq_team_projects reused)
-    fetch(SB + '/cq_team_projects?project_id=eq.lo4_lock&unit_id=eq.4', {
-      method: 'PATCH',
-      headers: { 'apikey': AK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ status: newStatus ? 'locked' : 'unlocked', updated_at: new Date().toISOString() })
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      if (!Array.isArray(data) || data.length === 0) {
-        // Insert if not exists
-        fetch(SB + '/cq_team_projects', {
-          method: 'POST',
-          headers: { 'apikey': AK, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ project_id: 'lo4_lock', status: newStatus ? 'locked' : 'unlocked', unit_id: 4 })
-        });
-      }
-    }).catch(function(){});
-    
-    applyLO4Lock(newStatus);
-    
-    alert(newStatus ? 'LO4 verrouillé pour les élèves' : 'LO4 débloqué pour les élèves !');
+    toggleLock('lo4', function(locked) {
+      applyLO4Lock(locked);
+      alert(locked ? 'LO4 verrouillé pour les élèves' : 'LO4 débloqué pour les élèves !');
+    });
   };
   
   checkLO4();

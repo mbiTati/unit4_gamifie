@@ -576,5 +576,14 @@ renderCases();
 </script>
 <script src="presence-tracker.js?v=1774960217"></script>
 <script src="duel-notify.js?v=1774960217"></script>
+
+<script src="lock-manager.js?v=1774967129"></script>
+<script>
+loadLocks(function() {
+  if (isLocked('pipeline_bdd')) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0f1a;font-family:Outfit,sans-serif"><div style="text-align:center"><div style="font-size:3rem;margin-bottom:.5rem">🔒</div><div style="font-size:1.2rem;font-weight:800;color:#F59E0B;margin-bottom:.5rem">Accès bloqué</div><div style="font-size:.85rem;color:#94a3b8;margin-bottom:1rem">Votre enseignant(e) n\'a pas encore débloqué cette section.</div><a href="home.html" style="color:#32E0C4;text-decoration:none;font-weight:700">← Retour à l\'accueil</a></div></div>';
+  }
+});
+</script>
 </body>
 </html>

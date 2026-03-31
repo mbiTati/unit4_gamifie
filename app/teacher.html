@@ -104,6 +104,8 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <button class="tab" onclick="showTab('exercises',this)">Exercices</button>
     <button class="tab" onclick="showTab('docs',this)">Mes Documents</button>
     <button class="tab" onclick="showTab('tools',this)">Outils & SQL</button>
+  
+    <button class="tab" onclick="showTab('access')">🔒 Accès</button>
   </div>
   
   <!-- FILTERS -->
@@ -216,6 +218,15 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   </div>
 </div>
 
+
+  <div id="tab-access" style="display:none">
+    <div style="font-size:1rem;font-weight:800;margin-bottom:.8rem;color:var(--gold)">🔒 Contrôle d'accès</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem">Bloquez ou débloquez les sections pour vos élèves. Le prof voit toujours tout.</div>
+    <div id="locksList" style="display:grid;gap:.4rem"></div>
+    <div id="lockMsg" style="font-size:.72rem;margin-top:.5rem;min-height:1.5rem"></div>
+  </div>
+
+<script src="lock-manager.js?v=1774963800"></script>
 <script src="supabase-config.js?v=1774960217"></script>
 <script>
 const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
