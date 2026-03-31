@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Pipeline BDD</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,var(--lo4),var(--lo2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.4rem;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:600;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:inherit}
+.main{max-width:950px;margin:0 auto;padding:1rem}
+.btn{padding:.4rem .8rem;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:.78rem}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff}
+.btn-sm{padding:.3rem .5rem;font-size:.68rem}
+
+/* CASE SELECTOR */
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;margin-bottom:1.5rem}
+.case-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;cursor:pointer;transition:all .2s}
+.case-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.case-card.active{border-color:var(--gold);background:rgba(245,158,11,.04)}
+.case-card h3{font-size:.82rem;font-weight:700;margin-bottom:.3rem}
+.case-card p{font-size:.65rem;color:var(--muted);line-height:1.3}
+.case-card .tag{font-size:.5rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;display:inline-block;margin-bottom:.3rem}
+
+/* PIPELINE STEPS */
+.pipeline{display:flex;gap:.3rem;margin-bottom:1rem;overflow-x:auto;padding-bottom:.3rem;scrollbar-width:none}
+.pipeline::-webkit-scrollbar{display:none}
+.pipe-step{padding:.3rem .6rem;font-size:.65rem;font-weight:700;border-radius:15px;cursor:pointer;white-space:nowrap;border:1px solid var(--border);color:var(--muted);transition:all .2s;flex-shrink:0}
+.pipe-step.active{background:var(--accent2);color:#000;border-color:var(--accent2)}
+.pipe-step.done{background:var(--lo1);color:#fff;border-color:var(--lo1)}
+.pipe-step.locked{opacity:.3;cursor:not-allowed}
+
+/* EXERCISE AREA */
+.exercise{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem;display:none}
+.exercise.active{display:block}
+.ex-title{font-size:.9rem;font-weight:800;margin-bottom:.5rem}
+.ex-desc{font-size:.78rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5}
+.ex-text{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem;font-size:.78rem;line-height:1.6;margin-bottom:.8rem;font-style:italic;color:var(--text)}
+
+/* DRAG & DROP ZONES */
+.dz{min-height:60px;border:2px dashed var(--border);border-radius:8px;padding:.5rem;margin-bottom:.5rem;transition:border-color .2s}
+.dz.over{border-color:var(--accent2);background:rgba(50,224,196,.03)}
+.dz-label{font-size:.65rem;font-weight:700;color:var(--muted);margin-bottom:.3rem}
+.drag-item{display:inline-block;padding:.2rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;font-size:.72rem;margin:.2rem;cursor:grab;font-family:'JetBrains Mono',monospace}
+.drag-item:active{cursor:grabbing}
+.drag-item.placed{background:rgba(50,224,196,.08);border-color:var(--accent2)}
+
+/* TABLE BUILDER */
+.tbl-builder{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:.8rem}
+.tbl-header{background:var(--surface);padding:.3rem .5rem;font-size:.7rem;font-weight:700;display:grid;gap:.3rem}
+.tbl-row{padding:.3rem .5rem;border-top:1px solid var(--border);display:grid;gap:.3rem;font-size:.72rem}
+.tbl-row input,.tbl-row select{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);padding:.2rem .3rem;font-family:'JetBrains Mono',monospace;font-size:.68rem}
+
+/* CODE EDITOR */
+.code-area{width:100%;min-height:100px;padding:.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:.75rem;resize:vertical;line-height:1.5}
+.code-area:focus{outline:none;border-color:var(--accent2)}
+
+/* FEEDBACK */
+.fb{padding:.5rem;border-radius:6px;font-size:.75rem;margin-top:.5rem;min-height:2rem}
+.fb.ok{background:rgba(16,185,129,.08);color:var(--lo1);border:1px solid rgba(16,185,129,.2)}
+.fb.no{background:rgba(239,68,68,.08);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+
+/* MATRIX */
+.matrix{overflow-x:auto;margin-bottom:.8rem}
+.matrix table{border-collapse:collapse;font-size:.68rem;font-family:'JetBrains Mono',monospace}
+.matrix th,.matrix td{border:1px solid var(--border);padding:.3rem .4rem;text-align:center;min-width:35px}
+.matrix th{background:var(--surface);font-weight:700;color:var(--accent2)}
+.matrix td{cursor:pointer;transition:background .15s}
+.matrix td:hover{background:rgba(50,224,196,.05)}
+.matrix td.marked{background:rgba(50,224,196,.15);color:var(--accent2);font-weight:700}
+
+/* SCORE */
+.score-bar{background:var(--surface);border-radius:6px;padding:.4rem .8rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;font-size:.75rem}
+.score-bar .pts{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--accent2)}
+</style>
+</head>
+<body>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
+<div class="topbar">
+  <h1>Pipeline BDD</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+    <a href="scores.html">Classement</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="doLogout()">Déconnexion</button>
+  </div>
+</div>
+<div class="main">
+  <div class="score-bar">
+    <span>Score : <span class="pts" id="totalScore">0</span> pts</span>
+    <span id="caseTitle" style="color:var(--gold);font-weight:700"></span>
+    <span style="color:var(--accent2);font-size:.65rem" id="xpInfo">+20 XP max</span>
+  </div>
+  
+  <!-- CASE SELECTION -->
+  <div id="caseSelect">
+    <div style="font-size:.9rem;font-weight:800;margin-bottom:.8rem">Choisissez un cas d'entreprise</div>
+    <div class="cases" id="casesGrid"></div>
+  </div>
+  
+  <!-- PIPELINE -->
+  <div id="pipelineArea" style="display:none">
+    <div class="pipeline" id="pipelineSteps"></div>
+    <div id="exerciseContainer"></div>
+  </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="progress-saver.js"></script>
+<script>
+var student = JSON.parse(localStorage.getItem('cq_student')||'null');
+function doLogout(){localStorage.clear();window.location.href='login.html';}
+
+var totalScore = 0;
+var currentCase = null;
+var currentStep = 0;
+var stepScores = {};
+
+// ===================== CAS D'ENTREPRISE =====================
+var CASES = [
+{
+  id:'garage',
+  name:'Garage AutoPlus',
+  tag:'Automobile',
+  color:'var(--lo2)',
+  desc:'Un garage suisse gère ses véhicules, clients et réparations.',
+  text:"Le garage AutoPlus à Lausanne gère ses clients (nom, prénom, téléphone, email, adresse), ses véhicules (marque, modèle, année, immatriculation, couleur) et les réparations effectuées (date, description du problème, pièces utilisées, coût main d'œuvre, coût total). Chaque véhicule appartient à un seul client, mais un client peut avoir plusieurs véhicules. Une réparation concerne un seul véhicule. Le mécanicien responsable (nom, spécialité) est assigné à chaque réparation.",
+  steps:[
+    {name:'Dictionnaire',type:'dict',
+      items:['nom_client','prenom_client','telephone','email','adresse','marque','modele','annee','immatriculation','couleur','date_reparation','description_probleme','pieces','cout_mo','cout_total','nom_mecanicien','specialite'],
+      tables:['CLIENT','VEHICULE','REPARATION','MECANICIEN'],
+      correct:{'CLIENT':['nom_client','prenom_client','telephone','email','adresse'],'VEHICULE':['marque','modele','annee','immatriculation','couleur'],'REPARATION':['date_reparation','description_probleme','pieces','cout_mo','cout_total'],'MECANICIEN':['nom_mecanicien','specialite']}
+    },
+    {name:'Matrice DF',type:'matrix',
+      attrs:['nom_client','telephone','marque','immatriculation','date_reparation','cout_total','nom_mecanicien'],
+      keys:['id_client','id_vehicule','id_reparation','id_mecanicien'],
+      correct:{'id_client':['nom_client','telephone'],'id_vehicule':['marque','immatriculation'],'id_reparation':['date_reparation','cout_total'],'id_mecanicien':['nom_mecanicien']}
+    },
+    {name:'MCD',type:'mcd',
+      entities:['CLIENT','VEHICULE','REPARATION','MECANICIEN'],
+      relations:[
+        {from:'CLIENT',to:'VEHICULE',verb:'possède',card_from:'1,N',card_to:'1,1'},
+        {from:'VEHICULE',to:'REPARATION',verb:'subit',card_from:'1,N',card_to:'1,1'},
+        {from:'MECANICIEN',to:'REPARATION',verb:'effectue',card_from:'1,N',card_to:'1,1'}
+      ]
+    },
+    {name:'MLD',type:'mld',
+      correct:[
+        'CLIENT(id_client PK, nom_client, prenom_client, telephone, email, adresse)',
+        'VEHICULE(id_vehicule PK, id_client FK, marque, modele, annee, immatriculation, couleur)',
+        'MECANICIEN(id_mecanicien PK, nom_mecanicien, specialite)',
+        'REPARATION(id_reparation PK, id_vehicule FK, id_mecanicien FK, date_reparation, description_probleme, pieces, cout_mo, cout_total)'
+      ],
+      keywords:['id_client','PK','FK','id_vehicule','id_mecanicien','id_reparation']
+    },
+    {name:'MPD',type:'mpd',
+      correct_keywords:['INT','VARCHAR','DATE','DECIMAL','PRIMARY KEY','FOREIGN KEY','REFERENCES','NOT NULL','AUTO_INCREMENT'],
+      tables:['CLIENT','VEHICULE','MECANICIEN','REPARATION']
+    },
+    {name:'Code SQL',type:'code',
+      expected_keywords:['CREATE TABLE','client','vehicule','mecanicien','reparation','PRIMARY KEY','FOREIGN KEY','REFERENCES','INT','VARCHAR','DATE','DECIMAL','NOT NULL'],
+      hint:'Créez les 4 tables dans le bon ordre (FK après PK référencée)'
+    }
+  ]
+},
+{
+  id:'bibliotheque',
+  name:'Bibliothèque Municipale',
+  tag:'Culture',
+  color:'var(--lo1)',
+  desc:'Une bibliothèque gère ses livres, adhérents et emprunts.',
+  text:"La bibliothèque municipale de Genève gère ses livres (titre, auteur, ISBN, genre, année de publication, éditeur), ses adhérents (nom, prénom, adresse, date d'inscription, email) et les emprunts (date d'emprunt, date de retour prévue, date de retour effective, état du livre au retour). Un adhérent peut emprunter plusieurs livres. Un même livre peut être emprunté par plusieurs adhérents (à des dates différentes). Chaque livre a un seul éditeur.",
+  steps:[
+    {name:'Dictionnaire',type:'dict',
+      items:['titre','auteur','isbn','genre','annee_pub','editeur','nom_adherent','prenom_adherent','adresse_adherent','date_inscription','email_adherent','date_emprunt','date_retour_prevue','date_retour_effective','etat_retour'],
+      tables:['LIVRE','ADHERENT','EMPRUNT'],
+      correct:{'LIVRE':['titre','auteur','isbn','genre','annee_pub','editeur'],'ADHERENT':['nom_adherent','prenom_adherent','adresse_adherent','date_inscription','email_adherent'],'EMPRUNT':['date_emprunt','date_retour_prevue','date_retour_effective','etat_retour']}
+    },
+    {name:'Matrice DF',type:'matrix',
+      attrs:['titre','auteur','isbn','nom_adherent','email_adherent','date_emprunt','etat_retour'],
+      keys:['id_livre','id_adherent','id_emprunt'],
+      correct:{'id_livre':['titre','auteur','isbn'],'id_adherent':['nom_adherent','email_adherent'],'id_emprunt':['date_emprunt','etat_retour']}
+    },
+    {name:'MCD',type:'mcd',
+      entities:['LIVRE','ADHERENT','EMPRUNT'],
+      relations:[
+        {from:'ADHERENT',to:'EMPRUNT',verb:'effectue',card_from:'1,N',card_to:'1,1'},
+        {from:'LIVRE',to:'EMPRUNT',verb:'concerne',card_from:'1,N',card_to:'1,1'}
+      ]
+    },
+    {name:'MLD',type:'mld',
+      correct:[
+        'LIVRE(id_livre PK, titre, auteur, isbn, genre, annee_pub, editeur)',
+        'ADHERENT(id_adherent PK, nom_adherent, prenom_adherent, adresse_adherent, date_inscription, email_adherent)',
+        'EMPRUNT(id_emprunt PK, id_livre FK, id_adherent FK, date_emprunt, date_retour_prevue, date_retour_effective, etat_retour)'
+      ],
+      keywords:['id_livre','id_adherent','id_emprunt','PK','FK']
+    },
+    {name:'MPD',type:'mpd',
+      correct_keywords:['INT','VARCHAR','DATE','PRIMARY KEY','FOREIGN KEY','REFERENCES','NOT NULL'],
+      tables:['LIVRE','ADHERENT','EMPRUNT']
+    },
+    {name:'Code SQL',type:'code',
+      expected_keywords:['CREATE TABLE','livre','adherent','emprunt','PRIMARY KEY','FOREIGN KEY','REFERENCES','INT','VARCHAR','DATE','NOT NULL'],
+      hint:'Créez les 3 tables : LIVRE et ADHERENT d\'abord, puis EMPRUNT'
+    }
+  ]
+},
+{
+  id:'restaurant',
+  name:'Restaurant Le Léman',
+  tag:'Restauration',
+  color:'var(--gold)',
+  desc:'Un restaurant gère sa carte, ses commandes et ses serveurs.',
+  text:"Le restaurant Le Léman à Montreux gère sa carte avec des plats (nom, description, prix, catégorie : entrée/plat/dessert, allergènes), ses clients (nom, téléphone, email, programme fidélité oui/non), ses serveurs (nom, prénom, date embauche) et ses commandes (date, heure, nombre de couverts, montant total, pourboire). Chaque commande est passée par un client et servie par un serveur. Une commande peut contenir plusieurs plats avec des quantités différentes.",
+  steps:[
+    {name:'Dictionnaire',type:'dict',
+      items:['nom_plat','description_plat','prix','categorie','allergenes','nom_client','telephone_client','email_client','fidelite','nom_serveur','prenom_serveur','date_embauche','date_commande','heure','nb_couverts','montant_total','pourboire','quantite'],
+      tables:['PLAT','CLIENT','SERVEUR','COMMANDE','LIGNE_COMMANDE'],
+      correct:{'PLAT':['nom_plat','description_plat','prix','categorie','allergenes'],'CLIENT':['nom_client','telephone_client','email_client','fidelite'],'SERVEUR':['nom_serveur','prenom_serveur','date_embauche'],'COMMANDE':['date_commande','heure','nb_couverts','montant_total','pourboire'],'LIGNE_COMMANDE':['quantite']}
+    },
+    {name:'Matrice DF',type:'matrix',
+      attrs:['nom_plat','prix','nom_client','telephone_client','nom_serveur','date_commande','montant_total','quantite'],
+      keys:['id_plat','id_client','id_serveur','id_commande','id_commande+id_plat'],
+      correct:{'id_plat':['nom_plat','prix'],'id_client':['nom_client','telephone_client'],'id_serveur':['nom_serveur'],'id_commande':['date_commande','montant_total'],'id_commande+id_plat':['quantite']}
+    },
+    {name:'MCD',type:'mcd',
+      entities:['PLAT','CLIENT','SERVEUR','COMMANDE','LIGNE_COMMANDE'],
+      relations:[
+        {from:'CLIENT',to:'COMMANDE',verb:'passe',card_from:'1,N',card_to:'1,1'},
+        {from:'SERVEUR',to:'COMMANDE',verb:'sert',card_from:'1,N',card_to:'1,1'},
+        {from:'COMMANDE',to:'LIGNE_COMMANDE',verb:'contient',card_from:'1,N',card_to:'1,1'},
+        {from:'PLAT',to:'LIGNE_COMMANDE',verb:'figure dans',card_from:'1,N',card_to:'1,1'}
+      ]
+    },
+    {name:'MLD',type:'mld',
+      correct:[
+        'PLAT(id_plat PK, nom_plat, description_plat, prix, categorie, allergenes)',
+        'CLIENT(id_client PK, nom_client, telephone_client, email_client, fidelite)',
+        'SERVEUR(id_serveur PK, nom_serveur, prenom_serveur, date_embauche)',
+        'COMMANDE(id_commande PK, id_client FK, id_serveur FK, date_commande, heure, nb_couverts, montant_total, pourboire)',
+        'LIGNE_COMMANDE(id_commande FK PK, id_plat FK PK, quantite)'
+      ],
+      keywords:['id_plat','id_client','id_serveur','id_commande','PK','FK','LIGNE_COMMANDE']
+    },
+    {name:'MPD',type:'mpd',
+      correct_keywords:['INT','VARCHAR','DATE','TIME','DECIMAL','BOOLEAN','PRIMARY KEY','FOREIGN KEY','REFERENCES','NOT NULL','COMPOSITE'],
+      tables:['PLAT','CLIENT','SERVEUR','COMMANDE','LIGNE_COMMANDE']
+    },
+    {name:'Code SQL',type:'code',
+      expected_keywords:['CREATE TABLE','plat','client','serveur','commande','ligne_commande','PRIMARY KEY','FOREIGN KEY','REFERENCES','INT','VARCHAR','DECIMAL','DATE','TIME'],
+      hint:'5 tables. LIGNE_COMMANDE a une clé primaire composite (id_commande, id_plat)'
+    }
+  ]
+}
+];
+
+// ===================== RENDER =====================
+function renderCases(){
+  document.getElementById('casesGrid').innerHTML = CASES.map(c =>
+    '<div class="case-card" data-id="'+c.id+'">' +
+    '<span class="tag" style="background:'+c.color+'20;color:'+c.color+'">'+c.tag+'</span>' +
+    '<h3>'+c.name+'</h3>' +
+    '<p>'+c.desc+'</p>' +
+    '<div style="font-size:.55rem;color:var(--muted);margin-top:.3rem">6 étapes : Dict → DF → MCD → MLD → MPD → SQL</div>' +
+    '</div>'
+  ).join('');
+  document.querySelectorAll('.case-card').forEach(function(card){
+    card.addEventListener('click',function(){selectCase(this.dataset.id);});
+  });
+}
+
+function selectCase(id){
+  currentCase = CASES.find(function(c){return c.id===id;});
+  currentStep = 0;
+  stepScores = {};
+  document.getElementById('caseSelect').style.display='none';
+  document.getElementById('pipelineArea').style.display='block';
+  document.getElementById('caseTitle').textContent = currentCase.name;
+  renderPipeline();
+  renderStep();
+}
+
+function renderPipeline(){
+  var html='';
+  for(var i=0;i<currentCase.steps.length;i++){
+    var s=currentCase.steps[i];
+    var cls=i===currentStep?'active':stepScores[i]!==undefined?'done':i>currentStep?'locked':'';
+    html+='<div class="pipe-step '+cls+'" data-step="'+i+'">'+(i+1)+'. '+s.name+'</div>';
+  }
+  document.getElementById('pipelineSteps').innerHTML=html;
+  document.querySelectorAll('.pipe-step:not(.locked)').forEach(function(el){
+    el.addEventListener('click',function(){
+      var st=parseInt(this.dataset.step);
+      if(st<=currentStep||stepScores[st]!==undefined){currentStep=st;renderPipeline();renderStep();}
+    });
+  });
+}
+
+function renderStep(){
+  var step=currentCase.steps[currentStep];
+  var container=document.getElementById('exerciseContainer');
+  
+  if(step.type==='dict') renderDictStep(container,step);
+  else if(step.type==='matrix') renderMatrixStep(container,step);
+  else if(step.type==='mcd') renderMCDStep(container,step);
+  else if(step.type==='mld') renderMLDStep(container,step);
+  else if(step.type==='mpd') renderMPDStep(container,step);
+  else if(step.type==='code') renderCodeStep(container,step);
+}
+
+// ===== DICT STEP =====
+function renderDictStep(el,step){
+  var html='<div class="exercise active">';
+  html+='<div class="ex-title">Étape 1 : Dictionnaire des données</div>';
+  html+='<div class="ex-desc">À partir du texte ci-dessous, classez chaque donnée dans la bonne table.</div>';
+  html+='<div class="ex-text">'+currentCase.text+'</div>';
+  html+='<div style="font-size:.72rem;font-weight:700;margin-bottom:.5rem">Glissez les données dans les tables :</div>';
+  
+  // Draggable items
+  html+='<div id="itemPool" style="margin-bottom:.8rem">';
+  var shuffled=[].concat(step.items).sort(function(){return Math.random()-.5;});
+  for(var i=0;i<shuffled.length;i++){
+    html+='<span class="drag-item" draggable="true" data-val="'+shuffled[i]+'" ondragstart="event.dataTransfer.setData(\'text\',\''+shuffled[i]+'\')">'+shuffled[i].replace(/_/g,' ')+'</span>';
+  }
+  html+='</div>';
+  
+  // Drop zones (tables)
+  for(var t=0;t<step.tables.length;t++){
+    html+='<div class="dz-label">'+step.tables[t]+'</div>';
+    html+='<div class="dz" id="dz_'+step.tables[t]+'" ondragover="event.preventDefault();this.classList.add(\'over\')" ondragleave="this.classList.remove(\'over\')" ondrop="dropDict(event,\''+step.tables[t]+'\')"></div>';
+  }
+  
+  html+='<button class="btn btn-primary" onclick="checkDict()">Vérifier</button>';
+  html+='<div class="fb" id="dictFb"></div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+var dictPlaced={};
+function dropDict(e,table){
+  e.preventDefault();e.currentTarget.classList.remove('over');
+  var val=e.dataTransfer.getData('text');
+  if(!dictPlaced[table])dictPlaced[table]=[];
+  if(dictPlaced[table].indexOf(val)===-1){
+    dictPlaced[table].push(val);
+    // Remove from pool
+    var pool=document.querySelectorAll('#itemPool .drag-item');
+    for(var i=0;i<pool.length;i++){if(pool[i].dataset.val===val){pool[i].style.display='none';break;}}
+    // Show in zone
+    var zone=document.getElementById('dz_'+table);
+    var span=document.createElement('span');
+    span.className='drag-item placed';
+    span.textContent=val.replace(/_/g,' ');
+    span.style.cursor='pointer';
+    span.title='Cliquer pour retirer';
+    span.onclick=function(){
+      var idx=dictPlaced[table].indexOf(val);
+      if(idx>-1)dictPlaced[table].splice(idx,1);
+      span.remove();
+      var pool2=document.querySelectorAll('#itemPool .drag-item');
+      for(var j=0;j<pool2.length;j++){if(pool2[j].dataset.val===val){pool2[j].style.display='';break;}}
+    };
+    zone.appendChild(span);
+  }
+}
+
+function checkDict(){
+  var step=currentCase.steps[currentStep];
+  var correct=0,total=0;
+  for(var t in step.correct){
+    var expected=step.correct[t];
+    var got=dictPlaced[t]||[];
+    total+=expected.length;
+    for(var i=0;i<expected.length;i++){
+      if(got.indexOf(expected[i])>-1)correct++;
+    }
+  }
+  var pct=Math.round(correct/total*100);
+  var pts=Math.round(pct/10);
+  stepScores[currentStep]=pts;
+  totalScore+=pts;
+  document.getElementById('totalScore').textContent=totalScore;
+  var fb=document.getElementById('dictFb');
+  fb.innerHTML=pct>=70?'✅ '+correct+'/'+total+' correct ('+pct+'%) — +'+pts+' pts':'❌ '+correct+'/'+total+' correct ('+pct+'%). Réessayez ou passez à l\'étape suivante.';
+  fb.className='fb '+(pct>=70?'ok':'no');
+  if(pct>=50){currentStep++;renderPipeline();}
+}
+
+// ===== MATRIX STEP =====
+function renderMatrixStep(el,step){
+  var html='<div class="exercise active">';
+  html+='<div class="ex-title">Étape 2 : Matrice des dépendances fonctionnelles</div>';
+  html+='<div class="ex-desc">Cochez les cases : quelle clé détermine quel attribut ? (cliquez pour cocher/décocher)</div>';
+  html+='<div class="matrix"><table><tr><th></th>';
+  for(var a=0;a<step.attrs.length;a++) html+='<th>'+step.attrs[a].replace(/_/g,' ')+'</th>';
+  html+='</tr>';
+  for(var k=0;k<step.keys.length;k++){
+    html+='<tr><th>'+step.keys[k]+'</th>';
+    for(var a2=0;a2<step.attrs.length;a2++){
+      html+='<td data-key="'+step.keys[k]+'" data-attr="'+step.attrs[a2]+'" onclick="toggleMatrix(this)"></td>';
+    }
+    html+='</tr>';
+  }
+  html+='</table></div>';
+  html+='<button class="btn btn-primary" onclick="checkMatrix()">Vérifier</button>';
+  html+='<div class="fb" id="matrixFb"></div></div>';
+  el.innerHTML=html;
+}
+
+function toggleMatrix(td){td.classList.toggle('marked');td.textContent=td.classList.contains('marked')?'X':'';}
+
+function checkMatrix(){
+  var step=currentCase.steps[currentStep];
+  var correct=0,total=0,wrong=0;
+  var cells=document.querySelectorAll('.matrix td');
+  for(var i=0;i<cells.length;i++){
+    var key=cells[i].dataset.key,attr=cells[i].dataset.attr;
+    var shouldBeMarked=step.correct[key]&&step.correct[key].indexOf(attr)>-1;
+    var isMarked=cells[i].classList.contains('marked');
+    if(shouldBeMarked)total++;
+    if(shouldBeMarked&&isMarked)correct++;
+    if(!shouldBeMarked&&isMarked)wrong++;
+  }
+  var pct=total>0?Math.round((correct-wrong/2)/total*100):0;
+  if(pct<0)pct=0;
+  var pts=Math.round(pct/10);
+  stepScores[currentStep]=pts;totalScore+=pts;
+  document.getElementById('totalScore').textContent=totalScore;
+  var fb=document.getElementById('matrixFb');
+  fb.innerHTML=pct>=60?'✅ '+correct+'/'+total+' DF correctes ('+pct+'%) — +'+pts+' pts':'❌ '+correct+'/'+total+' DF correctes, '+wrong+' erreurs.';
+  fb.className='fb '+(pct>=60?'ok':'no');
+  if(pct>=50){currentStep++;renderPipeline();}
+}
+
+// ===== MCD STEP =====
+function renderMCDStep(el,step){
+  var html='<div class="exercise active">';
+  html+='<div class="ex-title">Étape 3 : MCD — Associations et cardinalités</div>';
+  html+='<div class="ex-desc">Pour chaque relation, indiquez le verbe d\'association et les cardinalités.</div>';
+  for(var r=0;r<step.relations.length;r++){
+    var rel=step.relations[r];
+    html+='<div style="background:var(--surface);border-radius:6px;padding:.6rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;font-size:.78rem">';
+    html+='<strong style="color:var(--accent2)">'+rel.from+'</strong>';
+    html+='<select id="card_from_'+r+'" style="background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);padding:.2rem;font-size:.7rem"><option value="">card</option><option>0,1</option><option>0,N</option><option>1,1</option><option>1,N</option></select>';
+    html+='<input id="verb_'+r+'" placeholder="verbe" style="width:80px;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);padding:.2rem .4rem;font-size:.7rem;text-align:center">';
+    html+='<select id="card_to_'+r+'" style="background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);padding:.2rem;font-size:.7rem"><option value="">card</option><option>0,1</option><option>0,N</option><option>1,1</option><option>1,N</option></select>';
+    html+='<strong style="color:var(--gold)">'+rel.to+'</strong>';
+    html+='</div>';
+  }
+  html+='<button class="btn btn-primary" onclick="checkMCD()">Vérifier</button>';
+  html+='<div class="fb" id="mcdFb"></div></div>';
+  el.innerHTML=html;
+}
+
+function checkMCD(){
+  var step=currentCase.steps[currentStep];
+  var correct=0,total=step.relations.length*3;
+  for(var r=0;r<step.relations.length;r++){
+    var rel=step.relations[r];
+    if(document.getElementById('card_from_'+r).value===rel.card_from)correct++;
+    if(document.getElementById('card_to_'+r).value===rel.card_to)correct++;
+    var verb=document.getElementById('verb_'+r).value.trim().toLowerCase();
+    if(verb&&rel.verb.toLowerCase().indexOf(verb)>-1)correct++;
+  }
+  var pct=Math.round(correct/total*100);
+  var pts=Math.round(pct/10);
+  stepScores[currentStep]=pts;totalScore+=pts;
+  document.getElementById('totalScore').textContent=totalScore;
+  var fb=document.getElementById('mcdFb');
+  fb.innerHTML=pct>=60?'✅ '+correct+'/'+total+' correct ('+pct+'%) — +'+pts+' pts':'❌ '+correct+'/'+total+' correct. Vérifiez les cardinalités.';
+  fb.className='fb '+(pct>=60?'ok':'no');
+  if(pct>=50){currentStep++;renderPipeline();}
+}
+
+// ===== MLD STEP =====
+function renderMLDStep(el,step){
+  var html='<div class="exercise active">';
+  html+='<div class="ex-title">Étape 4 : MLD — Schéma relationnel</div>';
+  html+='<div class="ex-desc">Écrivez le schéma relationnel. Utilisez la notation : TABLE(col1 PK, col2 FK, col3)</div>';
+  html+='<textarea class="code-area" id="mldInput" rows="6" placeholder="CLIENT(id_client PK, nom_client, ...)\nVEHICULE(id_vehicule PK, id_client FK, ...)"></textarea>';
+  html+='<button class="btn btn-primary" onclick="checkMLD()">Vérifier</button>';
+  html+='<div class="fb" id="mldFb"></div></div>';
+  el.innerHTML=html;
+}
+
+function checkMLD(){
+  var step=currentCase.steps[currentStep];
+  var input=document.getElementById('mldInput').value.toUpperCase();
+  var found=0;
+  for(var i=0;i<step.keywords.length;i++){
+    if(input.indexOf(step.keywords[i].toUpperCase())>-1)found++;
+  }
+  var pct=Math.round(found/step.keywords.length*100);
+  var pts=Math.round(pct/10);
+  stepScores[currentStep]=pts;totalScore+=pts;
+  document.getElementById('totalScore').textContent=totalScore;
+  var fb=document.getElementById('mldFb');
+  fb.innerHTML=pct>=60?'✅ '+found+'/'+step.keywords.length+' éléments trouvés — +'+pts+' pts':'❌ '+found+'/'+step.keywords.length+' éléments. Vérifiez PK, FK et noms de tables.';
+  fb.className='fb '+(pct>=60?'ok':'no');
+  if(pct>=50){currentStep++;renderPipeline();}
+}
+
+// ===== MPD STEP =====
+function renderMPDStep(el,step){
+  var html='<div class="exercise active">';
+  html+='<div class="ex-title">Étape 5 : MPD — Types de données MySQL</div>';
+  html+='<div class="ex-desc">Pour chaque table, indiquez les types MySQL appropriés (INT, VARCHAR, DATE, DECIMAL, BOOLEAN, TEXT, TIME).</div>';
+  html+='<textarea class="code-area" id="mpdInput" rows="8" placeholder="CLIENT:\n  id_client INT PRIMARY KEY AUTO_INCREMENT\n  nom_client VARCHAR(100) NOT NULL\n  ..."></textarea>';
+  html+='<button class="btn btn-primary" onclick="checkMPD()">Vérifier</button>';
+  html+='<div class="fb" id="mpdFb"></div></div>';
+  el.innerHTML=html;
+}
+
+function checkMPD(){
+  var step=currentCase.steps[currentStep];
+  var input=document.getElementById('mpdInput').value.toUpperCase();
+  var found=0;
+  for(var i=0;i<step.correct_keywords.length;i++){
+    if(input.indexOf(step.correct_keywords[i].toUpperCase())>-1)found++;
+  }
+  var tablesFound=0;
+  for(var t=0;t<step.tables.length;t++){
+    if(input.indexOf(step.tables[t].toUpperCase())>-1)tablesFound++;
+  }
+  var total=step.correct_keywords.length+step.tables.length;
+  var all=found+tablesFound;
+  var pct=Math.round(all/total*100);
+  var pts=Math.round(pct/10);
+  stepScores[currentStep]=pts;totalScore+=pts;
+  document.getElementById('totalScore').textContent=totalScore;
+  var fb=document.getElementById('mpdFb');
+  fb.innerHTML=pct>=50?'✅ '+tablesFound+'/'+step.tables.length+' tables, '+found+' types corrects — +'+pts+' pts':'❌ Tables: '+tablesFound+'/'+step.tables.length+', Types: '+found+'/'+step.correct_keywords.length;
+  fb.className='fb '+(pct>=50?'ok':'no');
+  if(pct>=40){currentStep++;renderPipeline();}
+}
+
+// ===== CODE STEP =====
+function renderCodeStep(el,step){
+  var html='<div class="exercise active">';
+  html+='<div class="ex-title">Étape 6 : Code SQL — CREATE TABLE</div>';
+  html+='<div class="ex-desc">Écrivez le code SQL complet pour créer toutes les tables.<br><span style="color:var(--gold);font-size:.7rem">'+step.hint+'</span></div>';
+  html+='<textarea class="code-area" id="codeInput" rows="15" placeholder="CREATE TABLE client (\n  id_client INT AUTO_INCREMENT PRIMARY KEY,\n  nom_client VARCHAR(100) NOT NULL,\n  ...\n);\n\nCREATE TABLE ..."></textarea>';
+  html+='<button class="btn btn-gold" onclick="checkCode()">Vérifier et terminer</button>';
+  html+='<div class="fb" id="codeFb"></div></div>';
+  el.innerHTML=html;
+}
+
+function checkCode(){
+  var step=currentCase.steps[currentStep];
+  var input=document.getElementById('codeInput').value.toUpperCase();
+  var found=0;
+  for(var i=0;i<step.expected_keywords.length;i++){
+    if(input.indexOf(step.expected_keywords[i].toUpperCase())>-1)found++;
+  }
+  var pct=Math.round(found/step.expected_keywords.length*100);
+  var pts=Math.round(pct/10);
+  stepScores[currentStep]=pts;totalScore+=pts;
+  document.getElementById('totalScore').textContent=totalScore;
+  var fb=document.getElementById('codeFb');
+  fb.innerHTML='🏆 Terminé ! Score final : <strong>'+totalScore+' pts</strong> — '+found+'/'+step.expected_keywords.length+' mots-clés SQL trouvés.';
+  fb.className='fb ok';
+  renderPipeline();
+  // Save score
+  if(typeof saveGameScore==='function')saveGameScore('pipeline-'+currentCase.id,totalScore,0);
+}
+
+// INIT
+renderCases();
+</script>
+<script src="presence-tracker.js"></script>
+<script src="duel-notify.js"></script>
+</body>
+</html>
