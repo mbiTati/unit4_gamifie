@@ -45,8 +45,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 .level-connector.active{background:linear-gradient(90deg,var(--accent2),var(--accent))}
 
 /* DANCING CHARACTER */
-.dancer{position:absolute;top:-32px;left:50%;transform:translateX(-50%);font-size:1.3rem;animation:dance 1s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(50,224,196,.4))}
-@keyframes dance{0%,100%{transform:translateX(-50%) translateY(0) rotate(0deg)}25%{transform:translateX(-50%) translateY(-6px) rotate(-10deg)}50%{transform:translateX(-50%) translateY(-2px) rotate(0deg)}75%{transform:translateX(-50%) translateY(-6px) rotate(10deg)}}
+.dancer-slot{position:absolute;top:-40px;left:50%;transform:translateX(-50%);z-index:2}
 
 /* LEVEL UP CELEBRATION */
 .celebration{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;flex-direction:column}
@@ -153,12 +152,13 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   <button class="close-btn" onclick="closeCelebration()">Continuer</button>
 </div>
 
+<script src="characters.js"></script>
 <script src="supabase-config.js"></script>
 <script>
 const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
 if (!student) window.location.href = 'login.html';
 
-const CHARACTERS = ['🧙‍♂️','🧑‍💻','🦸','🧑‍🔬','🎓','🏆','⚡','🔥','👑'];
+// Characters are now rendered by characters.js
 
 // Show teacher link if applicable
 if (student && student.role === 'teacher') {
@@ -217,7 +217,16 @@ async function loadDashboard() {
     document.getElementById('avatar').style.borderColor = level.color;
     document.getElementById('avatar').style.background = level.color + '15';
     document.getElementById('avatar').style.color = level.color;
-    document.getElementById('avatar').innerHTML = CHARACTERS[charIdx] || '🧑‍💻';
+    // Create animated character
+    const avatarEl = document.getElementById('avatar');
+    avatarEl.innerHTML = '';
+    avatarEl.style.width = '70px';
+    avatarEl.style.height = '90px';
+    avatarEl.style.borderRadius = '12px';
+    avatarEl.style.border = 'none';
+    avatarEl.style.overflow = 'visible';
+    const char = createCharacter(charIdx, avatarEl, 60);
+    char.classList.add('dancing');
     document.getElementById('wName').textContent = student.first_name + ' ' + student.last_name;
     document.getElementById('wLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:700">' + level.name + '</span> <span style="font-size:.7rem;color:var(--muted)">(Nv. ' + (level.index + 1) + '/9)</span>';
     document.getElementById('wXP').textContent = totalXP + ' XP' + (level.nextMin > level.xp ? ' — prochain niveau à ' + level.nextMin + ' XP' : ' — NIVEAU MAX!');
@@ -263,7 +272,8 @@ function renderLevelsTrack(xp, currentLevel, isTeacher) {
     
     // Dancing character on current level
     if (isCurrent) {
-      html += '<div class="dancer">' + (CHARACTERS[i] || '🧑‍💻') + '</div>';
+      // Dancing character will be added after render
+      html += '<div class="dancer-slot" data-level="' + i + '"></div>';
     }
     
     html += (i + 1);
@@ -274,6 +284,22 @@ function renderLevelsTrack(xp, currentLevel, isTeacher) {
   }
   
   track.innerHTML = html;
+  
+  // Add dancing character on current level
+  document.querySelectorAll('.dancer-slot').forEach(slot => {
+    const lvlIdx = parseInt(slot.dataset.level);
+    const miniChar = createCharacter(lvlIdx, null, 36);
+    miniChar.classList.add('dancing');
+    miniChar.style.position = 'absolute';
+    miniChar.style.top = '-40px';
+    miniChar.style.left = '50%';
+    miniChar.style.transform = 'translateX(-50%)';
+    slot.style.position = 'absolute';
+    slot.style.top = '-40px';
+    slot.style.left = '50%';
+    slot.style.transform = 'translateX(-50%)';
+    slot.appendChild(miniChar);
+  });
 }
 
 function showCelebration(level) {
@@ -290,11 +316,17 @@ function showCelebration(level) {
     confettiHtml += '<div class="confetti" style="left:' + x + '%;background:' + color + ';animation-delay:' + delay + 's"></div>';
   }
   cel.innerHTML = confettiHtml + 
-    '<div class="big-char">' + (CHARACTERS[charIdx] || '🎓') + '</div>' +
+    '<div id="celebCharContainer" style="width:120px;height:140px;margin:0 auto"></div>' +
     '<div class="level-up-text" style="color:' + level.color + '">LEVEL UP!</div>' +
     '<div style="font-size:1.1rem;color:var(--muted);margin-top:.5rem">' + level.name + '</div>' +
     '<button class="close-btn" onclick="closeCelebration()">Continuer</button>';
   cel.classList.add('active');
+  // Add dancing character to celebration
+  const celebContainer = document.getElementById('celebCharContainer');
+  if (celebContainer) {
+    const bigChar = createCharacter(level.index, celebContainer, 100);
+    bigChar.classList.add('dancing');
+  }
 }
 
 function closeCelebration() {
