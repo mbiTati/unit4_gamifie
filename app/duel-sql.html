@@ -9,146 +9,145 @@
 body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .topbar h1{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--error));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.topbar-right{display:flex;gap:.4rem}
-.topbar-right a{color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:600;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px}
+.topbar-right{display:flex;gap:.4rem;flex-wrap:wrap}
+.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:600;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:inherit}
 .main{max-width:900px;margin:0 auto;padding:1rem}
-
-/* LOBBY */
-.lobby{text-align:center;padding:2rem}
-.lobby h2{font-size:1.3rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,var(--gold),var(--error));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.lobby p{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem}
-.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-bottom:1.5rem}
-.player-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem;cursor:pointer;transition:all .2s;text-align:center}
-.player-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
-.player-card.online{border-left:3px solid var(--lo1)}
-.player-card.challenged{border-color:var(--gold);background:rgba(245,158,11,.05)}
-.player-card.me{opacity:.4;pointer-events:none}
-.player-name{font-size:.78rem;font-weight:700}
-.player-level{font-size:.6rem;color:var(--muted)}
-.player-status{font-size:.55rem;margin-top:.2rem}
 .btn{padding:.5rem 1rem;border:none;border-radius:6px;font-family:inherit;font-weight:700;cursor:pointer;font-size:.82rem}
 .btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff}
 .btn-teal{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-sm{padding:.3rem .6rem;font-size:.7rem}
 
-/* WAITING */
-.waiting{text-align:center;padding:3rem}
-.waiting .spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:1rem auto}
+/* STEP 1: Choose exercise */
+.step{display:none}.step.active{display:block}
+.section-title{font-size:.9rem;font-weight:800;margin-bottom:.8rem}
+.exercise-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.5rem;margin-bottom:1.5rem}
+.exercise-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.7rem;cursor:pointer;transition:all .2s}
+.exercise-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.exercise-card.selected{border-color:var(--gold);background:rgba(245,158,11,.05);box-shadow:0 0 15px rgba(245,158,11,.1)}
+.exercise-card .tag{font-size:.55rem;font-weight:700;padding:.1rem .3rem;border-radius:3px;margin-bottom:.3rem;display:inline-block}
+.exercise-card h4{font-size:.78rem;font-weight:700;margin-bottom:.2rem}
+.exercise-card p{font-size:.65rem;color:var(--muted);line-height:1.3}
+
+/* STEP 2: Choose opponent */
+.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-bottom:1rem}
+.player-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem;cursor:pointer;transition:all .2s;text-align:center}
+.player-card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.player-card.online{border-left:3px solid var(--lo1)}
+.player-card.selected{border-color:var(--gold);background:rgba(245,158,11,.05)}
+.player-name{font-size:.75rem;font-weight:700}
+.player-status{font-size:.55rem;margin-top:.2rem}
+
+/* STEP 3: Waiting */
+.waiting{text-align:center;padding:2rem}
+.spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:1rem auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* DUEL ARENA */
-.arena{display:none}
-.arena-header{display:flex;justify-content:space-between;align-items:center;padding:.8rem;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:1rem}
+/* ARENA */
+.arena-header{display:flex;justify-content:space-between;align-items:center;padding:.8rem;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem}
 .arena-player{display:flex;align-items:center;gap:.5rem}
-.arena-player .char{width:40px;height:50px}
-.arena-player .name{font-weight:700;font-size:.85rem}
+.arena-player .name{font-weight:700;font-size:.82rem}
 .arena-player .score-val{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:800}
 .arena-vs{font-size:1.2rem;font-weight:900;color:var(--gold)}
-.arena-timer{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:.8rem}
-.arena-question{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.8rem}
-.arena-question .q{font-size:.9rem;font-weight:600;margin-bottom:.8rem;line-height:1.5}
-.arena-question .schema{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);background:var(--surface);padding:.5rem;border-radius:5px;margin-bottom:.8rem}
-.sql-input{width:100%;padding:.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;resize:vertical;min-height:60px}
+.arena-timer{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:.6rem}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.6rem}
+.q-card .q{font-size:.88rem;font-weight:600;margin-bottom:.6rem;line-height:1.5}
+.q-card .schema{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);background:var(--surface);padding:.4rem;border-radius:5px;margin-bottom:.6rem}
+.sql-input{width:100%;padding:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.8rem;resize:vertical;min-height:55px}
 .sql-input:focus{outline:none;border-color:var(--accent2)}
-.submit-row{display:flex;gap:.5rem;margin-top:.5rem}
-.feedback{padding:.5rem;border-radius:5px;font-size:.78rem;margin-top:.5rem;min-height:2rem}
-.feedback.correct{background:rgba(16,185,129,.1);color:var(--lo1);border:1px solid rgba(16,185,129,.2)}
-.feedback.wrong{background:rgba(239,68,68,.1);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+.feedback{padding:.4rem;border-radius:5px;font-size:.75rem;margin-top:.4rem;min-height:1.8rem}
+.feedback.ok{background:rgba(16,185,129,.1);color:var(--lo1)}.feedback.no{background:rgba(239,68,68,.1);color:var(--error)}
 
-/* RESULTS */
-.results{display:none;text-align:center;padding:2rem}
+/* Results */
+.results{text-align:center;padding:2rem}
 .results .winner{font-size:1.5rem;font-weight:900;margin-bottom:.5rem}
-.results .recap{font-size:.85rem;color:var(--muted);margin-bottom:1rem}
-.final-scores{display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem}
+.final-scores{display:flex;justify-content:center;gap:2rem;margin:1rem 0}
 .final-player{text-align:center}
 .final-player .fscore{font-size:2rem;font-weight:900;font-family:'JetBrains Mono',monospace}
 </style>
 </head>
 <body>
-<script>
-if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
-</script>
+<script>if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }</script>
+
 <div class="topbar">
-  <h1>Duel SQL</h1>
+  <h1>⚔️ Duel SQL</h1>
   <div class="topbar-right">
     <a href="home.html">Accueil</a>
     <a href="profile.html">Mon Profil</a>
     <a href="scores.html">Classement</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="doLogout()">Déconnexion</button>
   </div>
 </div>
 
 <div class="main">
-  <!-- LOBBY -->
-  <div id="lobby" class="lobby">
-    <h2>Duel SQL</h2>
-    <p>Défiez un camarade de classe ! Résolvez les mêmes requêtes SQL en même temps. Le plus rapide gagne !</p>
-    <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem" id="lobbyStatus">Chargement des joueurs...</div>
-    <div class="players-grid" id="playersGrid"></div>
-    <div style="margin-top:1rem;font-size:.7rem;color:var(--muted)">Sélectionnez un adversaire en ligne pour lancer un duel.</div>
-    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
-      <button class="btn btn-teal" onclick="startSolo()" style="font-size:.78rem">Mode solo (s'entraîner seul)</button>
+  <!-- STEP 1: Choose Exercise -->
+  <div id="step1" class="step active">
+    <div class="section-title">1. Choisissez l'exercice du duel</div>
+    <div class="exercise-grid" id="exerciseGrid"></div>
+    <div style="text-align:center;margin-top:.5rem">
+      <button class="btn btn-gold" onclick="goStep2()" id="btnStep2" disabled>Suivant → Choisir l'adversaire</button>
     </div>
   </div>
   
-  <!-- WAITING -->
-  <div id="waiting" style="display:none" class="waiting">
-    <div class="spinner"></div>
-    <div style="font-size:1rem;font-weight:700;margin-bottom:.5rem" id="waitText">En attente de l'adversaire...</div>
-    <div style="font-size:.78rem;color:var(--muted)" id="waitSub">L'autre joueur doit accepter le duel.</div>
-    <button class="btn" style="margin-top:1rem;background:var(--surface);color:var(--muted);border:1px solid var(--border)" onclick="cancelDuel()">Annuler</button>
+  <!-- STEP 2: Choose Opponent -->
+  <div id="step2" class="step">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+      <div class="section-title" style="margin:0">2. Choisissez votre adversaire</div>
+      <button class="btn-sm" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);cursor:pointer;font-family:inherit" onclick="goStep(1)">← Retour</button>
+    </div>
+    <div id="selectedExName" style="font-size:.78rem;color:var(--gold);margin-bottom:.8rem"></div>
+    <div class="players-grid" id="playersGrid"></div>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem">
+      <button class="btn btn-gold" onclick="launchDuel()" id="btnLaunch" disabled>⚔️ Lancer le duel !</button>
+      <button class="btn btn-teal" onclick="startSoloDuel()">Mode solo (vs Bot)</button>
+    </div>
   </div>
   
-  <!-- ARENA -->
-  <div id="arena" class="arena">
+  <!-- STEP 3: Waiting -->
+  <div id="step3" class="step">
+    <div class="waiting">
+      <div class="spinner"></div>
+      <div style="font-size:1rem;font-weight:700" id="waitText">En attente...</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem" id="waitSub"></div>
+      <button class="btn" style="margin-top:1rem;background:var(--surface);color:var(--muted);border:1px solid var(--border)" onclick="cancelDuel()">Annuler</button>
+    </div>
+  </div>
+  
+  <!-- STEP 4: Arena -->
+  <div id="step4" class="step">
     <div class="arena-header">
-      <div class="arena-player">
-        <div class="char" id="charMe"></div>
-        <div>
-          <div class="name" id="nameMe">Moi</div>
-          <div class="score-val" id="scoreMe" style="color:var(--accent2)">0</div>
-        </div>
-      </div>
+      <div class="arena-player"><div id="charMe" style="width:36px;height:46px"></div><div><div class="name" id="nameMe">Moi</div><div class="score-val" id="scoreMe" style="color:var(--accent2)">0</div></div></div>
       <div class="arena-vs">VS</div>
-      <div class="arena-player" style="text-align:right">
-        <div>
-          <div class="name" id="nameOpp">Adversaire</div>
-          <div class="score-val" id="scoreOpp" style="color:var(--gold)">0</div>
-        </div>
-        <div class="char" id="charOpp"></div>
-      </div>
+      <div class="arena-player" style="text-align:right"><div><div class="name" id="nameOpp">Adversaire</div><div class="score-val" id="scoreOpp" style="color:var(--gold)">0</div></div><div id="charOpp" style="width:36px;height:46px"></div></div>
     </div>
     <div class="arena-timer" id="timer">⏱ 5:00</div>
-    <div class="arena-question">
-      <div id="questionNum" style="font-size:.65rem;color:var(--muted);margin-bottom:.3rem">Question 1/8</div>
-      <div class="q" id="questionText"></div>
-      <div class="schema" id="questionSchema"></div>
-      <textarea class="sql-input" id="sqlInput" placeholder="Écrivez votre requête SQL ici..." rows="3"></textarea>
-      <div class="submit-row">
-        <button class="btn btn-gold" onclick="submitAnswer()">Valider</button>
-        <button class="btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="skipQuestion()">Passer →</button>
+    <div id="exTitle" style="font-size:.7rem;color:var(--gold);text-align:center;margin-bottom:.4rem"></div>
+    <div class="q-card">
+      <div id="qNum" style="font-size:.62rem;color:var(--muted);margin-bottom:.2rem"></div>
+      <div class="q" id="qText"></div>
+      <div class="schema" id="qSchema"></div>
+      <textarea class="sql-input" id="sqlInput" placeholder="Votre requête SQL..." rows="2"></textarea>
+      <div style="display:flex;gap:.4rem;margin-top:.4rem">
+        <button class="btn btn-gold btn-sm" onclick="submitAnswer()">Valider</button>
+        <button class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="skipQ()">Passer →</button>
       </div>
       <div class="feedback" id="feedback"></div>
     </div>
   </div>
   
-  <!-- RESULTS -->
-  <div id="results" class="results">
-    <div class="winner" id="winnerText"></div>
-    <div class="recap" id="recapText"></div>
-    <div class="final-scores">
-      <div class="final-player">
-        <div class="name" id="finalNameMe">Moi</div>
-        <div class="fscore" id="finalScoreMe" style="color:var(--accent2)">0</div>
-        <div style="font-size:.7rem;color:var(--muted)">points</div>
+  <!-- STEP 5: Results -->
+  <div id="step5" class="step">
+    <div class="results">
+      <div class="winner" id="winnerText"></div>
+      <div id="recapText" style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem"></div>
+      <div class="final-scores">
+        <div class="final-player"><div class="name" id="fNameMe">Moi</div><div class="fscore" id="fScoreMe" style="color:var(--accent2)">0</div><div style="font-size:.65rem;color:var(--muted)">points</div></div>
+        <div class="final-player"><div class="name" id="fNameOpp">Bot</div><div class="fscore" id="fScoreOpp" style="color:var(--gold)">0</div><div style="font-size:.65rem;color:var(--muted)">points</div></div>
       </div>
-      <div class="final-player">
-        <div class="name" id="finalNameOpp">Adversaire</div>
-        <div class="fscore" id="finalScoreOpp" style="color:var(--gold)">0</div>
-        <div style="font-size:.7rem;color:var(--muted)">points</div>
+      <div style="display:flex;gap:.5rem;justify-content:center">
+        <button class="btn btn-gold" onclick="location.reload()">Nouveau duel</button>
+        <button class="btn btn-teal" onclick="location.href='home.html'">Accueil</button>
       </div>
-    </div>
-    <div style="display:flex;gap:.5rem;justify-content:center">
-      <button class="btn btn-gold" onclick="location.reload()">Nouveau duel</button>
-      <button class="btn btn-teal" onclick="location.href='home.html'">Accueil</button>
     </div>
   </div>
 </div>
@@ -158,349 +157,232 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
 <script src="progress-saver.js"></script>
 <script>
 const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
-const SUPABASE_REST = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
-const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+const SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+const AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
 
-// ===================== QUESTIONS BANK =====================
-const DUEL_QUESTIONS = [
-  {q:"Afficher tous les modèles de la marque 1",schema:"marque(id_marque,nom_marque) · modele(id_modele,id_marque,nom_modele,prix_vente)",answer:["SELECT * FROM modele WHERE id_marque = 1","SELECT * FROM modele WHERE id_marque=1"],keywords:["SELECT","modele","WHERE","id_marque","1"]},
-  {q:"Compter le nombre total de clients",schema:"client(id_client,nom,prenom,email,ville)",answer:["SELECT COUNT(*) FROM client"],keywords:["SELECT","COUNT","client"]},
-  {q:"Afficher les marques par ordre alphabétique",schema:"marque(id_marque,nom_marque,pays_origine)",answer:["SELECT * FROM marque ORDER BY nom_marque","SELECT * FROM marque ORDER BY nom_marque ASC"],keywords:["SELECT","marque","ORDER BY","nom_marque"]},
-  {q:"Trouver les modèles dont le prix dépasse 150",schema:"modele(id_modele,nom_modele,prix_vente,categorie)",answer:["SELECT * FROM modele WHERE prix_vente > 150"],keywords:["SELECT","modele","WHERE","prix_vente",">","150"]},
-  {q:"Afficher le nom et prénom des clients de Genève",schema:"client(id_client,nom,prenom,ville,code_postal)",answer:["SELECT nom, prenom FROM client WHERE ville = 'Genève'","SELECT nom,prenom FROM client WHERE ville='Genève'"],keywords:["SELECT","nom","prenom","client","WHERE","ville","Genève"]},
-  {q:"Compter les ventes par mode de paiement",schema:"vente(id_vente,id_client,prix_paye,mode_paiement,date_vente)",answer:["SELECT mode_paiement, COUNT(*) FROM vente GROUP BY mode_paiement"],keywords:["SELECT","mode_paiement","COUNT","vente","GROUP BY"]},
-  {q:"Afficher les modèles avec le nom de leur marque (JOIN)",schema:"marque(id_marque,nom_marque) · modele(id_modele,id_marque,nom_modele)",answer:["SELECT m.nom_modele, ma.nom_marque FROM modele m JOIN marque ma ON m.id_marque = ma.id_marque"],keywords:["SELECT","JOIN","modele","marque","ON","id_marque"]},
-  {q:"Calculer le chiffre d'affaires total (somme des prix_paye)",schema:"vente(id_vente,prix_paye,date_vente)",answer:["SELECT SUM(prix_paye) FROM vente"],keywords:["SELECT","SUM","prix_paye","vente"]},
-  {q:"Trouver les clients qui ont la carte de fidélité",schema:"client(id_client,nom,prenom,carte_fidelite)",answer:["SELECT * FROM client WHERE carte_fidelite = 1","SELECT * FROM client WHERE carte_fidelite = true"],keywords:["SELECT","client","WHERE","carte_fidelite"]},
-  {q:"Afficher les 5 ventes les plus récentes",schema:"vente(id_vente,id_client,prix_paye,date_vente)",answer:["SELECT * FROM vente ORDER BY date_vente DESC LIMIT 5"],keywords:["SELECT","vente","ORDER BY","date_vente","DESC","LIMIT","5"]},
-  {q:"Compter le nombre de modèles par catégorie",schema:"modele(id_modele,nom_modele,categorie,prix_vente)",answer:["SELECT categorie, COUNT(*) FROM modele GROUP BY categorie"],keywords:["SELECT","categorie","COUNT","modele","GROUP BY"]},
-  {q:"Trouver le prix moyen des modèles",schema:"modele(id_modele,nom_modele,prix_vente)",answer:["SELECT AVG(prix_vente) FROM modele"],keywords:["SELECT","AVG","prix_vente","modele"]},
-  {q:"Afficher les clients inscrits en 2024",schema:"client(id_client,nom,prenom,date_inscription)",answer:["SELECT * FROM client WHERE YEAR(date_inscription) = 2024","SELECT * FROM client WHERE date_inscription LIKE '2024%'"],keywords:["SELECT","client","WHERE","date_inscription","2024"]},
-  {q:"Trouver le modèle le plus cher",schema:"modele(id_modele,nom_modele,prix_vente)",answer:["SELECT * FROM modele ORDER BY prix_vente DESC LIMIT 1","SELECT * FROM modele WHERE prix_vente = (SELECT MAX(prix_vente) FROM modele)"],keywords:["SELECT","modele","prix_vente","DESC","LIMIT","1"]},
-  {q:"Supprimer les ventes dont le prix payé est 0",schema:"vente(id_vente,prix_paye)",answer:["DELETE FROM vente WHERE prix_paye = 0"],keywords:["DELETE","vente","WHERE","prix_paye","0"]},
-  {q:"Ajouter un nouveau client 'Dupont' de Lausanne",schema:"client(id_client,nom,prenom,ville)",answer:["INSERT INTO client (nom, prenom, ville) VALUES ('Dupont'"],keywords:["INSERT","INTO","client","VALUES","Dupont","Lausanne"]},
+function doLogout(){ localStorage.clear(); window.location.href='login.html'; }
+
+// ========== EXERCISE BANKS ==========
+const EXERCISES = [
+  { id:'sql_select', name:'SELECT & WHERE', tag:'SQL', color:'var(--lo2)', desc:'Filtrage, tri, LIKE, BETWEEN, DISTINCT', questions:[
+    {q:"Tous les modèles de la marque 1",schema:"modele(id_modele, id_marque, nom_modele, prix_vente)",kw:["SELECT","modele","WHERE","id_marque","1"],hint:"SELECT ... FROM ... WHERE ..."},
+    {q:"Clients de Genève triés par nom",schema:"client(id_client, nom, prenom, ville)",kw:["SELECT","client","WHERE","ville","Genève","ORDER BY","nom"],hint:"WHERE ville = '...' ORDER BY ..."},
+    {q:"Les 5 modèles les plus chers",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","modele","ORDER BY","prix_vente","DESC","LIMIT","5"],hint:"ORDER BY ... DESC LIMIT ..."},
+    {q:"Modèles entre 50 et 150 CHF",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","modele","WHERE","prix_vente","BETWEEN","50","150"],hint:"BETWEEN ... AND ..."},
+    {q:"Clients dont le nom commence par 'D'",schema:"client(id_client, nom, prenom)",kw:["SELECT","client","WHERE","nom","LIKE","D%"],hint:"WHERE nom LIKE '...'"},
+    {q:"Villes distinctes des clients",schema:"client(id_client, nom, ville)",kw:["SELECT","DISTINCT","ville","client"],hint:"SELECT DISTINCT ..."},
+    {q:"Modèles qui ne sont PAS de la catégorie 'Running'",schema:"modele(id_modele, nom_modele, categorie)",kw:["SELECT","modele","WHERE","categorie","NOT","Running"],hint:"WHERE categorie != '...' ou NOT"},
+    {q:"10 dernières ventes par date",schema:"vente(id_vente, date_vente, prix_paye)",kw:["SELECT","vente","ORDER BY","date_vente","DESC","LIMIT","10"],hint:"ORDER BY ... DESC LIMIT ..."},
+  ]},
+  { id:'sql_aggregation', name:'Agrégation & GROUP BY', tag:'SQL', color:'var(--lo4)', desc:'COUNT, SUM, AVG, MAX, GROUP BY, HAVING', questions:[
+    {q:"Nombre total de clients",schema:"client(id_client, nom, prenom)",kw:["SELECT","COUNT","client"],hint:"SELECT COUNT(*) FROM ..."},
+    {q:"Chiffre d'affaires total",schema:"vente(id_vente, prix_paye)",kw:["SELECT","SUM","prix_paye","vente"],hint:"SELECT SUM(...) FROM ..."},
+    {q:"Prix moyen des modèles",schema:"modele(id_modele, prix_vente)",kw:["SELECT","AVG","prix_vente","modele"],hint:"SELECT AVG(...) FROM ..."},
+    {q:"Nombre de ventes par mode de paiement",schema:"vente(id_vente, mode_paiement)",kw:["SELECT","mode_paiement","COUNT","vente","GROUP BY"],hint:"GROUP BY mode_paiement"},
+    {q:"Nombre de modèles par catégorie",schema:"modele(id_modele, categorie)",kw:["SELECT","categorie","COUNT","modele","GROUP BY"],hint:"SELECT ..., COUNT(*) ... GROUP BY ..."},
+    {q:"Catégories ayant plus de 3 modèles",schema:"modele(id_modele, categorie)",kw:["SELECT","categorie","COUNT","GROUP BY","HAVING","3"],hint:"GROUP BY ... HAVING COUNT(*) > ..."},
+    {q:"Chiffre d'affaires par client",schema:"vente(id_vente, id_client, prix_paye)",kw:["SELECT","id_client","SUM","prix_paye","vente","GROUP BY"],hint:"SELECT id_client, SUM(...) ... GROUP BY ..."},
+    {q:"Modèle le plus cher (avec MAX)",schema:"modele(id_modele, nom_modele, prix_vente)",kw:["SELECT","MAX","prix_vente","modele"],hint:"SELECT MAX(...) FROM ..."},
+  ]},
+  { id:'sql_join', name:'Jointures (JOIN)', tag:'JOIN', color:'var(--lo1)', desc:'INNER JOIN, LEFT JOIN, multi-tables', questions:[
+    {q:"Modèles avec le nom de leur marque",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque, nom_modele)",kw:["SELECT","JOIN","modele","marque","ON","id_marque"],hint:"... JOIN marque ON ..."},
+    {q:"Ventes avec le nom du client",schema:"client(id_client, nom) · vente(id_vente, id_client, prix_paye)",kw:["SELECT","JOIN","vente","client","ON","id_client"],hint:"... JOIN client ON ..."},
+    {q:"Marques sans aucun modèle (LEFT JOIN)",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque)",kw:["SELECT","LEFT JOIN","marque","modele","ON","NULL","IS NULL"],hint:"LEFT JOIN ... WHERE ... IS NULL"},
+    {q:"Ventes avec nom du client ET nom du modèle",schema:"client(id_client, nom) · vente(id_vente, id_client, id_modele) · modele(id_modele, nom_modele)",kw:["SELECT","JOIN","vente","client","modele","ON"],hint:"Double JOIN : ... JOIN client ON ... JOIN modele ON ..."},
+    {q:"Chiffre d'affaires par marque",schema:"marque(id_marque, nom_marque) · modele(id_modele, id_marque) · vente(id_vente, id_modele, prix_paye)",kw:["SELECT","nom_marque","SUM","JOIN","GROUP BY"],hint:"JOIN marque → modele → vente puis GROUP BY"},
+    {q:"Clients ayant acheté plus de 500 CHF au total",schema:"client(id_client, nom) · vente(id_vente, id_client, prix_paye)",kw:["SELECT","nom","SUM","JOIN","GROUP BY","HAVING","500"],hint:"JOIN + GROUP BY + HAVING SUM(...) > ..."},
+  ]},
+  { id:'sql_dml', name:'INSERT / UPDATE / DELETE', tag:'DML', color:'var(--error)', desc:'Manipulation des données', questions:[
+    {q:"Insérer un client 'Dupont' à Lausanne",schema:"client(id_client, nom, prenom, ville)",kw:["INSERT","INTO","client","VALUES","Dupont","Lausanne"],hint:"INSERT INTO ... VALUES (...)"},
+    {q:"Augmenter tous les prix de 10%",schema:"modele(id_modele, prix_vente)",kw:["UPDATE","modele","SET","prix_vente","1.1"],hint:"UPDATE ... SET prix_vente = prix_vente * 1.1"},
+    {q:"Supprimer les ventes de 2020",schema:"vente(id_vente, date_vente)",kw:["DELETE","FROM","vente","WHERE","date_vente","2020"],hint:"DELETE FROM ... WHERE ..."},
+    {q:"Modifier la ville du client 5 en 'Berne'",schema:"client(id_client, ville)",kw:["UPDATE","client","SET","ville","Berne","WHERE","id_client","5"],hint:"UPDATE ... SET ... WHERE id_client = ..."},
+    {q:"Insérer un modèle 'Air Max' pour la marque 2",schema:"modele(id_modele, id_marque, nom_modele)",kw:["INSERT","INTO","modele","VALUES","Air Max","2"],hint:"INSERT INTO modele ... VALUES ..."},
+    {q:"Supprimer les clients sans carte fidélité",schema:"client(id_client, carte_fidelite)",kw:["DELETE","FROM","client","WHERE","carte_fidelite","0"],hint:"DELETE FROM ... WHERE carte_fidelite = 0"},
+  ]},
+  { id:'mcd_quiz', name:'MCD & Normalisation', tag:'MCD', color:'var(--gold)', desc:'Questions théoriques sur la conception', questions:[
+    {q:"Quel est le résultat d'une relation N:M au passage MLD ?",schema:"MCD → MLD",kw:["table","liaison","associative","intermédiaire"],hint:"Pensez à la table qui fait le lien entre les deux"},
+    {q:"Qu'élimine la 2NF ?",schema:"Normalisation",kw:["dépendances","partielles","partielle"],hint:"Concerne les dépendances vis-à-vis d'une PARTIE de la clé"},
+    {q:"Qu'élimine la 3NF ?",schema:"Normalisation",kw:["dépendances","transitives","transitive"],hint:"A → B → C, que faire de C ?"},
+    {q:"Que signifie la cardinalité (0,N) ?",schema:"MCD Merise",kw:["zéro","plusieurs","0","optionnel","N"],hint:"Le minimum est 0, le maximum est illimité"},
+    {q:"Qu'est-ce qu'un attribut multivalué viole ?",schema:"Normalisation",kw:["1NF","première","forme","normale","atomique"],hint:"Les valeurs doivent être ..."},
+    {q:"PK signifie ?",schema:"Bases de données",kw:["primary","key","primaire","clé","unique","identifiant"],hint:"L'identifiant unique d'un enregistrement"},
+  ]},
 ];
 
-// ===================== STATE =====================
-let duelMode = 'solo'; // 'solo' or 'pair'
+// ========== STATE ==========
+let selectedExercise = null;
+let selectedOpponent = null;
 let questions = [];
 let currentQ = 0;
 let myScore = 0;
 let oppScore = 0;
-let oppName = 'Bot SQL';
-let oppLevel = 0;
+let oppName = '';
 let timerInterval = null;
-let timeLeft = 300; // 5 minutes
+let timeLeft = 300;
 let duelId = null;
 let pollInterval = null;
+let _amP1 = null;
 
-// ===================== LOBBY =====================
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+}
+function goStep2() { if (!selectedExercise) return; goStep(2); loadPlayers(); }
 
-// Check if we're joining an existing duel via URL
-async function checkJoinDuel() {
-  const params = new URLSearchParams(window.location.search);
-  const joinId = params.get('duel');
-  if (!joinId) return false;
-  
-  // Load the duel from Supabase
-  const res = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + joinId + '&select=*', {
-    headers: { 'apikey': ANON }
-  }).then(r => r.json());
-  
-  if (!Array.isArray(res) || res.length === 0) return false;
-  
-  const duel = res[0];
-  duelId = duel.id;
-  
-  // Get opponent name
-  const oppId = duel.player1_id === student.id ? duel.player2_id : duel.player1_id;
-  const oppRes = await fetch(SUPABASE_REST + '/cq_students?id=eq.' + oppId + '&select=first_name,last_name', {
-    headers: { 'apikey': ANON }
-  }).then(r => r.json());
-  
-  const oppData = Array.isArray(oppRes) && oppRes[0] ? oppRes[0] : { first_name: 'Adversaire', last_name: '' };
-  oppName = oppData.first_name + ' ' + oppData.last_name.charAt(0) + '.';
-  
-  // Convert questions
-  const qs = (duel.questions || []).map(q => ({
-    q: q.q, schema: q.schema, keywords: q.keywords, answer: [q.answer]
-  }));
-  
-  // Start duel directly
-  startDuel(qs, oppName, 3);
-  
-  // Start polling opponent score
-  startScorePolling(duel);
-  
-  return true;
+// ========== STEP 1: EXERCISE SELECTION ==========
+function renderExercises() {
+  const grid = document.getElementById('exerciseGrid');
+  grid.innerHTML = EXERCISES.map(ex => 
+    '<div class="exercise-card" id="ex_' + ex.id + '" onclick="selectExercise(\'' + ex.id + '\')">' +
+    '<span class="tag" style="background:' + ex.color + '20;color:' + ex.color + '">' + ex.tag + '</span>' +
+    '<h4>' + ex.name + '</h4>' +
+    '<p>' + ex.desc + '</p>' +
+    '<div style="font-size:.55rem;color:var(--muted);margin-top:.2rem">' + ex.questions.length + ' questions</div>' +
+    '</div>'
+  ).join('');
 }
 
-function startScorePolling(duel) {
-  const amPlayer1 = duel.player1_id === student.id;
-  const oppScoreField = amPlayer1 ? 'player2_score' : 'player1_score';
-  const myScoreField = amPlayer1 ? 'player1_score' : 'player2_score';
-  
-  // Poll opponent score every 3 seconds
-  setInterval(async () => {
-    const res = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId + '&select=' + oppScoreField, {
-      headers: { 'apikey': ANON }
-    }).then(r => r.json()).catch(() => []);
-    
-    if (Array.isArray(res) && res[0]) {
-      const newOppScore = res[0][oppScoreField] || 0;
-      if (newOppScore !== oppScore) {
-        oppScore = newOppScore;
-        document.getElementById('scoreOpp').textContent = oppScore;
-        // Flash effect
-        document.getElementById('scoreOpp').style.textShadow = '0 0 10px var(--gold)';
-        setTimeout(() => document.getElementById('scoreOpp').style.textShadow = 'none', 500);
-      }
-    }
-  }, 3000);
+function selectExercise(id) {
+  selectedExercise = EXERCISES.find(e => e.id === id);
+  document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('ex_' + id).classList.add('selected');
+  document.getElementById('btnStep2').disabled = false;
 }
 
-async function loadLobby() {
-  // Load online players from presence
-  const presence = await supabase.query('cq_presence', {
-    select: '*',
-    filter: { 'unit_id': 'eq.4' },
-    order: 'last_seen.desc'
-  }) || [];
+// ========== STEP 2: OPPONENT SELECTION ==========
+async function loadPlayers() {
+  document.getElementById('selectedExName').textContent = '⚔️ Exercice : ' + selectedExercise.name;
   
+  // Load class students + presence
   const students = await supabase.query('cq_students', {
     select: '*',
-    filter: { 'role': 'eq.student', 'class_name': 'eq.' + (student.class_name || 'BI1') }
+    filter: { 'class_name': 'eq.' + (student.class_name || 'BI1') }
   }) || [];
   
-  const studentList = Array.isArray(students) ? students : [];
-  const presenceList = Array.isArray(presence) ? presence : [];
+  const presence = await supabase.query('cq_presence', {
+    select: '*', filter: { 'unit_id': 'eq.4' }
+  }) || [];
+  
+  const sList = Array.isArray(students) ? students : [];
+  const pList = Array.isArray(presence) ? presence : [];
   const now = new Date();
   
   const grid = document.getElementById('playersGrid');
   let html = '';
-  let onlineCount = 0;
   
-  for (const s of studentList) {
-    if (s.id === student.id) continue; // Skip self
+  // Also load teachers from all classes
+  const teachers = await supabase.query('cq_students', {
+    select: '*', filter: { 'role': 'eq.teacher' }
+  }) || [];
+  const tList = Array.isArray(teachers) ? teachers : [];
+  
+  const allPlayers = [...sList, ...tList.filter(t => !sList.find(s => s.id === t.id))];
+  
+  for (const s of allPlayers) {
+    if (s.id === student.id) continue;
+    const p = pList.find(pr => pr.student_id === s.id);
+    const lastSeen = p ? new Date(p.last_seen) : null;
+    const isOnline = lastSeen && (now - lastSeen) < 120000;
+    const isTeacher = s.role === 'teacher';
     
-    const pres = presenceList.find(p => p.student_id === s.id);
-    const lastSeen = pres ? new Date(pres.last_seen) : null;
-    const isOnline = lastSeen && (now - lastSeen) < 120000; // 2 min
-    if (isOnline) onlineCount++;
-    
-    const xpRaw = await getStudentXP(s.id);
-    const level = getLevel(xpRaw);
-    
-    html += '<div class="player-card ' + (isOnline ? 'online' : '') + '" onclick="challengePlayer(\'' + s.id + '\',\'' + s.first_name + '\',\'' + s.last_name + '\',' + level.index + ')">';
-    html += '<div style="width:36px;height:46px;margin:0 auto .3rem" id="pchar_' + s.id + '"></div>';
-    html += '<div class="player-name">' + s.first_name + ' ' + s.last_name.charAt(0) + '.</div>';
-    html += '<div class="player-level" style="color:' + level.color + '">' + level.name + '</div>';
+    html += '<div class="player-card ' + (isOnline ? 'online' : '') + '" id="pl_' + s.id + '" onclick="selectPlayer(\'' + s.id + '\',\'' + s.first_name + '\',\'' + s.last_name + '\')">';
+    html += '<div class="player-name">' + (isTeacher ? '👑 ' : '') + s.first_name + ' ' + s.last_name.charAt(0) + '.</div>';
+    html += '<div style="font-size:.6rem;color:' + (isTeacher ? 'var(--gold)' : 'var(--muted)') + '">' + (isTeacher ? 'Prof' : s.class_name) + '</div>';
     html += '<div class="player-status" style="color:' + (isOnline ? 'var(--lo1)' : 'var(--muted)') + '">' + (isOnline ? '● En ligne' : '○ Hors ligne') + '</div>';
     html += '</div>';
   }
   
-  grid.innerHTML = html;
-  document.getElementById('lobbyStatus').textContent = onlineCount + ' joueur(s) en ligne dans ' + student.class_name;
-  
-  // Create characters
-  for (const s of studentList) {
-    if (s.id === student.id) continue;
-    const container = document.getElementById('pchar_' + s.id);
-    if (container) {
-      const xp = await getStudentXP(s.id);
-      const ch = createCharacter(getLevel(xp).index, container, 30);
-    }
-  }
-  
-  // Cache students for challenge lookup
-  allStudentsCache = studentList;
-  
-  // Check for incoming challenges
-  checkIncomingChallenges();
-  
-  // Poll for challenges every 5 seconds
-  setInterval(checkIncomingChallenges, 5000);
+  grid.innerHTML = html || '<div style="text-align:center;color:var(--muted);padding:1rem">Aucun autre joueur trouvé.</div>';
 }
 
-async function getStudentXP(studentId) {
-  // Simple: just return 0 for now, level will be recalculated
-  return 0;
+function selectPlayer(id, first, last) {
+  selectedOpponent = { id, name: first + ' ' + last.charAt(0) + '.' };
+  document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('pl_' + id).classList.add('selected');
+  document.getElementById('btnLaunch').disabled = false;
 }
 
-// ===================== CHALLENGE =====================
-async function challengePlayer(id, first, last, levelIdx) {
-  oppName = first + ' ' + last.charAt(0) + '.';
-  oppLevel = levelIdx;
+// ========== LAUNCH DUEL ==========
+async function launchDuel() {
+  if (!selectedExercise || !selectedOpponent) return;
   
-  const qs = generateQuestions();
+  const qs = [...selectedExercise.questions].sort(() => Math.random() - 0.5);
+  oppName = selectedOpponent.name;
   
   // Create duel in Supabase
-  const res = await fetch(SUPABASE_REST + '/cq_duels', {
+  const res = await fetch(SB + '/cq_duels', {
     method: 'POST',
-    headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    headers: { 'apikey': AK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
     body: JSON.stringify({
       player1_id: student.id,
-      player2_id: id,
+      player2_id: selectedOpponent.id,
       status: 'waiting',
-      questions: qs.map(q => ({q: q.q, schema: q.schema, keywords: q.keywords, answer: q.answer[0]})),
+      questions: qs.map(q => ({ q: q.q, schema: q.schema, kw: q.kw, hint: q.hint })),
       unit_id: 4
     })
-  });
-  const data = await res.json();
-  duelId = Array.isArray(data) ? data[0]?.id : data?.id;
+  }).then(r => r.json());
   
-  if (!duelId) { alert('Erreur création duel'); return; }
+  duelId = Array.isArray(res) ? res[0]?.id : res?.id;
+  if (!duelId) { alert('Erreur'); return; }
   
-  // Show waiting screen
-  document.getElementById('lobby').style.display = 'none';
-  document.getElementById('waiting').style.display = 'block';
-  document.getElementById('waitText').textContent = 'Défi envoyé à ' + oppName + '!';
-  document.getElementById('waitSub').textContent = 'En attente que ' + first + ' accepte...';
+  goStep(3);
+  document.getElementById('waitText').textContent = 'Défi envoyé à ' + oppName + ' !';
+  document.getElementById('waitSub').textContent = 'Exercice : ' + selectedExercise.name + ' · En attente...';
   
   // Poll for acceptance
   pollInterval = setInterval(async () => {
-    const check = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId + '&select=status', {
-      headers: { 'apikey': ANON }
-    }).then(r => r.json());
-    
-    if (Array.isArray(check) && check[0]?.status === 'playing') {
+    const chk = await fetch(SB + '/cq_duels?id=eq.' + duelId + '&select=status', { headers: { 'apikey': AK } }).then(r => r.json());
+    if (Array.isArray(chk) && chk[0]?.status === 'playing') {
       clearInterval(pollInterval);
-      startDuel(qs, oppName, oppLevel);
+      startArena(qs, oppName);
     }
   }, 2000);
 }
 
-
-  var _amPlayer1 = null;
-  async function syncMyScore() {
-    if (!duelId) return;
-    if (_amPlayer1 === null) {
-      var d = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId + '&select=player1_id', {headers:{'apikey':ANON}}).then(r=>r.json()).catch(()=>[]);
-      if (Array.isArray(d) && d[0]) _amPlayer1 = d[0].player1_id === student.id;
-    }
-    var field = _amPlayer1 ? 'player1_score' : 'player2_score';
-    var body = {}; body[field] = myScore; body['updated_at'] = new Date().toISOString();
-    fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId, {
-      method: 'PATCH', headers: {'apikey':ANON,'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    }).catch(function(){});
-  }
-
-function startSolo() {
-  duelMode = 'solo';
+function startSoloDuel() {
+  if (!selectedExercise) return;
   oppName = 'Bot SQL';
-  oppLevel = Math.floor(Math.random() * 5) + 2;
-  startDuel(generateQuestions(), oppName, oppLevel);
+  const qs = [...selectedExercise.questions].sort(() => Math.random() - 0.5);
+  startArena(qs, 'Bot SQL');
 }
 
-async function checkIncomingChallenges() {
-  // Check if someone challenged me
-  const res = await fetch(
-    SUPABASE_REST + '/cq_duels?player2_id=eq.' + student.id + '&status=eq.waiting&order=created_at.desc&limit=1',
-    { headers: { 'apikey': ANON } }
-  ).then(r => r.json());
+function cancelDuel() {
+  if (pollInterval) clearInterval(pollInterval);
+  if (duelId) fetch(SB + '/cq_duels?id=eq.' + duelId, { method: 'DELETE', headers: { 'apikey': AK } });
+  goStep(2);
+}
+
+// ========== ARENA ==========
+function startArena(qs, opp) {
+  questions = qs; currentQ = 0; myScore = 0; oppScore = 0; oppName = opp; timeLeft = 300; _amP1 = null;
   
-  if (Array.isArray(res) && res.length > 0) {
-    const duel = res[0];
-    const challenger = allStudentsCache.find(s => s.id === duel.player1_id);
-    const name = challenger ? challenger.first_name + ' ' + challenger.last_name : 'Quelqu\'un';
-    
-    // Show challenge notification
-    showChallengePopup(duel, name);
-  }
-}
-
-let allStudentsCache = [];
-
-function showChallengePopup(duel, challengerName) {
-  const popup = document.createElement('div');
-  popup.id = 'challengePopup';
-  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:1.5rem;z-index:9999;text-align:center;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.5)';
-  popup.innerHTML = '<div style="font-size:1.5rem;margin-bottom:.5rem">⚔️</div>' +
-    '<div style="font-size:1rem;font-weight:800;color:var(--gold);margin-bottom:.3rem">DÉFI SQL !</div>' +
-    '<div style="font-size:.85rem;margin-bottom:1rem"><strong>' + challengerName + '</strong> vous défie en duel !</div>' +
-    '<div style="display:flex;gap:.5rem;justify-content:center">' +
-    '<button class="btn btn-gold" onclick="acceptDuel(\'' + duel.id + '\')">Accepter</button>' +
-    '<button class="btn" style="background:var(--surface);color:var(--muted);border:1px solid var(--border)" onclick="declineDuel(\'' + duel.id + '\')">Refuser</button>' +
-    '</div>';
-  document.body.appendChild(popup);
-}
-
-async function acceptDuel(id) {
-  // Update duel status to 'playing'
-  await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + id, {
-    method: 'PATCH',
-    headers: { 'apikey': ANON, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'playing', updated_at: new Date().toISOString() })
-  });
-  
-  // Load duel questions
-  const duel = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + id + '&select=*', {
-    headers: { 'apikey': ANON }
-  }).then(r => r.json());
-  
-  if (Array.isArray(duel) && duel[0]) {
-    duelId = id;
-    const d = duel[0];
-    const challenger = allStudentsCache.find(s => s.id === d.player1_id);
-    oppName = challenger ? challenger.first_name : 'Adversaire';
-    
-    // Convert stored questions back to playable format
-    const qs = d.questions.map(q => ({
-      q: q.q, schema: q.schema, keywords: q.keywords, answer: [q.answer]
-    }));
-    
-    document.getElementById('challengePopup')?.remove();
-    startDuel(qs, oppName, 3);
-  }
-}
-
-async function declineDuel(id) {
-  await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + id, {
-    method: 'DELETE',
-    headers: { 'apikey': ANON }
-  });
-  document.getElementById('challengePopup')?.remove();
-}
-
-// ===================== GENERATE QUESTIONS =====================
-function generateQuestions() {
-  const shuffled = [...DUEL_QUESTIONS].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 8);
-}
-
-// ===================== DUEL =====================
-function startDuel(qs, opponent, oppLvl) {
-  questions = qs;
-  currentQ = 0;
-  myScore = 0;
-  oppScore = 0;
-  oppName = opponent;
-  oppLevel = oppLvl;
-  timeLeft = 300;
-  
-  document.getElementById('lobby').style.display = 'none';
-  document.getElementById('waiting').style.display = 'none';
-  document.getElementById('arena').style.display = 'block';
-  
+  goStep(4);
   document.getElementById('nameMe').textContent = student.first_name;
   document.getElementById('nameOpp').textContent = oppName;
+  document.getElementById('exTitle').textContent = selectedExercise ? '⚔️ ' + selectedExercise.name : '';
   
-  // Create characters
-  createCharacter(getLevel(0).index, document.getElementById('charMe'), 34);
-  createCharacter(oppLevel, document.getElementById('charOpp'), 34);
+  createCharacter(0, document.getElementById('charMe'), 30);
+  createCharacter(3, document.getElementById('charOpp'), 30);
   
-  showDuelQuestion();
-  startTimer();
+  showQ();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    document.getElementById('timer').textContent = '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s;
+    if (timeLeft <= 60) document.getElementById('timer').style.color = 'var(--error)';
+    if (timeLeft <= 0) endDuel();
+  }, 1000);
+  
+  if (duelId && oppName !== 'Bot SQL') startScorePoll();
 }
 
-function showDuelQuestion() {
+function showQ() {
   if (currentQ >= questions.length) { endDuel(); return; }
-  
   const q = questions[currentQ];
-  document.getElementById('questionNum').textContent = 'Question ' + (currentQ + 1) + '/' + questions.length;
-  document.getElementById('questionText').textContent = q.q;
-  document.getElementById('questionSchema').textContent = 'Tables: ' + q.schema;
+  document.getElementById('qNum').textContent = 'Question ' + (currentQ + 1) + '/' + questions.length;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qSchema').textContent = 'Tables: ' + q.schema;
   document.getElementById('sqlInput').value = '';
   document.getElementById('feedback').textContent = '';
   document.getElementById('feedback').className = 'feedback';
@@ -511,121 +393,94 @@ function submitAnswer() {
   const input = document.getElementById('sqlInput').value.trim().toUpperCase();
   const q = questions[currentQ];
   const fb = document.getElementById('feedback');
+  if (!input) { fb.textContent = 'Écrivez une réponse !'; fb.className = 'feedback no'; return; }
   
-  if (!input) { fb.textContent = 'Écrivez une requête !'; fb.className = 'feedback wrong'; return; }
-  
-  // Check answer — keyword matching
   let matched = 0;
-  for (const kw of q.keywords) {
-    if (input.includes(kw.toUpperCase())) matched++;
-  }
-  const accuracy = matched / q.keywords.length;
+  for (const kw of q.kw) { if (input.includes(kw.toUpperCase())) matched++; }
   
-  if (accuracy >= 0.7) {
-    // Correct!
-    const bonus = Math.max(0, Math.floor(timeLeft / 30));
-    const pts = 10 + bonus;
+  if (matched / q.kw.length >= 0.7) {
+    const pts = 10 + Math.max(0, Math.floor(timeLeft / 30));
     myScore += pts;
     document.getElementById('scoreMe').textContent = myScore;
-    fb.innerHTML = '✅ Correct ! +' + pts + ' pts';
-    fb.className = 'feedback correct';
-    
-    // Bot scores sometimes (simulated opponent)
-    if (duelMode === 'solo' && Math.random() < 0.5) {
-      oppScore += Math.floor(Math.random() * 8) + 5;
-      document.getElementById('scoreOpp').textContent = oppScore;
-    }
-    
-        // Sync MY score to Supabase
-    if (duelId) {
-      syncMyScore();
-    }
-    
-    setTimeout(() => { currentQ++; showDuelQuestion(); }, 1200);
+    fb.innerHTML = '✅ +' + pts + ' pts !'; fb.className = 'feedback ok';
+    syncScore();
+    if (oppName === 'Bot SQL' && Math.random() < 0.45) { oppScore += 5 + Math.floor(Math.random() * 8); document.getElementById('scoreOpp').textContent = oppScore; }
+    setTimeout(() => { currentQ++; showQ(); }, 1000);
   } else {
-    fb.innerHTML = '❌ Pas tout à fait... Vérifiez les mots-clés: ' + q.keywords.slice(0, 3).join(', ') + '...';
-    fb.className = 'feedback wrong';
-    
-    // Bot might score on wrong answers
-    if (duelMode === 'solo' && Math.random() < 0.3) {
-      oppScore += Math.floor(Math.random() * 6) + 8;
-      document.getElementById('scoreOpp').textContent = oppScore;
-    }
+    fb.innerHTML = '❌ Indice : ' + (q.hint || 'Vérifiez les mots-clés SQL'); fb.className = 'feedback no';
+    if (oppName === 'Bot SQL' && Math.random() < 0.25) { oppScore += 5 + Math.floor(Math.random() * 6); document.getElementById('scoreOpp').textContent = oppScore; }
   }
 }
 
-function skipQuestion() {
+function skipQ() {
   const fb = document.getElementById('feedback');
-  fb.innerHTML = 'Passée ! La réponse était : <span style="color:var(--accent2)">' + questions[currentQ].answer[0] + '</span>';
-  fb.className = 'feedback wrong';
-  
-  // Bot scores on skip
-  if (duelMode === 'solo') {
-    oppScore += Math.floor(Math.random() * 10) + 5;
-    document.getElementById('scoreOpp').textContent = oppScore;
+  fb.innerHTML = 'Passée ! Indice : ' + (questions[currentQ].hint || ''); fb.className = 'feedback no';
+  if (oppName === 'Bot SQL') { oppScore += 8; document.getElementById('scoreOpp').textContent = oppScore; }
+  setTimeout(() => { currentQ++; showQ(); }, 1500);
+}
+
+// ========== SCORE SYNC ==========
+async function syncScore() {
+  if (!duelId) return;
+  if (_amP1 === null) {
+    const d = await fetch(SB + '/cq_duels?id=eq.' + duelId + '&select=player1_id', { headers: { 'apikey': AK } }).then(r => r.json()).catch(() => []);
+    if (Array.isArray(d) && d[0]) _amP1 = d[0].player1_id === student.id;
   }
-  
-  setTimeout(() => { currentQ++; showDuelQuestion(); }, 2000);
+  const f = _amP1 ? 'player1_score' : 'player2_score';
+  const b = {}; b[f] = myScore;
+  fetch(SB + '/cq_duels?id=eq.' + duelId, { method: 'PATCH', headers: { 'apikey': AK, 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).catch(() => {});
 }
 
-function startTimer() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    const min = Math.floor(timeLeft / 60);
-    const sec = timeLeft % 60;
-    document.getElementById('timer').textContent = '⏱ ' + min + ':' + (sec < 10 ? '0' : '') + sec;
-    if (timeLeft <= 60) document.getElementById('timer').style.color = 'var(--error)';
-    if (timeLeft <= 0) endDuel();
-  }, 1000);
+function startScorePoll() {
+  setInterval(async () => {
+    if (_amP1 === null) return;
+    const f = _amP1 ? 'player2_score' : 'player1_score';
+    const d = await fetch(SB + '/cq_duels?id=eq.' + duelId + '&select=' + f, { headers: { 'apikey': AK } }).then(r => r.json()).catch(() => []);
+    if (Array.isArray(d) && d[0]) {
+      const ns = d[0][f] || 0;
+      if (ns !== oppScore) { oppScore = ns; document.getElementById('scoreOpp').textContent = oppScore; document.getElementById('scoreOpp').style.textShadow = '0 0 10px var(--gold)'; setTimeout(() => document.getElementById('scoreOpp').style.textShadow = 'none', 500); }
+    }
+  }, 3000);
 }
 
+// ========== END DUEL ==========
 function endDuel() {
   clearInterval(timerInterval);
-  
-  document.getElementById('arena').style.display = 'none';
-  document.getElementById('results').style.display = 'block';
-  
-  const won = myScore > oppScore;
-  const tie = myScore === oppScore;
-  
-  document.getElementById('winnerText').innerHTML = tie 
-    ? '<span style="color:var(--gold)">Égalité !</span>'
-    : won 
-      ? '<span style="color:var(--lo1)">Victoire !</span>'
-      : '<span style="color:var(--error)">Défaite...</span>';
-  
-  document.getElementById('recapText').textContent = questions.length + ' questions en ' + (300 - timeLeft) + ' secondes';
-  
-  document.getElementById('finalNameMe').textContent = student.first_name;
-  document.getElementById('finalScoreMe').textContent = myScore;
-  document.getElementById('finalNameOpp').textContent = oppName;
-  document.getElementById('finalScoreOpp').textContent = oppScore;
-  
-  // Save score
-  if (typeof saveGameScore === 'function') {
-    saveGameScore('duel-sql', myScore, 300 - timeLeft);
-  }
+  goStep(5);
+  const won = myScore > oppScore, tie = myScore === oppScore;
+  document.getElementById('winnerText').innerHTML = tie ? '<span style="color:var(--gold)">Égalité !</span>' : won ? '<span style="color:var(--lo1)">Victoire ! 🎉</span>' : '<span style="color:var(--error)">Défaite... 💪</span>';
+  document.getElementById('recapText').textContent = (selectedExercise?.name || 'Duel') + ' · ' + questions.length + ' questions';
+  document.getElementById('fNameMe').textContent = student.first_name;
+  document.getElementById('fScoreMe').textContent = myScore;
+  document.getElementById('fNameOpp').textContent = oppName;
+  document.getElementById('fScoreOpp').textContent = oppScore;
+  if (typeof saveGameScore === 'function') saveGameScore('duel-sql', myScore, 300 - timeLeft);
+  if (duelId) fetch(SB + '/cq_duels?id=eq.' + duelId, { method: 'PATCH', headers: { 'apikey': AK, 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'finished' }) }).catch(() => {});
 }
 
-function cancelDuel() {
-  document.getElementById('waiting').style.display = 'none';
-  document.getElementById('lobby').style.display = 'block';
+// ========== JOIN FROM URL ==========
+async function checkJoinDuel() {
+  const p = new URLSearchParams(window.location.search);
+  const jid = p.get('duel');
+  if (!jid) return false;
+  const d = await fetch(SB + '/cq_duels?id=eq.' + jid + '&select=*', { headers: { 'apikey': AK } }).then(r => r.json());
+  if (!Array.isArray(d) || !d[0]) return false;
+  duelId = jid;
+  const duel = d[0];
+  const oppId = duel.player1_id === student.id ? duel.player2_id : duel.player1_id;
+  const oppR = await fetch(SB + '/cq_students?id=eq.' + oppId + '&select=first_name,last_name', { headers: { 'apikey': AK } }).then(r => r.json());
+  oppName = (Array.isArray(oppR) && oppR[0]) ? oppR[0].first_name + ' ' + oppR[0].last_name.charAt(0) + '.' : 'Adversaire';
+  const qs = (duel.questions || []).map(q => ({ q: q.q, schema: q.schema, kw: q.kw, hint: q.hint }));
+  selectedExercise = { name: 'Duel', questions: qs };
+  startArena(qs, oppName);
+  return true;
 }
 
-// Allow Enter to submit
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey && document.getElementById('arena').style.display === 'block') {
-    e.preventDefault();
-    submitAnswer();
-  }
-});
+// Enter to submit
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && document.getElementById('step4').classList.contains('active')) { e.preventDefault(); submitAnswer(); } });
 
 // Init
-(async () => {
-  const joined = await checkJoinDuel();
-  if (!joined) loadLobby();
-})();
+(async () => { if (!(await checkJoinDuel())) { renderExercises(); } })();
 </script>
 <script src="presence-tracker.js"></script>
 <script src="duel-notify.js"></script>
