@@ -32,17 +32,16 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 /* LEVELS MAP */
 .levels-section{margin-bottom:1.5rem}
 .levels-title{font-size:.85rem;font-weight:700;margin-bottom:.8rem;color:var(--muted)}
-.levels-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:.5rem 0 .3rem;position:relative;scrollbar-width:none;-ms-overflow-style:none}
-.levels-track::-webkit-scrollbar{display:none}
-.level-node{display:flex;flex-direction:column;align-items:center;min-width:85px;position:relative;z-index:1}
-.level-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;border:2px solid;transition:all .5s;position:relative}
+.levels-track{display:flex;align-items:center;gap:0;padding:.5rem 0 .3rem;position:relative;flex-wrap:wrap;justify-content:center}
+.level-node{display:flex;flex-direction:column;align-items:center;min-width:75px;position:relative;z-index:1}
+.level-dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;border:2px solid;transition:all .5s;position:relative}
 .level-dot.locked{background:var(--surface);border-color:var(--border);color:var(--muted);opacity:.4}
 .level-dot.reached{border-width:3px}
 .level-dot.current{animation:currentPulse 1.5s ease-in-out infinite}
 @keyframes currentPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(50,224,196,.3)}50%{transform:scale(1.08);box-shadow:0 0 20px 4px rgba(50,224,196,.2)}}
 .level-name{font-size:.58rem;font-weight:600;margin-top:.3rem;text-align:center;max-width:80px;line-height:1.2}
 .level-xp{font-size:.5rem;color:var(--muted)}
-.level-connector{width:20px;height:3px;background:var(--border);flex-shrink:0;margin-top:-18px}
+.level-connector{width:12px;height:3px;background:var(--border);flex-shrink:0;margin-top:-18px}
 .level-connector.active{background:linear-gradient(90deg,var(--accent2),var(--accent))}
 
 /* DANCING CHARACTER */
@@ -84,71 +83,34 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
 
 <div class="topbar">
   <h1>DataQuest</h1>
-  <div class="topbar-right">
-    <a href="../index.html">Hub Cours</a>
-    <a href="teacher.html" id="teacherLink" style="display:none">Mon Espace</a>
-    <a href="teacher.html?tab=docs" style="color:var(--gold)">Documents</a>
-    <a href="profile.html" style="color:var(--accent2)">Mon Profil</a>
-    <a href="scores.html">Classement</a>
-    <a href="settings.html">Paramètres</a>
-    <button onclick="doLogout()">Déconnexion</button>
+  <div class="topbar-right"><a href="../index.html">Hub Cours</a><a href="teacher.html" id="teacherLink" style="display:none">Mon Espace</a><a href="teacher.html?tab=docs" style="color:var(--gold)">Documents</a><a href="profile.html" style="color:var(--accent2)">Mon Profil</a><a href="scores.html">Classement</a><a href="settings.html">Paramètres</a><button onclick="doLogout()">Déconnexion</button>
   </div>
 </div>
 
 <div class="main">
   <!-- WELCOME CARD -->
-  <div class="welcome" id="welcomeCard">
-    <div class="avatar avatar-glow" id="avatar">?</div>
-    <div class="welcome-info">
-      <div class="welcome-name" id="wName">Chargement...</div>
-      <div class="welcome-level" id="wLevel"></div>
-      <div class="welcome-xp" id="wXP"></div>
-      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-      <a href="profile.html" style="font-size:.72rem;color:var(--accent2);text-decoration:none;margin-top:.3rem;display:inline-block">Voir mon profil complet →</a>
-    </div>
+  <div class="welcome" id="welcomeCard"><div class="avatar avatar-glow" id="avatar">?</div><div class="welcome-info">  <div class="welcome-name" id="wName">Chargement...</div>  <div class="welcome-level" id="wLevel"></div>  <div class="welcome-xp" id="wXP"></div>  <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>  <a href="profile.html" style="font-size:.72rem;color:var(--accent2);text-decoration:none;margin-top:.3rem;display:inline-block">Voir mon profil complet →</a></div>
   </div>
   
   <!-- LEVELS MAP -->
-  <div class="levels-section">
-    <div class="levels-title">Parcours des niveaux</div>
-    <div class="levels-track" id="levelsTrack"></div>
+  <div class="levels-section"><div class="levels-title">Parcours des niveaux</div><div class="levels-track" id="levelsTrack"></div>
   </div>
   
   <!-- STATS -->
-  <div class="stats">
-    <div class="stat"><div class="n" id="statXP" style="color:var(--accent2)">0</div><div class="l">XP total</div></div>
-    <div class="stat"><div class="n" id="statModules" style="color:var(--lo1)">0/20</div><div class="l">Modules</div></div>
-    <div class="stat"><div class="n" id="statGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div>
-    <div class="stat"><div class="n" id="statExercises" style="color:var(--lo2)">0</div><div class="l">Exercices faits</div></div>
-    <div class="stat"><div class="n" id="statStreak" style="color:var(--gold)">0</div><div class="l">Série (jours)</div></div>
+  <div class="stats"><div class="stat"><div class="n" id="statXP" style="color:var(--accent2)">0</div><div class="l">XP total</div></div><div class="stat"><div class="n" id="statModules" style="color:var(--lo1)">0/20</div><div class="l">Modules</div></div><div class="stat"><div class="n" id="statGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div><div class="stat"><div class="n" id="statExercises" style="color:var(--lo2)">0</div><div class="l">Exercices faits</div></div><div class="stat"><div class="n" id="statStreak" style="color:var(--gold)">0</div><div class="l">Série (jours)</div></div>
   </div>
   
   <!-- GAMES -->
+  <div class="section-title"><span class="lo-badge" style="background:var(--gold)">DÉFI</span> Défis & conception</div>
+  
+  
   <div class="section-title"><span class="lo-badge" style="background:var(--accent2)">JEUX</span> Jeux pédagogiques</div>
-  <div class="actions">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem">
-    <a class="action" href="duel-sql.html" style="border-color:var(--gold);background:linear-gradient(135deg,rgba(245,158,11,.03),rgba(239,68,68,.03))"><div class="ic" style="background:rgba(245,158,11,.15);color:#f59e0b">VS</div><h3 style="color:var(--gold)">Duel SQL</h3><p>Défiez un camarade en temps réel !</p><span style="font-size:.55rem;color:var(--lo1);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="pipeline-bdd.html" style="border-color:var(--lo4);background:linear-gradient(135deg,rgba(139,92,246,.03),rgba(59,130,246,.03))"><div class="ic" style="background:rgba(139,92,246,.15);color:#8b5cf6">BDD</div><h3 style="color:var(--lo4)">Pipeline BDD</h3><p>Texte → Dict → DF → MCD → MLD → MPD → SQL</p><span style="font-size:.55rem;color:var(--lo1);font-weight:700;display:block;margin-top:.2rem">+20 XP max par cas</span></a>
-    </div>
-    <a class="action" href="join-master.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">JOIN</div><h3>Join Master</h3><p>Visualisez les jointures SQL</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="normalisation-puzzle.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">NF</div><h3>Normalisation Puzzle</h3><p>1NF → 2NF → 3NF drag & drop</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="query-racer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">SQL</div><h3>Query Racer</h3><p>Course SQL chronométrée</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="constraint-catcher.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">PK</div><h3>Constraint Catcher</h3><p>Trouvez les contraintes manquantes</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="table-designer.html"><div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">DDL</div><h3>Table Designer</h3><p>Créez des tables visuellement</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="df-explorer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">DF</div><h3>DF Explorer</h3><p>Dépendances fonctionnelles</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">MCD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="block-animations.html"><div class="ic" style="background:rgba(99,102,241,.1);color:#6366f1">VIS</div><h3>Block Animations</h3><p>SELECT, JOIN, INSERT animés</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">Démo (0 XP)</span></a>
-    <a class="action" href="quiz-live.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">QUIZ</div><h3>Quiz Live</h3><p>Kahoot — 4 banques de questions</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="sql-editor.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div><h3>SQL Editor Live</h3><p>Requêtes sur Supabase</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">Libre (0 XP)</span></a>
+  <div class="actions"><div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem"><a class="action" href="duel-sql.html" style="border-color:var(--gold);background:linear-gradient(135deg,rgba(245,158,11,.03),rgba(239,68,68,.03))"><div class="ic" style="background:rgba(245,158,11,.15);color:#f59e0b">VS</div><h3 style="color:var(--gold)">Duel SQL</h3><p>Défiez un camarade en temps réel !</p><span style="font-size:.55rem;color:var(--lo1);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="pipeline-bdd.html" style="border-color:var(--lo4);background:linear-gradient(135deg,rgba(139,92,246,.03),rgba(59,130,246,.03))"><div class="ic" style="background:rgba(139,92,246,.15);color:#8b5cf6">BDD</div><h3 style="color:var(--lo4)">Pipeline BDD</h3><p>Texte → Dict → DF → MCD → MLD → MPD → SQL</p><span style="font-size:.55rem;color:var(--lo1);font-weight:700;display:block;margin-top:.2rem">+20 XP max par cas</span></a></div><a class="action" href="join-master.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">JOIN</div><h3>Join Master</h3><p>Visualisez les jointures SQL</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="normalisation-puzzle.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">NF</div><h3>Normalisation Puzzle</h3><p>1NF → 2NF → 3NF drag & drop</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="query-racer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">SQL</div><h3>Query Racer</h3><p>Course SQL chronométrée</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="constraint-catcher.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">PK</div><h3>Constraint Catcher</h3><p>Trouvez les contraintes manquantes</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="table-designer.html"><div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">DDL</div><h3>Table Designer</h3><p>Créez des tables visuellement</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="df-explorer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">DF</div><h3>DF Explorer</h3><p>Dépendances fonctionnelles</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">MCD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="block-animations.html"><div class="ic" style="background:rgba(99,102,241,.1);color:#6366f1">VIS</div><h3>Block Animations</h3><p>SELECT, JOIN, INSERT animés</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">Démo (0 XP)</span></a><a class="action" href="quiz-live.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">QUIZ</div><h3>Quiz Live</h3><p>Kahoot — 4 banques de questions</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a><a class="action" href="sql-editor.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div><h3>SQL Editor Live</h3><p>Requêtes sur Supabase</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">Libre (0 XP)</span></a>
   </div>
   
   <!-- QUICK ACCESS -->
   <div class="section-title"><span class="lo-badge" style="background:var(--lo2)">COURS</span> Accès rapide</div>
-  <div class="actions">
-    <a class="action" href="../jeux/exercices_gescom/index.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">P1</div><h3>Exercices GESCOM P1</h3><p>29 exercices SQL basiques</p></a>
-    <a class="action" href="../jeux/exercices_gescom_avances/index.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">P2</div><h3>Exercices GESCOM P2</h3><p>28 exercices avancés</p></a>
-    <a class="action" href="../jeux/cas_footlocker/index.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">PRO</div><h3>Cas FootLocker</h3><p>Cas professionnel complet</p></a>
-    <a class="action" href="../index.html"><div class="ic" style="background:rgba(148,163,184,.1);color:#94a3b8">HUB</div><h3>Hub principal</h3><p>Tous les modules et boss fights</p></a>
+  <div class="actions"><a class="action" href="../jeux/exercices_gescom/index.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">P1</div><h3>Exercices GESCOM P1</h3><p>29 exercices SQL basiques</p></a><a class="action" href="../jeux/exercices_gescom_avances/index.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">P2</div><h3>Exercices GESCOM P2</h3><p>28 exercices avancés</p></a><a class="action" href="../jeux/cas_footlocker/index.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">PRO</div><h3>Cas FootLocker</h3><p>Cas professionnel complet</p></a><a class="action" href="../index.html"><div class="ic" style="background:rgba(148,163,184,.1);color:#94a3b8">HUB</div><h3>Hub principal</h3><p>Tous les modules et boss fights</p></a>
   </div>
 </div>
 
@@ -184,38 +146,25 @@ async function loadDashboard() {
   const isTeacher = student.role === 'teacher';
   
   // Calculate XP from progress
-  const progress = await supabase.query('cq_student_progress', { 
-    select: '*', 
-    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
+  const progress = await supabase.query('cq_student_progress', { select: '*', filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
   }) || [];
   
   const progressList = Array.isArray(progress) ? progress : [];
   // XP from course modules
   let xpFromCourse = 0;
   let modulesCompleted = 0;
-  for (const p of progressList) {
-    xpFromCourse += (p.credits_earned || 0) + (p.game_score || 0);
-    if (p.completed_at) modulesCompleted++;
+  for (const p of progressList) {xpFromCourse += (p.credits_earned || 0) + (p.game_score || 0);if (p.completed_at) modulesCompleted++;
   }
   
   // Game scores
-  const gameScores = await supabase.query('cq_game_scores', {
-    select: 'id,game_id,score',
-    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
+  const gameScores = await supabase.query('cq_game_scores', {select: 'id,game_id,score',filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
   }) || [];
   const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
   
   // XP from exercises/games (capped per game, reduced ratio)
   // Best score per game, capped at 100, then /5 → max 20 XP per game
   let xpFromGames = 0;
-  if (Array.isArray(gameScores)) {
-    const bestPerGame = {};
-    for (const g of gameScores) {
-      if (!bestPerGame[g.game_id] || g.score > bestPerGame[g.game_id]) {
-        bestPerGame[g.game_id] = g.score;
-      }
-    }
-    xpFromGames = Object.values(bestPerGame).reduce((a, s) => a + Math.min(Math.floor(s / 5), 20), 0);
+  if (Array.isArray(gameScores)) {const bestPerGame = {};for (const g of gameScores) {  if (!bestPerGame[g.game_id] || g.score > bestPerGame[g.game_id]) {    bestPerGame[g.game_id] = g.score;  }}xpFromGames = Object.values(bestPerGame).reduce((a, s) => a + Math.min(Math.floor(s / 5), 20), 0);
   }
   
   // TOTAL XP = course + games (course is primary, games are bonus)
@@ -229,47 +178,8 @@ async function loadDashboard() {
   const prevLevelStored = localStorage.getItem('cq_prev_level_' + student.id);
   
   // WELCOME CARD
-  if (isTeacher) {
-    document.getElementById('avatar').style.borderColor = '#F59E0B';
-    document.getElementById('avatar').style.background = 'rgba(245,158,11,.12)';
-    // Prof gets the SQL Overlord character (dancing)
-    const avatarEl2 = document.getElementById('avatar');
-    avatarEl2.innerHTML = '';
-    avatarEl2.style.width = '70px';
-    avatarEl2.style.height = '90px';
-    avatarEl2.style.borderRadius = '12px';
-    avatarEl2.style.border = 'none';
-    avatarEl2.style.overflow = 'visible';
-    const profChar = createCharacter(8, avatarEl2, 60);
-    profChar.classList.add('dancing');
-    document.getElementById('wName').textContent = student.first_name + ' — Enseignant(e)';
-    document.getElementById('wLevel').innerHTML = '<span style="color:#F59E0B;font-weight:700">PROF</span>';
-    document.getElementById('wXP').textContent = 'Accédez à votre espace via "Mon Espace" dans la navigation';
-    document.getElementById('xpFill').style.width = '100%';
-    document.getElementById('xpFill').style.background = 'linear-gradient(90deg, #F59E0B, #EF4444)';
-    document.querySelector('.welcome').style.borderColor = 'rgba(245,158,11,.3)';
-    document.querySelector('.welcome::before')
-  } else {
-    const charIdx = level.index;
-    document.getElementById('avatar').style.borderColor = level.color;
-    document.getElementById('avatar').style.background = level.color + '15';
-    document.getElementById('avatar').style.color = level.color;
-    // Create animated character
-    const avatarEl = document.getElementById('avatar');
-    avatarEl.innerHTML = '';
-    avatarEl.style.width = '70px';
-    avatarEl.style.height = '90px';
-    avatarEl.style.borderRadius = '12px';
-    avatarEl.style.border = 'none';
-    avatarEl.style.overflow = 'visible';
-    const char = createCharacter(charIdx, avatarEl, 60);
-    char.classList.add('dancing');
-    document.getElementById('wName').textContent = student.first_name + ' ' + student.last_name;
-    document.getElementById('wLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:700">' + level.name + '</span> <span style="font-size:.7rem;color:var(--muted)">(Nv. ' + (level.index + 1) + '/9)</span>';
-    document.getElementById('wXP').textContent = totalXP + ' XP (cours: ' + xpFromCourse + ' + exos: ' + xpFromGames + ')' + (level.nextMin > level.xp ? ' — prochain à ' + level.nextMin + ' XP' : ' — MAX!');
-    document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';
-    document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';
-    document.querySelector('.welcome').style.borderColor = level.color + '30';
+  if (isTeacher) {document.getElementById('avatar').style.borderColor = '#F59E0B';document.getElementById('avatar').style.background = 'rgba(245,158,11,.12)';// Prof gets the SQL Overlord character (dancing)const avatarEl2 = document.getElementById('avatar');avatarEl2.innerHTML = '';avatarEl2.style.width = '70px';avatarEl2.style.height = '90px';avatarEl2.style.borderRadius = '12px';avatarEl2.style.border = 'none';avatarEl2.style.overflow = 'visible';const profChar = createCharacter(8, avatarEl2, 60);profChar.classList.add('dancing');document.getElementById('wName').textContent = student.first_name + ' — Enseignant(e)';document.getElementById('wLevel').innerHTML = '<span style="color:#F59E0B;font-weight:700">PROF</span>';document.getElementById('wXP').textContent = 'Accédez à votre espace via "Mon Espace" dans la navigation';document.getElementById('xpFill').style.width = '100%';document.getElementById('xpFill').style.background = 'linear-gradient(90deg, #F59E0B, #EF4444)';document.querySelector('.welcome').style.borderColor = 'rgba(245,158,11,.3)';document.querySelector('.welcome::before')
+  } else {const charIdx = level.index;document.getElementById('avatar').style.borderColor = level.color;document.getElementById('avatar').style.background = level.color + '15';document.getElementById('avatar').style.color = level.color;// Create animated characterconst avatarEl = document.getElementById('avatar');avatarEl.innerHTML = '';avatarEl.style.width = '70px';avatarEl.style.height = '90px';avatarEl.style.borderRadius = '12px';avatarEl.style.border = 'none';avatarEl.style.overflow = 'visible';const char = createCharacter(charIdx, avatarEl, 60);char.classList.add('dancing');document.getElementById('wName').textContent = student.first_name + ' ' + student.last_name;document.getElementById('wLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:700">' + level.name + '</span> <span style="font-size:.7rem;color:var(--muted)">(Nv. ' + (level.index + 1) + '/9)</span>';document.getElementById('wXP').textContent = totalXP + ' XP (cours: ' + xpFromCourse + ' + exos: ' + xpFromGames + ')' + (level.nextMin > level.xp ? ' — prochain à ' + level.nextMin + ' XP' : ' — MAX!');document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';document.querySelector('.welcome').style.borderColor = level.color + '30';
   }
   
   // STATS
@@ -283,8 +193,7 @@ async function loadDashboard() {
   renderLevelsTrack(totalXP, level, isTeacher);
   
   // CHECK LEVEL UP
-  if (!isTeacher && prevLevelStored && parseInt(prevLevelStored) < level.index) {
-    showCelebration(level);
+  if (!isTeacher && prevLevelStored && parseInt(prevLevelStored) < level.index) {showCelebration(level);
   }
   localStorage.setItem('cq_prev_level_' + student.id, level.index);
 }
@@ -293,50 +202,13 @@ function renderLevelsTrack(xp, currentLevel, isTeacher) {
   const track = document.getElementById('levelsTrack');
   let html = '';
   
-  for (let i = 0; i < XP_LEVELS.length; i++) {
-    const lvl = XP_LEVELS[i];
-    let reached = xp >= lvl.min;
-    const isCurrent = i === currentLevel.index && !isTeacher;
-    const isLocked = !reached && !isTeacher;
-    if (isTeacher) reached = true; // Prof sees all levels as reached
-    
-    // Connector (except before first)
-    if (i > 0) {
-      html += '<div class="level-connector ' + (reached ? 'active' : '') + '"></div>';
-    }
-    
-    html += '<div class="level-node">';
-    html += '<div class="level-dot ' + (isLocked ? 'locked' : 'reached') + (isCurrent && !isTeacher ? ' current' : '') + '" style="' +
-      (reached ? 'background:' + lvl.color + '18;border-color:' + lvl.color + ';color:' + lvl.color : '') + '">';
-    
-    // Dancing character: on current level (student) or on ALL levels (prof)
-    if (isCurrent || isTeacher) {
-      html += '<div class="dancer-slot" data-level="' + i + '"></div>';
-    }
-    
-    html += (i + 1);
-    html += '</div>';
-    html += '<div class="level-name" style="color:' + (reached ? lvl.color : 'var(--muted)') + '">' + lvl.name + '</div>';
-    html += '<div class="level-xp">' + lvl.min + ' XP</div>';
-    html += '</div>';
+  for (let i = 0; i < XP_LEVELS.length; i++) {const lvl = XP_LEVELS[i];let reached = xp >= lvl.min;const isCurrent = i === currentLevel.index && !isTeacher;const isLocked = !reached && !isTeacher;if (isTeacher) reached = true; // Prof sees all levels as reached// Connector (except before first)if (i > 0) {  html += '<div class="level-connector ' + (reached ? 'active' : '') + '"></div>';}html += '<div class="level-node">';html += '<div class="level-dot ' + (isLocked ? 'locked' : 'reached') + (isCurrent && !isTeacher ? ' current' : '') + '" style="' +  (reached ? 'background:' + lvl.color + '18;border-color:' + lvl.color + ';color:' + lvl.color : '') + '">';// Dancing character: on current level (student) or on ALL levels (prof)if (isCurrent || isTeacher) {  html += '<div class="dancer-slot" data-level="' + i + '"></div>';}html += (i + 1);html += '</div>';html += '<div class="level-name" style="color:' + (reached ? lvl.color : 'var(--muted)') + '">' + lvl.name + '</div>';html += '<div class="level-xp">' + lvl.min + ' XP</div>';html += '</div>';
   }
   
   track.innerHTML = html;
   
   // Add dancing character on current level
-  document.querySelectorAll('.dancer-slot').forEach(slot => {
-    const lvlIdx = parseInt(slot.dataset.level);
-    const miniChar = createCharacter(lvlIdx, null, 36);
-    miniChar.classList.add('dancing');
-    miniChar.style.position = 'absolute';
-    miniChar.style.top = '-40px';
-    miniChar.style.left = '50%';
-    miniChar.style.transform = 'translateX(-50%)';
-    slot.style.position = 'absolute';
-    slot.style.top = '-40px';
-    slot.style.left = '50%';
-    slot.style.transform = 'translateX(-50%)';
-    slot.appendChild(miniChar);
+  document.querySelectorAll('.dancer-slot').forEach(slot => {const lvlIdx = parseInt(slot.dataset.level);const miniChar = createCharacter(lvlIdx, null, 36);miniChar.classList.add('dancing');miniChar.style.position = 'absolute';miniChar.style.top = '-40px';miniChar.style.left = '50%';miniChar.style.transform = 'translateX(-50%)';slot.style.position = 'absolute';slot.style.top = '-40px';slot.style.left = '50%';slot.style.transform = 'translateX(-50%)';slot.appendChild(miniChar);
   });
 }
 
@@ -347,23 +219,13 @@ function showCelebration(level) {
   // Add confetti
   let confettiHtml = '';
   const colors = ['#32E0C4', '#F59E0B', '#3b82f6', '#ef4444', '#8b5cf6', '#10b981', '#ec4899'];
-  for (let i = 0; i < 30; i++) {
-    const x = Math.random() * 100;
-    const delay = Math.random() * 1.5;
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    confettiHtml += '<div class="confetti" style="left:' + x + '%;background:' + color + ';animation-delay:' + delay + 's"></div>';
+  for (let i = 0; i < 30; i++) {const x = Math.random() * 100;const delay = Math.random() * 1.5;const color = colors[Math.floor(Math.random() * colors.length)];confettiHtml += '<div class="confetti" style="left:' + x + '%;background:' + color + ';animation-delay:' + delay + 's"></div>';
   }
-  cel.innerHTML = confettiHtml + 
-    '<div id="celebCharContainer" style="width:120px;height:140px;margin:0 auto"></div>' +
-    '<div class="level-up-text" style="color:' + level.color + '">LEVEL UP!</div>' +
-    '<div style="font-size:1.1rem;color:var(--muted);margin-top:.5rem">' + level.name + '</div>' +
-    '<button class="close-btn" onclick="closeCelebration()">Continuer</button>';
+  cel.innerHTML = confettiHtml + '<div id="celebCharContainer" style="width:120px;height:140px;margin:0 auto"></div>' +'<div class="level-up-text" style="color:' + level.color + '">LEVEL UP!</div>' +'<div style="font-size:1.1rem;color:var(--muted);margin-top:.5rem">' + level.name + '</div>' +'<button class="close-btn" onclick="closeCelebration()">Continuer</button>';
   cel.classList.add('active');
   // Add dancing character to celebration
   const celebContainer = document.getElementById('celebCharContainer');
-  if (celebContainer) {
-    const bigChar = createCharacter(level.index, celebContainer, 100);
-    bigChar.classList.add('dancing');
+  if (celebContainer) {const bigChar = createCharacter(level.index, celebContainer, 100);bigChar.classList.add('dancing');
   }
 }
 
