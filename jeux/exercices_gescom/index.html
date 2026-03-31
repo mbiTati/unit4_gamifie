@@ -385,7 +385,7 @@ function renderAll(){
         <div class="btn-row">
           <button class="btn btn-run" onclick="event.stopPropagation();runEx(${ex.n})">RUN</button>
           <button class="btn btn-hint" onclick="event.stopPropagation();toggle('hint_${ex.n}')">Indice</button>
-          <button class="btn btn-sol" onclick="event.stopPropagation();toggle('sol_${ex.n}')">Solution</button>
+          <button class="btn btn-sol" id="sol_btn_${ex.n}" onclick="event.stopPropagation();showSolution(${ex.n})" style="opacity:.3;cursor:not-allowed" title="Disponible après 3 essais">Solution (3 essais)</button>
         </div>
         <div class="hint-box" id="hint_${ex.n}">${ex.hint}</div>
         <div class="sol-box" id="sol_${ex.n}"><code>${ex.sol.replace(/\n/g,'<br>')}</code></div>
@@ -430,7 +430,7 @@ function runEx(n){
           } else if(got_rows === exp.nb_rows && got_cols === exp.nb_cols){
             if(st.textContent!=='✅ Correct'){st.textContent='✅ Correct';st.className='ex-status ok';solved++;updateProgress();}
           } else {
-            st.textContent='❌ '+got_rows+' lignes/'+got_cols+' cols (attendu: '+exp.nb_rows+'/'+exp.nb_cols+')';
+            _attempts[exNum]=(_attempts[exNum]||0)+1;var sb=document.getElementById('sol_btn_'+exNum);if(sb&&_attempts[exNum]>=3){sb.style.opacity='1';sb.style.cursor='pointer';sb.textContent='Solution';sb.title='Cliquez pour voir la solution'}st.textContent='❌ '+got_rows+' lignes/'+got_cols+' cols (attendu: '+exp.nb_rows+'/'+exp.nb_cols+')';
             st.className='ex-status';st.style.color='var(--error)';
           }
         }
@@ -502,5 +502,21 @@ initDB();
 })();
 </script>
 
-<script src="../../app/presence-tracker.js"></script>
+<script src="../../app/presence-tracker.js">
+// Track attempts per exercise and lock solution
+var _attempts = {};
+function showSolution(n) {
+  if (!_attempts[n] || _attempts[n] < 3) {
+    var btn = document.getElementById('sol_btn_' + n);
+    var remaining = 3 - (_attempts[n] || 0);
+    btn.title = 'Encore ' + remaining + ' essai(s) avant de pouvoir voir la solution';
+    btn.textContent = 'Solution (' + remaining + ' essais)';
+    return;
+  }
+  toggle('sol_' + n);
+}
+
+// Wrap the existing run function to track attempts
+var _origRunEx = typeof runEx === 'function' ? runEx : null;
+</script>
 </body></html>

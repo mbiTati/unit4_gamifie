@@ -98,5 +98,63 @@ r(1,'c1');r(2,'c2');r(3,'c3');r(4,'c4');
 function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}
 </script>
 <script src="app/presence-tracker.js"></script>
+
+<script>
+// Show XP earned on each module card
+(function() {
+  var student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+  if (!student) return;
+  
+  var SURL = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+  var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+  
+  fetch(SURL + '/cq_game_scores?student_id=eq.' + student.id + '&unit_id=eq.4&select=game_id,score', {
+    headers: { 'apikey': SKEY }
+  }).then(function(r) { return r.json(); })
+    .then(function(scores) {
+      if (!Array.isArray(scores)) return;
+      
+      // Best score per game
+      var best = {};
+      for (var i = 0; i < scores.length; i++) {
+        var g = scores[i];
+        if (!best[g.game_id] || g.score > best[g.game_id]) best[g.game_id] = g.score;
+      }
+      
+      // XP per game: score/5, max 20
+      var xpMap = {};
+      for (var gid in best) {
+        xpMap[gid] = Math.min(Math.floor(best[gid] / 5), 20);
+      }
+      
+      // Total XP from games
+      var totalXP = 0;
+      for (var k in xpMap) totalXP += xpMap[k];
+      
+      // Find all game links on the page and add XP badges
+      var links = document.querySelectorAll('a[href*="jeux/"]');
+      for (var j = 0; j < links.length; j++) {
+        var href = links[j].getAttribute('href');
+        // Extract game_id from href: jeux/MODULE_NAME/index.html → MODULE_NAME
+        var match = href.match(/jeux\/([^\/]+)\//);
+        if (!match) continue;
+        var gameId = match[1];
+        
+        if (xpMap[gameId]) {
+          var badge = document.createElement('span');
+          badge.style.cssText = 'font-size:.5rem;color:#10b981;font-weight:700;margin-left:.3rem;background:rgba(16,185,129,.1);padding:.1rem .3rem;border-radius:3px';
+          badge.textContent = '+' + xpMap[gameId] + ' XP';
+          links[j].appendChild(badge);
+        }
+      }
+      
+      // Show total XP in header
+      var brand = document.querySelector('.brand p');
+      if (brand) {
+        brand.innerHTML += ' · <span style="color:#32E0C4;font-weight:700">' + totalXP + ' XP jeux</span>';
+      }
+    }).catch(function(){});
+})();
+</script>
 </body>
 </html>

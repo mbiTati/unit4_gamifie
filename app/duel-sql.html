@@ -248,8 +248,14 @@ async function loadLobby() {
     }
   }
   
+  // Cache students for challenge lookup
+  allStudentsCache = studentList;
+  
   // Check for incoming challenges
   checkIncomingChallenges();
+  
+  // Poll for challenges every 5 seconds
+  setInterval(checkIncomingChallenges, 5000);
 }
 
 async function getStudentXP(studentId) {
@@ -258,27 +264,46 @@ async function getStudentXP(studentId) {
 }
 
 // ===================== CHALLENGE =====================
-function challengePlayer(id, first, last, levelIdx) {
+async function challengePlayer(id, first, last, levelIdx) {
   oppName = first + ' ' + last.charAt(0) + '.';
   oppLevel = levelIdx;
   
-  // Store challenge in localStorage (simple p2p via Supabase)
-  const challenge = {
-    from: student.id,
-    from_name: student.first_name + ' ' + student.last_name,
-    to: id,
-    to_name: oppName,
-    status: 'pending',
-    questions: generateQuestions(),
-    created_at: new Date().toISOString()
-  };
+  const qs = generateQuestions();
   
-  // Save challenge to Supabase (via cq_game_scores as a hack, or presence)
-  localStorage.setItem('dq_challenge_out', JSON.stringify(challenge));
+  // Create duel in Supabase
+  const res = await fetch(SUPABASE_REST + '/cq_duels', {
+    method: 'POST',
+    headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    body: JSON.stringify({
+      player1_id: student.id,
+      player2_id: id,
+      status: 'waiting',
+      questions: qs.map(q => ({q: q.q, schema: q.schema, keywords: q.keywords, answer: q.answer[0]})),
+      unit_id: 4
+    })
+  });
+  const data = await res.json();
+  duelId = Array.isArray(data) ? data[0]?.id : data?.id;
   
-  // For now, start directly in "pair simulation" mode
-  // A real P2P would need WebSockets or Supabase Realtime
-  startDuel(challenge.questions, oppName, levelIdx);
+  if (!duelId) { alert('Erreur création duel'); return; }
+  
+  // Show waiting screen
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('waiting').style.display = 'block';
+  document.getElementById('waitText').textContent = 'Défi envoyé à ' + oppName + '!';
+  document.getElementById('waitSub').textContent = 'En attente que ' + first + ' accepte...';
+  
+  // Poll for acceptance
+  pollInterval = setInterval(async () => {
+    const check = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId + '&select=status', {
+      headers: { 'apikey': ANON }
+    }).then(r => r.json());
+    
+    if (Array.isArray(check) && check[0]?.status === 'playing') {
+      clearInterval(pollInterval);
+      startDuel(qs, oppName, oppLevel);
+    }
+  }, 2000);
 }
 
 function startSolo() {
@@ -288,9 +313,74 @@ function startSolo() {
   startDuel(generateQuestions(), oppName, oppLevel);
 }
 
-function checkIncomingChallenges() {
-  // Poll for challenges (simplified — via localStorage cross-tab)
-  // In a real implementation, use Supabase Realtime subscriptions
+async function checkIncomingChallenges() {
+  // Check if someone challenged me
+  const res = await fetch(
+    SUPABASE_REST + '/cq_duels?player2_id=eq.' + student.id + '&status=eq.waiting&order=created_at.desc&limit=1',
+    { headers: { 'apikey': ANON } }
+  ).then(r => r.json());
+  
+  if (Array.isArray(res) && res.length > 0) {
+    const duel = res[0];
+    const challenger = allStudentsCache.find(s => s.id === duel.player1_id);
+    const name = challenger ? challenger.first_name + ' ' + challenger.last_name : 'Quelqu\'un';
+    
+    // Show challenge notification
+    showChallengePopup(duel, name);
+  }
+}
+
+let allStudentsCache = [];
+
+function showChallengePopup(duel, challengerName) {
+  const popup = document.createElement('div');
+  popup.id = 'challengePopup';
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:1.5rem;z-index:9999;text-align:center;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.5)';
+  popup.innerHTML = '<div style="font-size:1.5rem;margin-bottom:.5rem">⚔️</div>' +
+    '<div style="font-size:1rem;font-weight:800;color:var(--gold);margin-bottom:.3rem">DÉFI SQL !</div>' +
+    '<div style="font-size:.85rem;margin-bottom:1rem"><strong>' + challengerName + '</strong> vous défie en duel !</div>' +
+    '<div style="display:flex;gap:.5rem;justify-content:center">' +
+    '<button class="btn btn-gold" onclick="acceptDuel(\'' + duel.id + '\')">Accepter</button>' +
+    '<button class="btn" style="background:var(--surface);color:var(--muted);border:1px solid var(--border)" onclick="declineDuel(\'' + duel.id + '\')">Refuser</button>' +
+    '</div>';
+  document.body.appendChild(popup);
+}
+
+async function acceptDuel(id) {
+  // Update duel status to 'playing'
+  await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { 'apikey': ANON, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'playing', updated_at: new Date().toISOString() })
+  });
+  
+  // Load duel questions
+  const duel = await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + id + '&select=*', {
+    headers: { 'apikey': ANON }
+  }).then(r => r.json());
+  
+  if (Array.isArray(duel) && duel[0]) {
+    duelId = id;
+    const d = duel[0];
+    const challenger = allStudentsCache.find(s => s.id === d.player1_id);
+    oppName = challenger ? challenger.first_name : 'Adversaire';
+    
+    // Convert stored questions back to playable format
+    const qs = d.questions.map(q => ({
+      q: q.q, schema: q.schema, keywords: q.keywords, answer: [q.answer]
+    }));
+    
+    document.getElementById('challengePopup')?.remove();
+    startDuel(qs, oppName, 3);
+  }
+}
+
+async function declineDuel(id) {
+  await fetch(SUPABASE_REST + '/cq_duels?id=eq.' + id, {
+    method: 'DELETE',
+    headers: { 'apikey': ANON }
+  });
+  document.getElementById('challengePopup')?.remove();
 }
 
 // ===================== GENERATE QUESTIONS =====================
@@ -364,6 +454,16 @@ function submitAnswer() {
     if (duelMode === 'solo' && Math.random() < 0.5) {
       oppScore += Math.floor(Math.random() * 8) + 5;
       document.getElementById('scoreOpp').textContent = oppScore;
+    }
+    
+        // Sync score to Supabase
+    if (duelId) {
+      var scoreField = student.id === (duelId.player1_id || '') ? 'player1_score' : 'player2_score';
+      fetch(SUPABASE_REST + '/cq_duels?id=eq.' + duelId, {
+        method: 'PATCH',
+        headers: { 'apikey': ANON, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [scoreField]: myScore, updated_at: new Date().toISOString() })
+      }).catch(function(){});
     }
     
     setTimeout(() => { currentQ++; showDuelQuestion(); }, 1200);
