@@ -85,8 +85,8 @@
       body: JSON.stringify({ status: 'playing', updated_at: new Date().toISOString() })
     }).then(function() {
       // Redirect to duel page with duel ID
-      var base = window.location.pathname.includes('/jeux/') ? '../../app/' : 
-                 window.location.pathname.includes('/app/') ? '' : 'app/';
+      var base = window.location.pathname.indexOf('/jeux/') ? '../../app/' : 
+                 window.location.pathname.indexOf('/app/') ? '' : 'app/';
       window.location.href = base + 'duel-sql.html?duel=' + duelId;
     });
   };

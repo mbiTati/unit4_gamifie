@@ -34,11 +34,11 @@
   
   // Also give XP for viewing course content (modules, chapters)
   // Award 5 points per course page visited
-  var isCoursePage = pageUrl.includes('/jeux/module') || 
-                     pageUrl.includes('index.html') ||
-                     pageUrl.includes('/jeux/exercices') ||
-                     pageUrl.includes('/jeux/cas_') ||
-                     pageUrl.includes('/jeux/boss_');
+  var isCoursePage = pageUrl.indexOf('/jeux/module') > -1 || 
+                     pageUrl.indexOf('index.html') > -1 ||
+                     pageUrl.indexOf('/jeux/exercices') > -1 ||
+                     pageUrl.indexOf('/jeux/cas_') > -1 ||
+                     pageUrl.indexOf('/jeux/boss_') > -1;
   
   if (isCoursePage) {
     // Track cumulative course page views → XP
