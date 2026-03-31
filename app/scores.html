@@ -107,8 +107,20 @@ async function loadScores() {
   const gameScores = await supabase.query('cq_game_scores', { select: '*', filter: { 'unit_id': 'eq.4' } }) || [];
   const gsList = Array.isArray(gameScores) ? gameScores : [];
   
+  // Load privacy settings
+  const settingsRaw = await supabase.query('cq_student_settings', { select: '*' }) || [];
+  const settingsList = Array.isArray(settingsRaw) ? settingsRaw : [];
+  const privateStudents = new Set(
+    settingsList.filter(s => s.scores_public === false).map(s => s.student_id)
+  );
+  
   // Calculate per-student stats
-  const rankings = allStudents.map(s => {
+  // Filter: hide students who set scores_public = false (except current user)
+  const visibleStudents = allStudents.filter(s => 
+    !privateStudents.has(s.id) || (student && s.id === student.id)
+  );
+  
+  const rankings = visibleStudents.map(s => {
     const sp = progressList.filter(p => p.student_id === s.id);
     let xpFromProgress = 0;
     for (const p of sp) xpFromProgress += (p.credits_earned || 0) + (p.game_score || 0);

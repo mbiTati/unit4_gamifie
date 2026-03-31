@@ -1,113 +1,171 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DataQuest — Paramètres</title>
 <style>
-:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444}
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.topbar-right a{color:var(--muted);text-decoration:none;font-size:.75rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
+.topbar-right{display:flex;gap:.6rem;align-items:center}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px}
 .main{max-width:500px;margin:0 auto;padding:1.5rem}
-.setting-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
-.setting-card h3{font-size:.9rem;font-weight:700;margin-bottom:.8rem}
-.form-group{margin-bottom:1rem}
-.form-group label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase}
-.input-wrap{position:relative}
-.input-wrap input{width:100%;padding:.6rem .8rem;padding-right:2.2rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.85rem}
-.input-wrap input:focus{outline:none;border-color:var(--accent2)}
-.eye-btn{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem}
-.btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.card h3{font-size:.9rem;font-weight:700;margin-bottom:.8rem}
+.field{margin-bottom:.8rem}
+.field label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:.3rem}
+.field input{width:100%;padding:.5rem .7rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.85rem}
+.field input:focus{outline:none;border-color:var(--accent2)}
+.btn{padding:.5rem 1rem;border:none;border-radius:6px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
 .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.btn-danger{background:rgba(239,68,68,.1);color:var(--error);border:1px solid rgba(239,68,68,.2)}
+.msg{font-size:.78rem;margin-top:.5rem;min-height:1.5rem}
+.msg.error{color:var(--error)}.msg.success{color:var(--lo1)}
+
+/* Toggle */
 .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0}
-.toggle-row label{font-size:.85rem}
-.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:.3s}
-.toggle.on{background:var(--accent2)}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.3s}
-.toggle.on::after{left:22px}
-.msg{font-size:.8rem;margin-top:.5rem;padding:.4rem .6rem;border-radius:4px;display:none}
-.msg.success{background:rgba(16,185,129,.1);color:#10b981;display:block}
-.msg.error{background:rgba(239,68,68,.1);color:var(--error);display:block}
+.toggle-row label{font-size:.82rem;font-weight:600}
+.toggle-row .desc{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+.switch{width:42px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .3s}
+.switch.on{background:var(--accent2)}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .3s}
+.switch.on::after{transform:translateX(18px)}
 </style>
 </head>
 <body>
 <script>
 if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
 </script>
-
 <div class="topbar">
   <h1>Paramètres</h1>
-  <div class="topbar-right"><a href="profile.html">Mon Profil</a>
-    <a href="home.html">← Accueil</a></div>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+  </div>
 </div>
+
 <div class="main">
-  <div class="setting-card">
+  <!-- CHANGE PASSWORD -->
+  <div class="card">
     <h3>Changer le mot de passe</h3>
-    <div class="form-group">
+    <div class="field">
       <label>Nouveau mot de passe</label>
-      <div class="input-wrap">
-        <input type="password" id="newPwd" placeholder="••••••••">
-        <button class="eye-btn" onclick="const i=document.getElementById('newPwd');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🔒'">👁</button>
-      </div>
+      <input type="password" id="newPwd" placeholder="Minimum 6 caractères">
     </div>
-    <div class="form-group">
+    <div class="field">
       <label>Confirmer</label>
-      <div class="input-wrap">
-        <input type="password" id="confirmPwd" placeholder="••••••••">
-      </div>
+      <input type="password" id="confirmPwd" placeholder="Retapez le mot de passe">
     </div>
     <button class="btn btn-primary" onclick="changePwd()">Mettre à jour</button>
     <div class="msg" id="pwdMsg"></div>
   </div>
   
-  <div class="setting-card">
-    <h3>Préférences</h3>
+  <!-- VISIBILITY -->
+  <div class="card">
+    <h3>Confidentialité</h3>
     <div class="toggle-row">
-      <label>Scores publics dans le classement</label>
-      <div class="toggle on" id="togglePublic" onclick="this.classList.toggle('on');saveSettings()"></div>
+      <div>
+        <label>Scores publics dans le classement</label>
+        <div class="desc">Si désactivé, votre nom n'apparaît pas dans le classement des autres élèves</div>
+      </div>
+      <div class="switch" id="togglePublic" onclick="toggleScoresPublic()"></div>
     </div>
+    <div class="msg" id="toggleMsg"></div>
+  </div>
+  
+  <!-- ACCOUNT INFO -->
+  <div class="card">
+    <h3>Mon compte</h3>
+    <div style="font-size:.78rem;color:var(--muted);line-height:1.8" id="accountInfo"></div>
   </div>
 </div>
 
 <script src="supabase-config.js"></script>
 <script>
+const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+
+// Load current settings
+async function loadSettings() {
+  if (!student) return;
+  
+  // Show account info
+  document.getElementById('accountInfo').innerHTML = 
+    'Email : <strong>' + student.email + '</strong><br>' +
+    'Classe : <strong>' + (student.class_name || '-') + '</strong><br>' +
+    'Cohorte : <strong>' + (student.cohort || '-') + '</strong>';
+  
+  // Load scores_public setting
+  const settings = await supabase.query('cq_student_settings', {
+    select: '*',
+    filter: { 'student_id': 'eq.' + student.id }
+  }) || [];
+  
+  const settingsList = Array.isArray(settings) ? settings : [];
+  const isPublic = settingsList.length > 0 ? settingsList[0].scores_public : true; // Default: public
+  
+  const toggle = document.getElementById('togglePublic');
+  if (isPublic) toggle.classList.add('on');
+  else toggle.classList.remove('on');
+}
+
+async function toggleScoresPublic() {
+  const toggle = document.getElementById('togglePublic');
+  toggle.classList.toggle('on');
+  const isPublic = toggle.classList.contains('on');
+  const msg = document.getElementById('toggleMsg');
+  
+  // Check if setting exists
+  const existing = await supabase.query('cq_student_settings', {
+    select: 'id',
+    filter: { 'student_id': 'eq.' + student.id }
+  }) || [];
+  
+  const existingList = Array.isArray(existing) ? existing : [];
+  
+  if (existingList.length > 0) {
+    // Update
+    await supabase.update('cq_student_settings', 
+      { scores_public: isPublic, updated_at: new Date().toISOString() },
+      { 'student_id': 'eq.' + student.id }
+    );
+  } else {
+    // Insert
+    await supabase.insert('cq_student_settings', {
+      student_id: student.id,
+      scores_public: isPublic,
+    });
+  }
+  
+  msg.className = 'msg success';
+  msg.textContent = isPublic ? 'Vos scores sont maintenant publics.' : 'Vos scores sont maintenant privés.';
+  setTimeout(() => msg.textContent = '', 3000);
+}
+
 async function changePwd() {
   const newPwd = document.getElementById('newPwd').value;
   const confirm = document.getElementById('confirmPwd').value;
   const msg = document.getElementById('pwdMsg');
   
-  if (newPwd.length < 6) {
-    msg.className = 'msg error'; msg.textContent = 'Minimum 6 caractères.'; return;
-  }
-  if (newPwd !== confirm) {
-    msg.className = 'msg error'; msg.textContent = 'Les mots de passe ne correspondent pas.'; return;
-  }
+  if (newPwd.length < 6) { msg.className = 'msg error'; msg.textContent = 'Minimum 6 caractères.'; return; }
+  if (newPwd !== confirm) { msg.className = 'msg error'; msg.textContent = 'Les mots de passe ne correspondent pas.'; return; }
   
   try {
     await supabase._ensureToken();
     const token = localStorage.getItem('cq_token');
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
       method: 'PUT',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: newPwd })
     });
-    if (res.ok) {
-      msg.className = 'msg success'; msg.textContent = 'Mot de passe mis à jour.';
-    } else {
-      msg.className = 'msg error'; msg.textContent = 'Erreur lors de la mise à jour.';
-    }
+    if (res.ok) { msg.className = 'msg success'; msg.textContent = 'Mot de passe mis à jour.'; }
+    else { msg.className = 'msg error'; msg.textContent = 'Erreur. Reconnectez-vous et réessayez.'; }
   } catch (e) {
     msg.className = 'msg error'; msg.textContent = 'Erreur réseau.';
   }
 }
 
-function saveSettings() {
-  const isPublic = document.getElementById('togglePublic').classList.contains('on');
-  localStorage.setItem('cq_public_scores', isPublic);
-}
+loadSettings();
 </script>
 </body>
 </html>
