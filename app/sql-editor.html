@@ -106,7 +106,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   <div id="resultArea"></div>
 </div>
 
-<script src="supabase-config.js"></script>
+<script src="supabase-config.js?v=1774960217"></script>
 <script>
 // Keyboard shortcut
 document.getElementById('sqlInput').addEventListener('keydown', e => {
@@ -240,8 +240,8 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 </script>
-<script src="presence-tracker.js"></script>
-<script src="duel-notify.js"></script>
+<script src="presence-tracker.js?v=1774960217"></script>
+<script src="duel-notify.js?v=1774960217"></script>
 
 <div id="dqDuelBtn" onclick="window.location.href=this.getAttribute('data-href')" style="position:fixed;bottom:20px;right:20px;z-index:9998;background:linear-gradient(135deg,#F59E0B,#d97706);color:#fff;padding:.5rem 1rem;border-radius:25px;font-family:Outfit,sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(245,158,11,.4);display:flex;align-items:center;gap:.4rem;transition:transform .2s;animation:dqPulseBtn 3s infinite" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
   <span>⚔️</span> DUEL
