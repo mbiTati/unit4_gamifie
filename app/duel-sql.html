@@ -236,7 +236,7 @@ function goStep2() { if (!selectedExercise) return; goStep(2); loadPlayers(); }
 function renderExercises() {
   const grid = document.getElementById('exerciseGrid');
   grid.innerHTML = EXERCISES.map(ex => 
-    '<div class="exercise-card" id="ex_' + ex.id + '" onclick="selectExercise(\'' + ex.id + '\')">' +
+    '<div class="exercise-card" id="ex_' + ex.id + '" onclick="selectExercise(this.id.replace('ex_',''))">' +
     '<span class="tag" style="background:' + ex.color + '20;color:' + ex.color + '">' + ex.tag + '</span>' +
     '<h4>' + ex.name + '</h4>' +
     '<p>' + ex.desc + '</p>' +
@@ -521,10 +521,11 @@ function endDuel() {
 
 // ========== JOIN FROM URL ==========
 async function checkJoinDuel() {
-  const p = new URLSearchParams(window.location.search);
-  const jid = p.get('duel');
-  if (!jid) return false;
-  const d = await fetch(SB + '/cq_duels?id=eq.' + jid + '&select=*', { headers: { 'apikey': AK } }).then(r => r.json());
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const jid = p.get('duel');
+    if (!jid) return false;
+    const d = await fetch(SB + '/cq_duels?id=eq.' + jid + '&select=*', { headers: { 'apikey': AK } }).then(r => r.json());
   if (!Array.isArray(d) || !d[0]) return false;
   duelId = jid;
   const duel = d[0];
@@ -533,15 +534,27 @@ async function checkJoinDuel() {
   oppName = (Array.isArray(oppR) && oppR[0]) ? oppR[0].first_name + ' ' + oppR[0].last_name.charAt(0) + '.' : 'Adversaire';
   const qs = (duel.questions || []).map(q => ({ q: q.q, schema: q.schema, kw: q.kw, hint: q.hint }));
   selectedExercise = { name: 'Duel', questions: qs };
-  startArena(qs, oppName);
-  return true;
+    startArena(qs, oppName);
+    return true;
+  } catch(e) {
+    console.error('checkJoinDuel error:', e);
+    return false;
+  }
 }
 
 // Enter to submit
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && document.getElementById('step4').classList.contains('active')) { e.preventDefault(); submitAnswer(); } });
 
 // Init
-(async () => { if (!(await checkJoinDuel())) { renderExercises(); } })();
+(async () => {
+  try {
+    const joined = await checkJoinDuel();
+    if (!joined) renderExercises();
+  } catch(e) {
+    console.error('Init error:', e);
+    renderExercises();
+  }
+})();
 </script>
 <script src="presence-tracker.js"></script>
 <script src="duel-notify.js"></script>
