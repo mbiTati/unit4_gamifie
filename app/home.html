@@ -200,12 +200,20 @@ async function loadDashboard() {
   }) || [];
   const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
   
-  // XP from exercises/games (each point = 1 XP)
-  const xpFromGames = Array.isArray(gameScores) 
-    ? gameScores.reduce((a, g) => a + (g.score || 0), 0) 
-    : 0;
+  // XP from exercises/games (capped per game, reduced ratio)
+  // Best score per game, capped at 100, then /5 → max 20 XP per game
+  let xpFromGames = 0;
+  if (Array.isArray(gameScores)) {
+    const bestPerGame = {};
+    for (const g of gameScores) {
+      if (!bestPerGame[g.game_id] || g.score > bestPerGame[g.game_id]) {
+        bestPerGame[g.game_id] = g.score;
+      }
+    }
+    xpFromGames = Object.values(bestPerGame).reduce((a, s) => a + Math.min(Math.floor(s / 5), 20), 0);
+  }
   
-  // TOTAL XP = course + games (both count!)
+  // TOTAL XP = course + games (course is primary, games are bonus)
   const totalXP = xpFromCourse + xpFromGames;
   
   // Count unique exercises done

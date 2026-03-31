@@ -160,7 +160,15 @@ async function loadProfile() {
   let xpFromProgress = 0;
   for (const p of progress) xpFromProgress += (p.credits_earned || 0) + (p.game_score || 0);
   const totalGameScore = scores.reduce((a, g) => a + (g.score || 0), 0);
-  const totalXP = xpFromProgress + totalGameScore; // Both count equally
+  // XP from games: best score per game, /5, max 20 per game
+  const bestPerGame = {};
+  for (const g of scores) {
+    if (!bestPerGame[g.game_id] || g.score > bestPerGame[g.game_id]) {
+      bestPerGame[g.game_id] = g.score;
+    }
+  }
+  const xpFromGames = Object.values(bestPerGame).reduce((a, s) => a + Math.min(Math.floor(s / 5), 20), 0);
+  const totalXP = xpFromProgress + xpFromGames;
   
   const level = getLevel(totalXP);
   const uniqueExercises = new Set(scores.map(g => g.game_id)).size;
@@ -173,7 +181,7 @@ async function loadProfile() {
   
   document.getElementById('heroName').textContent = student.first_name + ' ' + student.last_name;
   document.getElementById('heroLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:800;font-size:1.1rem">' + level.name + '</span>';
-  document.getElementById('heroXP').textContent = totalXP + ' XP (cours: ' + xpFromProgress + ' + exercices: ' + totalGameScore + ') — Niveau ' + (level.index + 1) + '/9';
+  document.getElementById('heroXP').textContent = totalXP + ' XP (cours: ' + xpFromProgress + ' + jeux: ' + xpFromGames + ') — Niveau ' + (level.index + 1) + '/9';
   document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';
   document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';
   document.getElementById('xpMin').textContent = level.min + ' XP';

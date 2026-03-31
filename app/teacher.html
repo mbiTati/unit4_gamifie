@@ -435,7 +435,12 @@ function renderData() {
     const exercisesDone = new Set(myGames.map(g => g.game_id)).size;
     const totalGameScore = myGames.reduce((a, g) => a + (g.score || 0), 0);
     const lastPlayed = myGames.length > 0 ? myGames.sort((a,b) => b.played_at?.localeCompare(a.played_at))[0]?.played_at : null;
-    xp += totalGameScore; // Game scores count equally with course credits
+    // XP from games: best score per unique game, /5, max 20 per game
+    const bestG = {};
+    for (const g of myGames) {
+      if (!bestG[g.game_id] || g.score > bestG[g.game_id]) bestG[g.game_id] = g.score;
+    }
+    xp += Object.values(bestG).reduce((a, s) => a + Math.min(Math.floor(s / 5), 20), 0);
     const quizAvg = quizScores.length > 0 ? Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) : -1;
     const level = getLevel(xp);
     const pct = Math.round(completed / 20 * 100);
