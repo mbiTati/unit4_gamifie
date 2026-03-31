@@ -95,6 +95,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <button class="tab" onclick="showTab('comments',this)">Questions <span class="badge" id="commentBadge" style="display:none">0</span></button>
     <button class="tab" onclick="showTab('manage',this)">Gérer les élèves</button>
     
+    <button class="tab" onclick="showTab('exercises',this)">Exercices</button>
     <button class="tab" onclick="showTab('docs',this)">Mes Documents</button>
     <button class="tab" onclick="showTab('tools',this)">Outils & SQL</button>
   </div>
@@ -111,6 +112,10 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   <div id="tab-progress"><div style="overflow-x:auto"><table class="s-table"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div>
   <div id="tab-comments" style="display:none"><div id="commentsList"></div></div>
   <div id="tab-manage" style="display:none" id="manageTab"></div>
+  </div>
+  
+  <div id="tab-exercises" style="display:none">
+    <div id="exercisesList"></div>
   </div>
   
   <div id="tab-docs" style="display:none">
@@ -207,11 +212,12 @@ let allStudents = [];
 let allProgress = [];
 let allComments = [];
 let allModules = [];
+let allGameScores = [];
 
 function showTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  ['progress','comments','manage','docs','tools'].forEach(t => {
+  ['progress','comments','manage','exercises','docs','tools'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
@@ -228,6 +234,119 @@ function applyFilters() {
   renderData();
   renderComments();
   renderManage();
+  renderExercises();
+  renderExercises();
+}
+
+function renderExercises() {
+  const filterClass = document.getElementById('filterClass').value;
+  const filterCohort = document.getElementById('filterCohort').value;
+  const students = allStudents.filter(s => s.role !== 'teacher'
+    && (filterClass === 'all' || s.class_name === filterClass)
+    && (filterCohort === 'all' || s.cohort === filterCohort)
+  );
+  const gameScores = Array.isArray(allGameScores) ? allGameScores : [];
+  
+  const el = document.getElementById('exercisesList');
+  if (!el) return;
+  
+  // Group scores by game
+  const games = {};
+  for (const g of gameScores) {
+    if (!games[g.game_id]) games[g.game_id] = [];
+    games[g.game_id].push(g);
+  }
+  
+  // Build per-student summary
+  const studentScores = students.map(s => {
+    const myScores = gameScores.filter(g => g.student_id === s.id);
+    const gamesPlayed = new Set(myScores.map(g => g.game_id)).size;
+    const totalScore = myScores.reduce((a, g) => a + (g.score || 0), 0);
+    const bestScores = {};
+    for (const g of myScores) {
+      if (!bestScores[g.game_id] || g.score > bestScores[g.game_id].score) {
+        bestScores[g.game_id] = g;
+      }
+    }
+    return { ...s, gamesPlayed, totalScore, myScores, bestScores };
+  }).sort((a, b) => b.totalScore - a.totalScore);
+  
+  // All unique game IDs
+  const allGameIds = [...new Set(gameScores.map(g => g.game_id))].sort();
+  
+  let html = '';
+  
+  // Summary KPIs
+  const totalPlays = gameScores.length;
+  const uniquePlayers = new Set(gameScores.map(g => g.student_id)).size;
+  html += '<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">';
+  html += '<div class="stat" style="flex:1;min-width:120px"><div class="n" style="color:var(--accent2)">' + totalPlays + '</div><div class="l">Parties jouées</div></div>';
+  html += '<div class="stat" style="flex:1;min-width:120px"><div class="n" style="color:var(--lo1)">' + uniquePlayers + '</div><div class="l">Joueurs actifs</div></div>';
+  html += '<div class="stat" style="flex:1;min-width:120px"><div class="n" style="color:var(--gold)">' + allGameIds.length + '</div><div class="l">Jeux différents</div></div>';
+  html += '</div>';
+  
+  if (gameScores.length === 0) {
+    html += '<div style="text-align:center;padding:2rem;color:var(--muted)">Aucun exercice enregistré pour le moment. Les scores se sauvegardent quand les élèves terminent un jeu.</div>';
+    el.innerHTML = html;
+    return;
+  }
+  
+  // Table: one row per student, columns = games
+  html += '<div style="overflow-x:auto"><table class="s-table">';
+  html += '<thead><tr><th style="position:sticky;left:0;background:var(--surface);z-index:1">Élève</th><th>Total</th><th>Jeux</th>';
+  
+  // Show top 8 most played games as columns
+  const topGames = allGameIds
+    .map(id => ({ id, count: games[id]?.length || 0 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+  
+  for (const g of topGames) {
+    var shortName = g.id.replace('module', 'M').replace('_', ' ').replace('exercices-gescom', 'GESCOM');
+    if (shortName.length > 15) shortName = shortName.substring(0, 14) + '.';
+    html += '<th style="font-size:.55rem;max-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + g.id + '">' + shortName + '</th>';
+  }
+  html += '</tr></thead><tbody>';
+  
+  for (const s of studentScores) {
+    html += '<tr>';
+    html += '<td style="position:sticky;left:0;background:var(--card);z-index:1"><strong>' + s.first_name + ' ' + s.last_name + '</strong></td>';
+    html += '<td style="font-family:monospace;font-weight:700;color:var(--accent2)">' + s.totalScore + '</td>';
+    html += '<td>' + s.gamesPlayed + '</td>';
+    
+    for (const g of topGames) {
+      var best = s.bestScores[g.id];
+      if (best) {
+        var color = best.score >= 50 ? 'var(--lo1)' : best.score >= 20 ? 'var(--gold)' : 'var(--muted)';
+        html += '<td style="font-family:monospace;font-size:.7rem;color:' + color + ';font-weight:600">' + best.score + '</td>';
+      } else {
+        html += '<td style="color:var(--border);font-size:.65rem">—</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  
+  html += '</tbody></table></div>';
+  
+  // Recent activity
+  html += '<div style="margin-top:1.5rem;font-size:.85rem;font-weight:700">Activité récente</div>';
+  var recent = gameScores.slice(0, 15);
+  html += '<div style="margin-top:.5rem">';
+  for (const g of recent) {
+    var student = allStudents.find(s => s.id === g.student_id);
+    var name = student ? student.first_name + ' ' + student.last_name : 'Inconnu';
+    var date = g.played_at ? new Date(g.played_at).toLocaleDateString('fr-CH') : '';
+    var time = g.played_at ? new Date(g.played_at).toLocaleTimeString('fr-CH', {hour:'2-digit',minute:'2-digit'}) : '';
+    html += '<div style="display:flex;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.75rem">';
+    html += '<span style="min-width:100px;font-weight:600">' + name + '</span>';
+    html += '<span style="color:var(--muted);min-width:100px">' + g.game_id + '</span>';
+    html += '<span style="color:var(--accent2);font-weight:700;min-width:40px">' + g.score + ' pts</span>';
+    html += '<span style="color:var(--muted);margin-left:auto">' + date + ' ' + time + '</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+  
+  el.innerHTML = html;
 }
 async function loadData() {
   try {
@@ -235,6 +354,9 @@ async function loadData() {
     allStudents = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
     allProgress = await supabase.query('cq_student_progress', { select: '*' }) || [];
     allComments = await supabase.query('cq_comments', { select: '*', order: 'created_at.desc', limit: 50 }) || [];
+    allGameScores = await supabase.query('cq_game_scores', { select: '*', order: 'played_at.desc' }) || [];
+    if (allGameScores.message) { console.error('GameScores error:', allGameScores.message); allGameScores = []; }
+    
     allModules = await supabase.query('cq_modules', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'order_index.asc' }) || [];
     
     // Handle error responses (Supabase returns {message:...} on error)

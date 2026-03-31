@@ -78,4 +78,18 @@ const s=p>=90?'*** EXCELLENT ***':p>=70?'** TRES BIEN **':p>=50?'* BIEN *':'';
 f.innerHTML='<div class="card"><div class="final">'+sc+' pts</div><div class="star">'+s+'</div><p style="color:var(--muted)">'+p+'% — Streak max: '+mx+'</p><div class="hist">'+ans.map((a,i)=>'<div class="hist-row"><span style="color:'+(a.ok?'var(--success)':'var(--error)')+'">'+( a.ok?'V':'X')+'</span> '+Q[i].q.substring(0,70)+(Q[i].q.length>70?'...':'')+'</div>').join('')+'</div><button class="btn btn-go" onclick="location.reload()" style="margin-top:1rem">Rejouer</button></div>'}
 </script><script src="../../app/comment-widget.js"></script>
 <script src="../../app/progress-saver.js"></script>
+
+<script>
+// Auto-save score when leaving the page
+window.addEventListener('beforeunload', function() {
+  if (typeof saveGameScore === 'function') {
+    var s = 0;
+    if (typeof score !== 'undefined') s = score;
+    else if (typeof totalScore !== 'undefined') s = totalScore;
+    else if (typeof points !== 'undefined') s = points;
+    else if (typeof correct !== 'undefined') s = correct * 10;
+    if (s > 0) saveGameScore('boss_lo1', s, 0);
+  }
+});
+</script>
 </body></html>

@@ -867,5 +867,19 @@ function recommencer(){location.reload();}
 function recommencer(){location.reload();}
 </script>
 <script src="../../app/progress-saver.js"></script>
+
+<script>
+// Auto-save score when leaving the page
+window.addEventListener('beforeunload', function() {
+  if (typeof saveGameScore === 'function') {
+    var s = 0;
+    if (typeof score !== 'undefined') s = score;
+    else if (typeof totalScore !== 'undefined') s = totalScore;
+    else if (typeof points !== 'undefined') s = points;
+    else if (typeof correct !== 'undefined') s = correct * 10;
+    if (s > 0) saveGameScore('module20_guide_parfait', s, 0);
+  }
+});
+</script>
 </body>
 </html>
