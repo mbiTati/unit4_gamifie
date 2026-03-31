@@ -63,6 +63,15 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
 </div>
 
 <div class="main">
+  <!-- CLASS FILTER -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">
+    <span style="font-size:.78rem;font-weight:700;color:var(--accent2)">Classe :</span>
+    <select id="classFilter" onchange="loadScores()" style="background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.3rem .6rem;font-family:inherit;font-size:.78rem">
+      <option value="all">Toutes les classes</option>
+    </select>
+    <span id="filterInfo" style="font-size:.7rem;color:var(--muted);margin-left:auto"></span>
+  </div>
+  
   <div class="tabs">
     <button class="tab active" onclick="showTab('xp',this)">Classement XP</button>
     <button class="tab" onclick="showTab('exercises',this)">Par exercices</button>
@@ -99,7 +108,21 @@ function showTab(id, btn) {
 
 async function loadScores() {
   const students = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
-  const allStudents = Array.isArray(students) ? students.filter(s => s.role !== 'teacher') : [];
+  const allStudentsFull = Array.isArray(students) ? students.filter(s => s.role !== 'teacher') : [];
+  
+  // Populate class filter
+  const classFilter = document.getElementById('classFilter');
+  const classes = [...new Set(allStudentsFull.map(s => s.class_name).filter(Boolean))].sort();
+  const currentClass = classFilter.value;
+  classFilter.innerHTML = '<option value="all">Toutes les classes</option>' + 
+    classes.map(cl => '<option value="' + cl + '"' + (cl === currentClass ? ' selected' : '') + '>' + cl + '</option>').join('');
+  
+  // Filter by selected class
+  const allStudents = currentClass === 'all' 
+    ? allStudentsFull 
+    : allStudentsFull.filter(s => s.class_name === currentClass);
+  
+  document.getElementById('filterInfo').textContent = allStudents.length + ' élève(s)' + (currentClass !== 'all' ? ' en ' + currentClass : '');
   
   const progress = await supabase.query('cq_student_progress', { select: '*', filter: { 'unit_id': 'eq.4' } }) || [];
   const progressList = Array.isArray(progress) ? progress : [];

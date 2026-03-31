@@ -67,6 +67,51 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   
   <div class="timer" id="timer">30</div>
   
+  
+  <!-- SCHEMA REFERENCE -->
+  <div style="margin-bottom:1rem">
+    <button onclick="document.getElementById('schemaPanel').style.display=document.getElementById('schemaPanel').style.display==='none'?'block':'none'" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent2);padding:.4rem .8rem;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;width:100%">Voir le schéma des tables (cliquer pour ouvrir/fermer)</button>
+    <div id="schemaPanel" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-top:.3rem;font-size:.72rem;font-family:'JetBrains Mono',monospace;line-height:1.8;max-height:300px;overflow-y:auto">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+        <div>
+          <div style="color:var(--accent2);font-weight:700;margin-bottom:.3rem">marque</div>
+          <div style="color:var(--muted)">id_marque <span style="color:var(--gold)">PK</span></div>
+          <div style="color:var(--muted)">nom_marque</div>
+          <div style="color:var(--muted)">pays_origine</div>
+          <div style="color:var(--muted)">site_web</div>
+        </div>
+        <div>
+          <div style="color:var(--accent2);font-weight:700;margin-bottom:.3rem">modele</div>
+          <div style="color:var(--muted)">id_modele <span style="color:var(--gold)">PK</span></div>
+          <div style="color:var(--muted)">id_marque <span style="color:var(--lo2)">FK→marque</span></div>
+          <div style="color:var(--muted)">nom_modele</div>
+          <div style="color:var(--muted)">categorie</div>
+          <div style="color:var(--muted)">prix_vente</div>
+          <div style="color:var(--muted)">date_sortie</div>
+          <div style="color:var(--muted)">couleur</div>
+        </div>
+        <div>
+          <div style="color:var(--accent2);font-weight:700;margin-bottom:.3rem">client</div>
+          <div style="color:var(--muted)">id_client <span style="color:var(--gold)">PK</span></div>
+          <div style="color:var(--muted)">nom, prenom</div>
+          <div style="color:var(--muted)">email, telephone</div>
+          <div style="color:var(--muted)">ville, code_postal</div>
+          <div style="color:var(--muted)">date_inscription</div>
+          <div style="color:var(--muted)">carte_fidelite (0/1)</div>
+        </div>
+        <div>
+          <div style="color:var(--accent2);font-weight:700;margin-bottom:.3rem">vente</div>
+          <div style="color:var(--muted)">id_vente <span style="color:var(--gold)">PK</span></div>
+          <div style="color:var(--muted)">id_client <span style="color:var(--lo2)">FK→client</span></div>
+          <div style="color:var(--muted)">id_modele <span style="color:var(--lo2)">FK→modele</span></div>
+          <div style="color:var(--muted)">pointure</div>
+          <div style="color:var(--muted)">quantite, prix_paye</div>
+          <div style="color:var(--muted)">date_vente</div>
+          <div style="color:var(--muted)">mode_paiement</div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="challenge" id="challenge"></div>
   
   <textarea id="sqlInput" placeholder="-- Écrivez votre requête SQL ici..." spellcheck="false"></textarea>
