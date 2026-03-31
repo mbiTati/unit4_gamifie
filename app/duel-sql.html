@@ -236,13 +236,20 @@ function goStep2() { if (!selectedExercise) return; goStep(2); loadPlayers(); }
 function renderExercises() {
   const grid = document.getElementById('exerciseGrid');
   grid.innerHTML = EXERCISES.map(ex => 
-    '<div class="exercise-card" id="ex_' + ex.id + '" onclick="selectExercise(this.id.replace('ex_',''))">' +
+    '<div class="exercise-card" data-id="' + ex.id + '" id="ex_' + ex.id + '">' +
     '<span class="tag" style="background:' + ex.color + '20;color:' + ex.color + '">' + ex.tag + '</span>' +
     '<h4>' + ex.name + '</h4>' +
     '<p>' + ex.desc + '</p>' +
     '<div style="font-size:.55rem;color:var(--muted);margin-top:.2rem">' + ex.questions.length + ' questions</div>' +
     '</div>'
   ).join('');
+  
+  // Add click handlers via delegation
+  grid.querySelectorAll('.exercise-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      selectExercise(this.dataset.id);
+    });
+  });
 }
 
 function selectExercise(id) {
@@ -308,7 +315,7 @@ async function loadPlayers() {
       const safeFN = (s.first_name || '').replace(/'/g, '');
       const safeLN = (s.last_name || '').replace(/'/g, '');
       
-      html += '<div class="player-card ' + (isOnline ? 'online' : '') + '" id="pl_' + s.id + '" onclick="selectPlayer('' + s.id + '','' + safeFN + '','' + safeLN + '')">';
+      html += '<div class="player-card ' + (isOnline ? 'online' : '') + '" id="pl_' + s.id + '" data-pid="' + s.id + '" data-fn="' + safeFN + '" data-ln="' + safeLN + '">';
       html += '<div class="player-name">' + (isProf ? '👑 ' : '') + s.first_name + ' ' + (s.last_name || '').charAt(0) + '.</div>';
       html += '<div style="font-size:.6rem;color:' + (isProf ? 'var(--gold)' : 'var(--muted)') + '">' + (isProf ? 'Prof' : (s.class_name || '')) + '</div>';
       html += '<div class="player-status" style="color:' + (isOnline ? 'var(--lo1)' : 'var(--muted)') + '">' + (isOnline ? '● En ligne' : '') + '</div>';
@@ -320,6 +327,14 @@ async function loadPlayers() {
     }
     
     grid.innerHTML = html;
+    
+    // Add click handlers for player cards
+    grid.querySelectorAll('.player-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        selectPlayer(this.dataset.pid, this.dataset.fn, this.dataset.ln);
+      });
+    });
+    
     document.getElementById('selectedExName').textContent = '⚔️ ' + selectedExercise.name + ' · ' + allPlayers.length + ' joueurs' + (onlineCount > 0 ? ' · ' + onlineCount + ' en ligne' : '');
     
   } catch(err) {
