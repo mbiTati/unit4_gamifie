@@ -54,7 +54,9 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
 
 <div class="topbar">
   <h1>Quiz Live</h1>
-  <div class="topbar-right"><a href="home.html">← Accueil</a></div>
+  <div class="topbar-right"><a href="home.html">← Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+    <a href="scores.html">Classement</a></div>
 </div>
 <div class="main" id="mainArea">
   <div style="text-align:center;margin-bottom:2rem">
@@ -126,12 +128,49 @@ Object.entries(BANKS).forEach(([name, qs]) => {
     selectedBank = name;
     document.getElementById('btnStart').disabled = false;
   };
+  const attKey = 'dq_quiz_attempts_' + name;
+  const att = parseInt(localStorage.getItem(attKey) || '0');
+  if (att >= 2) {
+    div.style.opacity = '0.4';
+    div.style.pointerEvents = 'none';
+    div.innerHTML += '<div style="font-size:.6rem;color:var(--error);margin-top:.3rem">2/2 tentatives utilisées</div>';
+  } else {
+    div.innerHTML += '<div style="font-size:.6rem;color:var(--muted);margin-top:.3rem">' + att + '/2 tentatives</div>';
+  }
   bankSelect.appendChild(div);
 });
 
 function startQuiz() {
   if (!selectedBank) return;
+  
+  // Check attempts (max 2 per bank)
+  const attemptsKey = 'dq_quiz_attempts_' + selectedBank;
+  const attempts = parseInt(localStorage.getItem(attemptsKey) || '0');
+  if (attempts >= 2) {
+    const msg = document.getElementById('mainArea');
+    msg.innerHTML = '<div style="text-align:center;padding:3rem"><h2 style="color:var(--gold);margin-bottom:1rem">Maximum atteint</h2><p style="color:var(--muted)">Vous avez déjà fait ce quiz 2 fois.<br>Essayez une autre banque de questions !</p><br><button class="btn btn-start" onclick="location.reload()">Retour</button></div>';
+    return;
+  }
+  localStorage.setItem(attemptsKey, attempts + 1);
+  
+  // Shuffle questions randomly
   questions = [...BANKS[selectedBank]].sort(() => Math.random() - 0.5);
+  
+  // Also shuffle the answers for each question (keeping track of correct)
+  questions = questions.map(q => {
+    const indices = q.a.map((_, i) => i);
+    // Fisher-Yates shuffle
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return {
+      q: q.q,
+      a: indices.map(i => q.a[i]),
+      c: indices.indexOf(q.c),
+    };
+  });
+  
   currentQ = 0;
   score = 0;
   showQuestion();
