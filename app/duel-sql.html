@@ -257,46 +257,75 @@ async function loadPlayers() {
   if (isTeacher) document.getElementById('teacherBadge').style.display = 'block';
   document.getElementById('selectedExName').textContent = '⚔️ Exercice : ' + selectedExercise.name;
   
-  // Load class students + presence
-  const students = await supabase.query('cq_students', {
-    select: '*',
-    filter: { 'class_name': 'eq.' + (student.class_name || 'BI1') }
-  }) || [];
-  
-  const presence = await supabase.query('cq_presence', {
-    select: '*', filter: { 'unit_id': 'eq.4' }
-  }) || [];
-  
-  const sList = Array.isArray(students) ? students : [];
-  const pList = Array.isArray(presence) ? presence : [];
-  const now = new Date();
-  
   const grid = document.getElementById('playersGrid');
-  let html = '';
+  grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem">Chargement...</div>';
   
-  // Also load teachers from all classes
-  const teachers = await supabase.query('cq_students', {
-    select: '*', filter: { 'role': 'eq.teacher' }
-  }) || [];
-  const tList = Array.isArray(teachers) ? teachers : [];
-  
-  const allPlayers = [...sList, ...tList.filter(t => !sList.find(s => s.id === t.id))];
-  
-  for (const s of allPlayers) {
-    if (s.id === student.id) continue;
-    const p = pList.find(pr => pr.student_id === s.id);
-    const lastSeen = p ? new Date(p.last_seen) : null;
-    const isOnline = lastSeen && (now - lastSeen) < 120000;
-    const isTeacher = s.role === 'teacher';
+  try {
+    // Load ALL students (same class + teachers)
+    const students = await supabase.query('cq_students', { select: '*' });
+    console.log('Students result:', students);
     
-    html += '<div class="player-card ' + (isOnline ? 'online' : '') + '" id="pl_' + s.id + '" onclick="selectPlayer(\'' + s.id + '\',\'' + s.first_name + '\',\'' + s.last_name + '\')">';
-    html += '<div class="player-name">' + (isTeacher ? '👑 ' : '') + s.first_name + ' ' + s.last_name.charAt(0) + '.</div>';
-    html += '<div style="font-size:.6rem;color:' + (isTeacher ? 'var(--gold)' : 'var(--muted)') + '">' + (isTeacher ? 'Prof' : s.class_name) + '</div>';
-    html += '<div class="player-status" style="color:' + (isOnline ? 'var(--lo1)' : 'var(--muted)') + '">' + (isOnline ? '● En ligne' : '○ Hors ligne') + '</div>';
-    html += '</div>';
+    // Filter: must be array, not error
+    let sList = [];
+    if (Array.isArray(students)) {
+      sList = students;
+    } else if (students && typeof students === 'object' && !students.message) {
+      sList = [students];
+    }
+    
+    // Teacher sees ALL students; Student sees own class + teachers
+    const myClass = student.class_name || 'BI1';
+    let allPlayers;
+    if (isTeacher) {
+      allPlayers = sList.filter(s => s.id !== student.id);
+    } else {
+      const classmates = sList.filter(s => s.class_name === myClass && s.id !== student.id && s.role !== 'teacher');
+      const profs = sList.filter(s => s.role === 'teacher' && s.id !== student.id);
+      allPlayers = [...classmates, ...profs];
+    }
+    
+    // Try to get presence (optional — might not exist)
+    let pMap = {};
+    try {
+      const pres = await supabase.query('cq_presence', { select: '*' });
+      if (Array.isArray(pres)) {
+        const now = new Date();
+        for (const p of pres) {
+          pMap[p.student_id] = (now - new Date(p.last_seen)) < 120000;
+        }
+      }
+    } catch(e) { console.log('Presence not available'); }
+    
+    let html = '';
+    let onlineCount = 0;
+    
+    for (const s of allPlayers) {
+      const isOnline = pMap[s.id] || false;
+      const isProf = s.role === 'teacher';
+      if (isOnline) onlineCount++;
+      
+      // Escape names for onclick
+      const safeFN = (s.first_name || '').replace(/'/g, '');
+      const safeLN = (s.last_name || '').replace(/'/g, '');
+      
+      html += '<div class="player-card ' + (isOnline ? 'online' : '') + '" id="pl_' + s.id + '" onclick="selectPlayer('' + s.id + '','' + safeFN + '','' + safeLN + '')">';
+      html += '<div class="player-name">' + (isProf ? '👑 ' : '') + s.first_name + ' ' + (s.last_name || '').charAt(0) + '.</div>';
+      html += '<div style="font-size:.6rem;color:' + (isProf ? 'var(--gold)' : 'var(--muted)') + '">' + (isProf ? 'Prof' : (s.class_name || '')) + '</div>';
+      html += '<div class="player-status" style="color:' + (isOnline ? 'var(--lo1)' : 'var(--muted)') + '">' + (isOnline ? '● En ligne' : '') + '</div>';
+      html += '</div>';
+    }
+    
+    if (!html) {
+      html = '<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Aucun joueur trouvé' + (isTeacher ? '' : ' dans la classe ' + myClass) + '.<br><span style="font-size:.7rem">Total élèves chargés: ' + sList.length + '</span></div>';
+    }
+    
+    grid.innerHTML = html;
+    document.getElementById('selectedExName').textContent = '⚔️ ' + selectedExercise.name + ' · ' + allPlayers.length + ' joueurs' + (onlineCount > 0 ? ' · ' + onlineCount + ' en ligne' : '');
+    
+  } catch(err) {
+    console.error('loadPlayers error:', err);
+    grid.innerHTML = '<div style="text-align:center;color:var(--error);padding:1rem">Erreur de chargement : ' + err.message + '</div>';
   }
-  
-  grid.innerHTML = html || '<div style="text-align:center;color:var(--muted);padding:1rem">Aucun autre joueur trouvé.</div>';
 }
 
 function selectPlayer(id, first, last) {
