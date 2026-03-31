@@ -462,9 +462,13 @@ async function loadData() {
   try {
 
     allStudents = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
-    allProgress = await supabase.query('cq_student_progress', { select: '*', filter: { 'unit_id': 'eq.4' } }) || [];
+    var _aps = await supabase.query('cq_student_progress', { select: '*', filter: { 'unit_id': 'eq.4' } }).catch(function(){return [];});
+    if (!Array.isArray(_aps)) _aps = await supabase.query('cq_student_progress', { select: '*' }).catch(function(){return [];});
+    allProgress = Array.isArray(_aps) ? _aps : [];
     allComments = await supabase.query('cq_comments', { select: '*', order: 'created_at.desc', limit: 50 }) || [];
-    allGameScores = await supabase.query('cq_game_scores', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'played_at.desc' }) || [];
+    var _ags = await supabase.query('cq_game_scores', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'played_at.desc' }).catch(function(){return [];});
+    if (!Array.isArray(_ags)) _ags = await supabase.query('cq_game_scores', { select: '*', order: 'played_at.desc' }).catch(function(){return [];});
+    allGameScores = Array.isArray(_ags) ? _ags : [];
     if (allGameScores.message) { console.error('GameScores error:', allGameScores.message); allGameScores = []; }
     
     allModules = await supabase.query('cq_modules', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'order_index.asc' }) || [];

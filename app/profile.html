@@ -169,18 +169,15 @@ const GAME_LABELS = {
 
 async function loadProfile() {
   // Load game scores
-  const raw = await supabase.query('cq_game_scores', {
-    select: '*',
-    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' },
-    order: 'played_at.desc'
-  }) || [];
+  var _raw = await supabase.query('cq_game_scores', { select: '*', filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }, order: 'played_at.desc' }).catch(function(){return [];});
+  if (!Array.isArray(_raw)) _raw = await supabase.query('cq_game_scores', { select: '*', filter: { 'student_id': 'eq.' + student.id }, order: 'played_at.desc' }).catch(function(){return [];});
+  var raw = Array.isArray(_raw) ? _raw : [];
   const scores = Array.isArray(raw) ? raw : [];
   
   // Load progress
-  const rawP = await supabase.query('cq_student_progress', {
-    select: '*',
-    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
-  }) || [];
+  var _rP = await supabase.query('cq_student_progress', { select: '*', filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' } }).catch(function(){return [];});
+  if (!Array.isArray(_rP)) _rP = await supabase.query('cq_student_progress', { select: '*', filter: { 'student_id': 'eq.' + student.id } }).catch(function(){return [];});
+  var rawP = Array.isArray(_rP) ? _rP : [];
   const progress = Array.isArray(rawP) ? rawP : [];
   
   // Calculate XP

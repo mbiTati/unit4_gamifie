@@ -138,10 +138,14 @@ async function loadScores() {
   
   document.getElementById('filterInfo').textContent = allStudents.length + ' élève(s)' + (currentClass !== 'all' ? ' en ' + currentClass : '');
   
-  const progress = await supabase.query('cq_student_progress', { select: '*', filter: { 'unit_id': 'eq.4' } }) || [];
+  var _ps = await supabase.query('cq_student_progress', { select: '*', filter: { 'unit_id': 'eq.4' } }).catch(function(){return [];});
+  if (!Array.isArray(_ps)) _ps = await supabase.query('cq_student_progress', { select: '*' }).catch(function(){return [];});
+  var progress = Array.isArray(_ps) ? _ps : [];
   const progressList = Array.isArray(progress) ? progress : [];
   
-  const gameScores = await supabase.query('cq_game_scores', { select: '*', filter: { 'unit_id': 'eq.4' } }) || [];
+  var _gs = await supabase.query('cq_game_scores', { select: '*', filter: { 'unit_id': 'eq.4' } }).catch(function(){return [];});
+  if (!Array.isArray(_gs)) _gs = await supabase.query('cq_game_scores', { select: '*' }).catch(function(){return [];});
+  var gameScores = Array.isArray(_gs) ? _gs : [];
   const gsList = Array.isArray(gameScores) ? gameScores : [];
   
   // Load privacy settings
