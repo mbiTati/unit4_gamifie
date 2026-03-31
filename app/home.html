@@ -116,6 +116,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <div class="stat"><div class="n" id="statXP" style="color:var(--accent2)">0</div><div class="l">XP total</div></div>
     <div class="stat"><div class="n" id="statModules" style="color:var(--lo1)">0/20</div><div class="l">Modules</div></div>
     <div class="stat"><div class="n" id="statGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div>
+    <div class="stat"><div class="n" id="statExercises" style="color:var(--lo2)">0</div><div class="l">Exercices faits</div></div>
     <div class="stat"><div class="n" id="statStreak" style="color:var(--gold)">0</div><div class="l">Série (jours)</div></div>
   </div>
   
@@ -191,10 +192,13 @@ async function loadDashboard() {
   
   // Game scores
   const gameScores = await supabase.query('cq_game_scores', {
-    select: 'id',
+    select: 'id,game_id,score',
     filter: { 'student_id': 'eq.' + student.id }
   }) || [];
   const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
+  
+  // Count unique exercises done
+  const exercisesDone = Array.isArray(gameScores) ? new Set(gameScores.map(g => g.game_id)).size : 0;
   
   // Level
   const level = getLevel(totalXP);
@@ -204,7 +208,16 @@ async function loadDashboard() {
   if (isTeacher) {
     document.getElementById('avatar').style.borderColor = '#F59E0B';
     document.getElementById('avatar').style.background = 'rgba(245,158,11,.12)';
-    document.getElementById('avatar').innerHTML = '👑';
+    // Prof gets the SQL Overlord character (dancing)
+    const avatarEl2 = document.getElementById('avatar');
+    avatarEl2.innerHTML = '';
+    avatarEl2.style.width = '70px';
+    avatarEl2.style.height = '90px';
+    avatarEl2.style.borderRadius = '12px';
+    avatarEl2.style.border = 'none';
+    avatarEl2.style.overflow = 'visible';
+    const profChar = createCharacter(8, avatarEl2, 60);
+    profChar.classList.add('dancing');
     document.getElementById('wName').textContent = student.first_name + ' — Enseignant(e)';
     document.getElementById('wLevel').innerHTML = '<span style="color:#F59E0B;font-weight:700">PROF</span>';
     document.getElementById('wXP').textContent = 'Accédez à votre espace via "Mon Espace" dans la navigation';
@@ -239,6 +252,7 @@ async function loadDashboard() {
   document.getElementById('statXP').textContent = totalXP;
   document.getElementById('statModules').textContent = modulesCompleted + '/20';
   document.getElementById('statGames').textContent = gamesPlayed;
+  document.getElementById('statExercises').textContent = exercisesDone;
   document.getElementById('statStreak').textContent = student.streak_days || 0;
   
   // LEVELS MAP
@@ -257,9 +271,10 @@ function renderLevelsTrack(xp, currentLevel, isTeacher) {
   
   for (let i = 0; i < XP_LEVELS.length; i++) {
     const lvl = XP_LEVELS[i];
-    const reached = xp >= lvl.min;
+    let reached = xp >= lvl.min;
     const isCurrent = i === currentLevel.index && !isTeacher;
     const isLocked = !reached && !isTeacher;
+    if (isTeacher) reached = true; // Prof sees all levels as reached
     
     // Connector (except before first)
     if (i > 0) {
@@ -267,12 +282,11 @@ function renderLevelsTrack(xp, currentLevel, isTeacher) {
     }
     
     html += '<div class="level-node">';
-    html += '<div class="level-dot ' + (isLocked ? 'locked' : 'reached') + (isCurrent ? ' current' : '') + '" style="' +
+    html += '<div class="level-dot ' + (isLocked ? 'locked' : 'reached') + (isCurrent && !isTeacher ? ' current' : '') + '" style="' +
       (reached ? 'background:' + lvl.color + '18;border-color:' + lvl.color + ';color:' + lvl.color : '') + '">';
     
-    // Dancing character on current level
-    if (isCurrent) {
-      // Dancing character will be added after render
+    // Dancing character: on current level (student) or on ALL levels (prof)
+    if (isCurrent || isTeacher) {
       html += '<div class="dancer-slot" data-level="' + i + '"></div>';
     }
     

@@ -417,7 +417,8 @@ function renderData() {
     && (filterCohort === 'all' || s.cohort === filterCohort)
   );
   
-  // Calculate stats per student
+  // Calculate stats per student (exercises + modules)
+  const gs = Array.isArray(allGameScores) ? allGameScores : [];
   const stats = students.map(s => {
     const sp = allProgress.filter(p => p.student_id === s.id && p.module_id >= 401 && p.module_id <= 420);
     const completed = sp.filter(p => p.completed_at).length;
@@ -428,10 +429,17 @@ function renderData() {
         quizScores.push(Math.round(p.quiz_score / p.total_questions * 100));
       }
     }
+    // Exercise scores
+    const myGames = gs.filter(g => g.student_id === s.id);
+    const exercisesDone = new Set(myGames.map(g => g.game_id)).size;
+    const totalGameScore = myGames.reduce((a, g) => a + (g.score || 0), 0);
+    const lastPlayed = myGames.length > 0 ? myGames.sort((a,b) => b.played_at?.localeCompare(a.played_at))[0]?.played_at : null;
+    xp += Math.floor(totalGameScore / 10); // Game score contributes to XP
     const quizAvg = quizScores.length > 0 ? Math.round(quizScores.reduce((a,b)=>a+b,0) / quizScores.length) : -1;
     const level = getLevel(xp);
     const pct = Math.round(completed / 20 * 100);
-    return { ...s, completed, xp, quizAvg, level, pct, atRisk: pct < 20 && sp.length > 0 };
+    const isActive = myGames.length > 0 || sp.length > 0;
+    return { ...s, completed, xp, quizAvg, level, pct, exercisesDone, totalGameScore, lastPlayed, isActive, atRisk: isActive && (pct < 20 || exercisesDone < 3) };
   }).sort((a, b) => b.xp - a.xp);
   
   // KPIs
@@ -457,19 +465,19 @@ function renderData() {
   else badge.style.display = 'none';
   
   // Table
-  document.getElementById('thead').innerHTML = `<tr><th>Élève</th><th>Classe</th><th>Niveau</th><th>XP</th><th>Modules</th><th>Progression</th><th>Quiz</th><th>Actions</th></tr>`;
+  document.getElementById('thead').innerHTML = '<tr><th>Élève</th><th>Classe</th><th>Niveau</th><th>XP</th><th>Exercices</th><th>Score jeux</th><th>Dernière activité</th><th>Actions</th></tr>';
   document.getElementById('tbody').innerHTML = stats.map(s => {
-    const barColor = s.pct < 30 ? 'var(--error)' : s.pct < 60 ? 'var(--gold)' : 'var(--lo1)';
-    return `<tr>
-      <td><strong>${s.first_name} ${s.last_name}</strong></td>
-      <td style="font-size:.7rem;color:var(--muted)">${s.class_name || '-'} · ${s.cohort || '-'}</td>
-      <td><span class="level-chip" style="background:${s.level.color}15;color:${s.level.color}">${s.level.name}</span></td>
-      <td style="font-family:monospace;font-weight:600">${s.xp}</td>
-      <td>${s.completed}/20</td>
-      <td><div class="bar"><div class="bar-fill" style="width:${s.pct}%;background:${barColor}"></div></div><span style="font-size:.6rem;color:var(--muted)">${s.pct}%</span></td>
-      <td class="${s.quizAvg >= 0 && s.quizAvg < 40 ? 'danger-text' : ''}">${s.quizAvg >= 0 ? s.quizAvg + '%' : '-'}</td>
-      <td><button class="btn-sm btn-danger" onclick="resetStudent('${s.id}')">Reset</button></td>
-    </tr>`;
+    const lastDate = s.lastPlayed ? new Date(s.lastPlayed).toLocaleDateString('fr-CH') : 'Jamais';
+    return '<tr>' +
+      '<td><strong>' + s.first_name + ' ' + s.last_name + '</strong></td>' +
+      '<td style="font-size:.7rem;color:var(--muted)">' + (s.class_name || '-') + '</td>' +
+      '<td><span class="level-chip" style="background:' + s.level.color + '15;color:' + s.level.color + '">' + s.level.name + '</span></td>' +
+      '<td style="font-family:monospace;font-weight:600">' + s.xp + '</td>' +
+      '<td style="font-weight:700;color:' + (s.exercisesDone > 5 ? 'var(--lo1)' : s.exercisesDone > 0 ? 'var(--gold)' : 'var(--muted)') + '">' + s.exercisesDone + ' jeux</td>' +
+      '<td style="font-family:monospace">' + s.totalGameScore + ' pts</td>' +
+      '<td style="font-size:.7rem;color:var(--muted)">' + lastDate + '</td>' +
+      '<td><button class="btn-sm btn-danger" onclick="resetStudent(\'' + s.id + '\')">Reset</button></td>' +
+      '</tr>';
   }).join('');
 }
 
