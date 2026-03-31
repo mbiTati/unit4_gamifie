@@ -192,18 +192,56 @@ const _corrObs = setInterval(()=>{
 <script src="../../app/comment-widget.js"></script>
 <script src="../../app/progress-saver.js"></script>
 
+
+
 <script>
-// Auto-save score when leaving the page
-window.addEventListener('beforeunload', function() {
-  if (typeof saveGameScore === 'function') {
-    var s = 0;
-    if (typeof score !== 'undefined') s = score;
-    else if (typeof totalScore !== 'undefined') s = totalScore;
-    else if (typeof points !== 'undefined') s = points;
-    else if (typeof correct !== 'undefined') s = correct * 10;
-    if (s > 0) saveGameScore('module07_nettoyeur_tables', s, 0);
+// Smart score tracker — counts validated exercises
+(function() {
+  var _dqScore = 0;
+  var _dqGameId = 'module07_nettoyeur_tables';
+  
+  // Method 1: Count elements with success indicators (for SQL exercises)
+  function countSuccesses() {
+    var indicators = document.querySelectorAll('.correct, .success, [style*="color: green"], [style*="color:#10b981"], [style*="color: #10b981"]');
+    // Also count ✅ in text content
+    var allText = document.body.innerText || '';
+    var checkmarks = (allText.match(/✅/g) || []).length;
+    return Math.max(indicators.length, checkmarks);
   }
-});
+  
+  // Method 2: Read score variables
+  function getScoreVar() {
+    if (typeof score !== 'undefined' && score > 0) return score;
+    if (typeof totalScore !== 'undefined' && totalScore > 0) return totalScore;
+    if (typeof correct !== 'undefined' && correct > 0) return correct * 10;
+    if (typeof points !== 'undefined' && points > 0) return points;
+    if (typeof goodAnswers !== 'undefined' && goodAnswers > 0) return goodAnswers * 10;
+    return 0;
+  }
+  
+  // Save periodically (every 30s) and on leave
+  function doSave() {
+    var s = Math.max(getScoreVar(), countSuccesses() * 10);
+    if (s > _dqScore) {
+      _dqScore = s;
+      if (typeof saveGameScore === 'function') {
+        saveGameScore(_dqGameId, _dqScore, 0);
+      }
+    }
+  }
+  
+  // Save every 30 seconds
+  setInterval(doSave, 30000);
+  
+  // Save on page leave
+  window.addEventListener('beforeunload', doSave);
+  
+  // Save on click (after validation)
+  document.addEventListener('click', function() {
+    setTimeout(doSave, 2000); // Wait for validation to render
+  });
+})();
 </script>
+
 </body>
 </html>

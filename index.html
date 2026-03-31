@@ -43,6 +43,10 @@ function dqLogout() {
 }
 </script>
 
+<div style="background:#111827;border-bottom:1px solid #1e3a5f;padding:.4rem 1rem;text-align:center">
+  <span style="font-size:.65rem;color:#94a3b8;font-family:Outfit,sans-serif">Chaque exercice rapporte des XP ! Score sauvegardé automatiquement.</span>
+  <span style="font-size:.65rem;color:#32E0C4;font-family:Outfit,sans-serif;margin-left:.5rem">Max 20 XP par exercice unique</span>
+</div>
 <header class="header"><div class="header-inner"><div class="brand"><div class="brand-icon">U4</div><div><h1>Unit 4 — Database Design & Development</h1><p>SwissSound Studios &middot; Mme MBI</p></div></div><nav class="nav-pills"><span class="nav-pill" onclick="s('top')">Hub</span><span class="nav-pill" onclick="s('m1')">LO1</span><span class="nav-pill" onclick="s('m2')">LO2</span><span class="nav-pill" onclick="s('m3')">LO3</span><span class="nav-pill" onclick="s('m4')">LO4</span><div style="width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:.3s" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'"><div style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:.3s" id="toggleDot"></div></div><a href="app/teacher.html" style="padding:.3rem .7rem;border-radius:6px;font-size:.72rem;font-weight:600;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);color:#a855f7;cursor:pointer;transition:.2s;text-decoration:none">Espace enseignant</a></nav>
 </div></header>
 <main class="main" id="top">
@@ -81,7 +85,7 @@ const C=[
 ];
 const bc=b=>b.includes('D')?'d':b.includes('M')&&b.includes('P')?'pm':b.includes('M')?'m':'p';
 const lc={1:'l1',2:'l2',3:'l3',4:'l4'};
-function r(lo,id){document.getElementById(id).innerHTML=C.filter(c=>c.lo===lo).map(c=>`<div class="ch ${lc[lo]}"><div class="ch-top"><span class="ch-n">${c.n}</span><span class="ch-b ${bc(c.b)}">${c.b}</span><span class="ch-tp">${c.tp}</span></div><div class="ch-tt">${c.t}</div><div class="ch-d">${c.d}</div><div class="ch-lk"><a class="ch-l pr" href="${c.g}">Mini-jeu</a>${c.e?`<a class="ch-l" href="${c.e}">Bac SQL</a>`:``}${c.s1?`<a class="ch-l" href="${c.s1}" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#2563eb;font-weight:700">SQL 1</a>`:``}${c.s2?`<a class="ch-l" href="${c.s2}" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#2563eb;font-weight:700">SQL 2</a>`:``}<a class="ch-l" href="${c.mm}" target="_blank">Memo</a></div></div>`).join('')}
+function r(lo,id){document.getElementById(id).innerHTML=C.filter(c=>c.lo===lo).map(c=>`<div class="ch ${lc[lo]}"><div class="ch-top"><span class="ch-n">${c.n}</span><span class="ch-b ${bc(c.b)}">${c.b}</span><span class="ch-tp">${c.tp}</span></div><div class="ch-tt">${c.t}</div><div class="ch-d">${c.d}</div><div class="ch-lk"><a class="ch-l pr" href="${c.g}">Mini-jeu <span style="font-size:.5rem;color:#10b981;font-weight:700">+XP</span></a>${c.e?`<a class="ch-l" href="${c.e}">Bac SQL <span style="font-size:.5rem;color:#10b981;font-weight:700">+XP</span></a>`:``}${c.s1?`<a class="ch-l" href="${c.s1}" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#2563eb;font-weight:700">SQL 1</a>`:``}${c.s2?`<a class="ch-l" href="${c.s2}" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#2563eb;font-weight:700">SQL 2</a>`:``}<a class="ch-l" href="${c.mm}" target="_blank">Memo</a></div></div>`).join('')}
 r(1,'c1');r(2,'c2');r(3,'c3');r(4,'c4');
 function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}
 </script>
