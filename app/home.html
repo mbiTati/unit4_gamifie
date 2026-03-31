@@ -181,7 +181,7 @@ async function loadDashboard() {
   // Calculate XP from progress
   const progress = await supabase.query('cq_student_progress', { 
     select: '*', 
-    filter: { 'student_id': 'eq.' + student.id }
+    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
   }) || [];
   
   const progressList = Array.isArray(progress) ? progress : [];
@@ -195,7 +195,7 @@ async function loadDashboard() {
   // Game scores
   const gameScores = await supabase.query('cq_game_scores', {
     select: 'id,game_id,score',
-    filter: { 'student_id': 'eq.' + student.id }
+    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
   }) || [];
   const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
   

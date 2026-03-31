@@ -352,9 +352,9 @@ async function loadData() {
   try {
 
     allStudents = await supabase.query('cq_students', { select: '*', order: 'last_name.asc' }) || [];
-    allProgress = await supabase.query('cq_student_progress', { select: '*' }) || [];
+    allProgress = await supabase.query('cq_student_progress', { select: '*', filter: { 'unit_id': 'eq.4' } }) || [];
     allComments = await supabase.query('cq_comments', { select: '*', order: 'created_at.desc', limit: 50 }) || [];
-    allGameScores = await supabase.query('cq_game_scores', { select: '*', order: 'played_at.desc' }) || [];
+    allGameScores = await supabase.query('cq_game_scores', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'played_at.desc' }) || [];
     if (allGameScores.message) { console.error('GameScores error:', allGameScores.message); allGameScores = []; }
     
     allModules = await supabase.query('cq_modules', { select: '*', filter: { 'unit_id': 'eq.4' }, order: 'order_index.asc' }) || [];

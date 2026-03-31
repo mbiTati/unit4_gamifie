@@ -22,6 +22,7 @@ async function saveGameScore(gameId, score, durationSeconds) {
         game_id: gameId,
         score: score,
         duration_seconds: durationSeconds || 0,
+        unit_id: 4,
       })
     });
     
@@ -71,6 +72,7 @@ async function saveModuleProgress(moduleId, creditsEarned, quizScore, totalQuest
           quiz_score: quizScore || 0,
           total_questions: totalQuestions || 0,
           current_step: 1,
+          unit_id: 4,
         })
       });
     }
