@@ -57,8 +57,9 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
   <h1>Classement — Unit 4</h1>
   <div class="topbar-right">
     <a href="home.html">Accueil</a>
-    <a href="profile.html" style="color:var(--accent2)">Mon Profil</a>
+    <a href="profile.html">Mon Profil</a>
     <a href="settings.html">Paramètres</a>
+    <button onclick="doLogout()">Déconnexion</button>
   </div>
 </div>
 
@@ -258,6 +259,14 @@ function renderBoard(suffix, data, mainKey, mainLabel, secKey, secLabel) {
 }
 
 loadScores();
+
+function doLogout() {
+  localStorage.removeItem('cq_student');
+  localStorage.removeItem('cq_token');
+  localStorage.removeItem('cq_refresh');
+  localStorage.removeItem('cq_user');
+  window.location.href = 'login.html';
+}
 </script>
 </body>
 </html>

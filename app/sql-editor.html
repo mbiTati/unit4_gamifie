@@ -59,9 +59,13 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
 
 <div class="topbar">
   <h1>SQL Editor — Supabase Live</h1>
-  <div class="topbar-right"><a href="home.html">← Accueil</a>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
     <a href="profile.html">Mon Profil</a>
-    <a href="scores.html">Classement</a></div>
+    <a href="scores.html">Classement</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="doLogout()">Déconnexion</button>
+  </div>
 </div>
 <div class="main">
   <div class="live-badge">LIVE — Requêtes sur les vraies tables GESCOM + SwissSound (lecture seule)</div>
@@ -227,6 +231,14 @@ async function loadSchema() {
 }
 
 loadSchema();
+
+function doLogout() {
+  localStorage.removeItem('cq_student');
+  localStorage.removeItem('cq_token');
+  localStorage.removeItem('cq_refresh');
+  localStorage.removeItem('cq_user');
+  window.location.href = 'login.html';
+}
 </script>
 </body>
 </html>
