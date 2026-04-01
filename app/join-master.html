@@ -49,18 +49,10 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 <script>
 if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
 </script>
+<script src="nav.js?v=1775083295"></script>
 
-<div class="topbar">
-  <h1>Join Master</h1>
-  <div class="topbar-right">
-    <a href="home.html">Accueil</a>
-    <a href="profile.html">Mon Profil</a>
-    <a href="scores.html">Classement</a>
-    <a href="docs.html" style="color:var(--gold)">Documents</a>
-    <a href="settings.html">Paramètres</a>
-    <button onclick="doLogout()">Déconnexion</button>
-  </div>
-</div>
+
+
 <div class="main">
   <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
   <div class="score-bar">

@@ -20,33 +20,11 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line
 <script>
 if (!localStorage.getItem('cq_student')) { window.location.href = 'app/login.html'; }
 </script>
+<script src="app/nav.js?v=1775083295"></script>
 
-<div id="dqNavBar" style="background:#0a0f1a;border-bottom:1px solid #1e3a5f;padding:.5rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:999">
-  <div style="display:flex;align-items:center;gap:.6rem">
-    <span style="font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;background:linear-gradient(135deg,#32E0C4,#0D7377);-webkit-background-clip:text;-webkit-text-fill-color:transparent">DataQuest</span>
-    <span style="font-size:.6rem;color:#94a3b8" id="dqStudentName"></span>
-  </div>
-  <div style="display:flex;gap:.4rem;flex-wrap:wrap">
-    <a href="app/home.html" style="color:#e2e8f0;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Accueil</a>
-    <a href="app/profile.html" style="color:#32E0C4;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #0D7377;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Mon Profil</a>
-    <a href="app/scores.html" style="color:#e2e8f0;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Classement</a>
-    <a href="app/settings.html" style="color:#e2e8f0;text-decoration:none;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;font-family:Outfit,sans-serif">Paramètres</a>
-    <button id="lo4ToggleBtn" onclick="toggleLO4()" style="display:none;color:#F59E0B;border-color:rgba(245,158,11,.3);font-size:.65rem" title="Débloquer/verrouiller LO4">🔒 LO4</button>
-    <button onclick="dqLogout()" style="color:#94a3b8;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:Outfit,sans-serif">Déconnexion</button>
-  </div>
-</div>
-<script>
-// Show student name in nav
-var _s = JSON.parse(localStorage.getItem('cq_student') || 'null');
-if (_s) document.getElementById('dqStudentName').textContent = _s.first_name + ' ' + _s.last_name;
-function dqLogout() {
-  localStorage.removeItem('cq_student');
-  localStorage.removeItem('cq_token');
-  localStorage.removeItem('cq_refresh');
-  localStorage.removeItem('cq_user');
-  window.location.href = 'app/login.html';
-}
-</script>
+
+
+
 
 <div style="background:#111827;border-bottom:1px solid #1e3a5f;padding:.4rem 1rem;text-align:center">
   <span style="font-size:.65rem;color:#94a3b8;font-family:Outfit,sans-serif">Chaque exercice rapporte des XP ! Score sauvegardé automatiquement.</span>
@@ -61,7 +39,19 @@ function dqLogout() {
   <button id="tabActivites" onclick="switchTab('activites')" style="padding:.6rem 1.5rem;font-family:Outfit,sans-serif;font-size:.85rem;font-weight:800;border:none;border-bottom:3px solid transparent;background:none;color:#94a3b8;cursor:pointer;margin-bottom:-2px">ACTIVITÉS</button>
 </div>
 <script>
+// Check URL hash or localStorage for initial tab
+(function() {
+  var hash = window.location.hash.replace('#','');
+  var saved = localStorage.getItem('dq_hub_tab');
+  if (hash === 'activites' || hash === 'cours') {
+    setTimeout(function() { switchTab(hash); }, 100);
+  } else if (saved === 'activites') {
+    setTimeout(function() { switchTab('activites'); }, 100);
+  }
+})();
+
 function switchTab(tab) {
+  localStorage.setItem('dq_hub_tab', tab);
   var cours = document.getElementById('coursContent');
   var act = document.getElementById('activitesContent');
   var btnC = document.getElementById('tabCours');
