@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Mes Activités</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.top{background:var(--surface);border-bottom:1px solid var(--border);padding:.5rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.top a{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border:1px solid var(--border);border-radius:4px}
+.top a.active{color:var(--gold);border-color:rgba(245,158,11,.3)}
+.top .logo{font-size:.9rem;font-weight:900;color:var(--accent2);text-decoration:none}
+.main{max-width:900px;margin:0 auto;padding:1rem}
+.section{margin-bottom:1.5rem}
+.section-title{font-size:.9rem;font-weight:800;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.section-title .tag{font-size:.5rem;font-weight:800;padding:.15rem .4rem;border-radius:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.5rem}
+.item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem;text-decoration:none;color:var(--text);transition:all .2s;display:block}
+.item:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.item .ic{font-size:.55rem;font-weight:800;margin-bottom:.3rem;display:inline-block;padding:.1rem .3rem;border-radius:3px}
+.item h4{font-size:.78rem;font-weight:700;margin-bottom:.2rem}
+.item p{font-size:.6rem;color:var(--muted);line-height:1.3}
+.item .xp{font-size:.5rem;color:var(--lo1);font-weight:700;margin-top:.3rem}
+
+/* FEATURED */
+.featured{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.5rem}
+.feat-card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1rem;text-decoration:none;color:var(--text);transition:all .2s;text-align:center}
+.feat-card:hover{transform:translateY(-3px)}
+.feat-card .fi{font-size:1.8rem;margin-bottom:.3rem}
+.feat-card h3{font-size:.9rem;font-weight:800;margin-bottom:.2rem}
+.feat-card p{font-size:.65rem;color:var(--muted)}
+.feat-card.duel{border-color:rgba(245,158,11,.3)}.feat-card.duel:hover{border-color:var(--gold);background:rgba(245,158,11,.03)}
+.feat-card.duel h3{color:var(--gold)}
+.feat-card.pipe{border-color:rgba(139,92,246,.3)}.feat-card.pipe:hover{border-color:var(--lo4);background:rgba(139,92,246,.03)}
+.feat-card.pipe h3{color:var(--lo4)}
+</style>
+</head>
+<body>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
+
+<div class="top">
+  <a href="home.html" class="logo">🎮 DataQuest</a>
+  <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+    <a href="home.html">Accueil</a>
+    <a href="../index.html">Cours</a>
+    <a href="activites.html" class="active">Activités</a>
+    <a href="profile.html">Profil</a>
+    <a href="projet-veloshop.html">Projet</a>
+  </div>
+</div>
+
+<div class="main">
+  <div style="text-align:center;margin-bottom:1rem">
+    <div style="font-size:1.5rem">🎮</div>
+    <h1 style="font-size:1.2rem;font-weight:900;color:var(--gold)">Mes Activités</h1>
+    <p style="font-size:.78rem;color:var(--muted)">Pratiquer, jouer, se défier</p>
+  </div>
+
+  <!-- FEATURED: Duel + Pipeline -->
+  <div class="featured">
+    <a href="duel-sql.html" class="feat-card duel">
+      <div class="fi">⚔️</div>
+      <h3>Duel SQL</h3>
+      <p>Défie un camarade !<br>86 questions · 7 catégories</p>
+    </a>
+    <a href="pipeline-bdd.html" class="feat-card pipe">
+      <div class="fi">🔬</div>
+      <h3>Pipeline BDD</h3>
+      <p>Dict → DF → MCD → MLD → SQL<br>3 cas d'entreprise</p>
+    </a>
+  </div>
+
+  <!-- JEUX -->
+  <div class="section">
+    <div class="section-title"><span class="tag" style="background:rgba(50,224,196,.1);color:var(--accent2)">JEUX</span> Jeux pédagogiques</div>
+    <div class="grid">
+      <a href="join-master.html" class="item"><span class="ic" style="background:rgba(59,130,246,.1);color:var(--lo2)">JOIN</span><h4>Join Master</h4><p>Visualisez les jointures</p><div class="xp">+20 XP</div></a>
+      <a href="normalisation-puzzle.html" class="item"><span class="ic" style="background:rgba(139,92,246,.1);color:var(--lo4)">NF</span><h4>Normalisation Puzzle</h4><p>1NF → 2NF → 3NF</p><div class="xp">+20 XP</div></a>
+      <a href="query-racer.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">SQL</span><h4>Query Racer</h4><p>Course SQL chronométrée</p><div class="xp">+20 XP</div></a>
+      <a href="constraint-catcher.html" class="item"><span class="ic" style="background:rgba(239,68,68,.1);color:var(--error)">PK</span><h4>Constraint Catcher</h4><p>Contraintes manquantes</p><div class="xp">+20 XP</div></a>
+      <a href="df-explorer.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">DF</span><h4>DF Explorer</h4><p>Dépendances fonctionnelles</p><div class="xp">+20 XP</div></a>
+      <a href="erd-builder.html" class="item"><span class="ic" style="background:rgba(50,224,196,.1);color:var(--accent2)">MCD</span><h4>ERD Builder</h4><p>Construisez un MCD</p><div class="xp">+20 XP</div></a>
+      <a href="quiz-live.html" class="item"><span class="ic" style="background:rgba(239,68,68,.1);color:var(--error)">QUIZ</span><h4>Quiz Live</h4><p>Kahoot-style · 4 banques</p><div class="xp">+20 XP</div></a>
+      <a href="table-designer.html" class="item"><span class="ic" style="background:rgba(16,185,129,.1);color:var(--lo1)">DDL</span><h4>Table Designer</h4><p>Créez des tables</p><div class="xp">+20 XP</div></a>
+    </div>
+  </div>
+
+  <!-- EXERCICES SQL -->
+  <div class="section">
+    <div class="section-title"><span class="tag" style="background:rgba(59,130,246,.1);color:var(--lo2)">SQL</span> Exercices SQL</div>
+    <div class="grid">
+      <a href="../jeux/exercices_gescom/index.html" class="item"><span class="ic" style="background:rgba(59,130,246,.1);color:var(--lo2)">P1</span><h4>GESCOM Partie 1</h4><p>29 exercices basiques</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/exercices_gescom_avances/index.html" class="item"><span class="ic" style="background:rgba(139,92,246,.1);color:var(--lo4)">P2</span><h4>GESCOM Partie 2</h4><p>25 exercices avancés</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/sql_trous/index.html" class="item"><span class="ic" style="background:rgba(50,224,196,.1);color:var(--accent2)">FILL</span><h4>SQL à trous</h4><p>Complétez les mots-clés</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/sql_sandbox/index.html" class="item"><span class="ic" style="background:rgba(100,116,139,.1);color:var(--muted)">SQL</span><h4>Bac à sable SQL</h4><p>Éditeur libre</p><div class="xp" style="color:var(--muted)">Libre</div></a>
+    </div>
+  </div>
+
+  <!-- CAS PRO -->
+  <div class="section">
+    <div class="section-title"><span class="tag" style="background:rgba(245,158,11,.1);color:var(--gold)">PRO</span> Cas professionnels</div>
+    <div class="grid">
+      <a href="../jeux/cas_footlocker/index.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">PRO</span><h4>FootLocker</h4><p>Magasin chaussures</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/cas_bateaux_gva/index.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">PRO</span><h4>Bateaux GVA</h4><p>Location nautique</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/cas_boulangerie/index.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">PRO</span><h4>Boulangerie de Luxe</h4><p>Pâtisserie Lausanne</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/cas_assurance/index.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">PRO</span><h4>Assurance</h4><p>Courtage Suisse</p><div class="xp">+20 XP</div></a>
+    </div>
+  </div>
+
+  <!-- MCD & CONCEPTION -->
+  <div class="section">
+    <div class="section-title"><span class="tag" style="background:rgba(139,92,246,.1);color:var(--lo4)">MCD</span> Conception</div>
+    <div class="grid">
+      <a href="../jeux/matrice_df/index.html" class="item"><span class="ic" style="background:rgba(245,158,11,.1);color:var(--gold)">DF</span><h4>Matrice DF</h4><p>Dépendances fonctionnelles</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/constructeur_mcd/index.html" class="item"><span class="ic" style="background:rgba(50,224,196,.1);color:var(--accent2)">MCD</span><h4>Constructeur MCD</h4><p>Placez entités et cardinalités</p><div class="xp">+20 XP</div></a>
+      <a href="../jeux/lecture_mcd/index.html" class="item"><span class="ic" style="background:rgba(139,92,246,.1);color:var(--lo4)">MCD</span><h4>Lecture MCD</h4><p>Vrai/Faux sur 3 cas</p><div class="xp">+20 XP</div></a>
+    </div>
+  </div>
+</div>
+
+<script src="presence-tracker.js?v=1774980000"></script>
+<script src="duel-notify.js?v=1774980000"></script>
+</body>
+</html>

@@ -68,22 +68,17 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 <script>
 if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
 </script>
-<div style="background:#111827;border-bottom:1px solid #1e3a5f;padding:.5rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
-  <a href="home.html" style="font-size:.9rem;font-weight:900;color:#32E0C4;text-decoration:none">🎮 DataQuest</a>
-  <div style="display:flex;gap:.3rem;flex-wrap:wrap">
-    <a href="home.html" style="color:#94a3b8;text-decoration:none;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border:1px solid #1e3a5f;border-radius:4px">Accueil</a>
-    <a href="../index.html" style="color:#94a3b8;text-decoration:none;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border:1px solid #1e3a5f;border-radius:4px">Cours</a>
-    <a href="activites.html" style="color:#94a3b8;text-decoration:none;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border:1px solid #1e3a5f;border-radius:4px">Activités</a>
-    <a href="profile.html" style="color:#3b82f6;text-decoration:none;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border:1px solid rgba(59,130,246,.3);border-radius:4px">Profil</a>
-    <a href="projet-veloshop.html" style="color:#94a3b8;text-decoration:none;font-size:.72rem;font-weight:600;padding:.2rem .5rem;border:1px solid #1e3a5f;border-radius:4px">Projet</a>
+<div class="topbar">
+  <h1>Mon Profil — Unit 4</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="scores.html">Classement</a>
+    <a href="docs.html" style="color:var(--gold)">Documents</a>
+    <a href="avatar-shop.html" style="color:var(--gold)">Mon Avatar</a>
+    <a href="cards.html" style="color:var(--gold)">🃏 Cartes</a>
+    <a href="settings.html">Paramètres</a>
+    <button onclick="doLogout()">Déconnexion</button>
   </div>
-</div>
-<div style="background:#111827;padding:.3rem 1rem;display:flex;gap:.2rem;border-bottom:1px solid #1e3a5f;overflow-x:auto">
-  <a href="profile.html" style="color:#3b82f6;text-decoration:none;font-size:.7rem;font-weight:700;padding:.3rem .6rem;border-bottom:2px solid #3b82f6">👤 Profil</a>
-  <a href="cards.html" style="color:#94a3b8;text-decoration:none;font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-bottom:2px solid transparent">🃏 Cartes</a>
-  <a href="scores.html" style="color:#94a3b8;text-decoration:none;font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-bottom:2px solid transparent">🏆 Classement</a>
-  <a href="docs.html" style="color:#94a3b8;text-decoration:none;font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-bottom:2px solid transparent">📄 Documents</a>
-  <a href="settings.html" style="color:#94a3b8;text-decoration:none;font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-bottom:2px solid transparent">⚙️ Paramètres</a>
 </div>
 
 <div class="main">

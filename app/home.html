@@ -1,441 +1,195 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DataQuest — Accueil</title>
+<title>DataQuest</title>
 <style>
 :root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse at 20% 50%,rgba(13,115,119,.1) 0%,transparent 50%)}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
-.topbar h1{font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.topbar-right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
-.topbar-right a,.topbar-right button{color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:600;background:none;border:1px solid var(--border);padding:.3rem .6rem;border-radius:5px;cursor:pointer;font-family:inherit}
-.topbar-right a:hover,.topbar-right button:hover{color:var(--accent2);border-color:var(--accent)}
-.main{max-width:950px;margin:0 auto;padding:1.5rem}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
 
-/* WELCOME CARD */
-.welcome{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;position:relative;overflow:hidden}
-.welcome::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
-.avatar{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;border:3px solid;flex-shrink:0;position:relative}
-.avatar-glow{animation:glow 2s ease-in-out infinite}
-@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(50,224,196,.2)}50%{box-shadow:0 0 25px rgba(50,224,196,.4)}}
-.welcome-info{flex:1;min-width:180px}
-.welcome-name{font-size:1.1rem;font-weight:800}
-.welcome-level{font-size:.82rem;margin-top:.2rem}
-.welcome-xp{font-size:.72rem;color:var(--muted);margin-top:.2rem}
-.xp-bar{height:8px;background:var(--surface);border-radius:4px;margin-top:.4rem;overflow:hidden}
-.xp-fill{height:100%;border-radius:4px;transition:width 1.5s ease;position:relative}
-.xp-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:shimmer 2s infinite linear}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+/* TOP BAR */
+.top{background:var(--surface);border-bottom:1px solid var(--border);padding:.5rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.top .logo{font-size:1rem;font-weight:900;color:var(--accent2);display:flex;align-items:center;gap:.4rem}
+.top .user{display:flex;align-items:center;gap:.6rem}
+.top .user-name{font-size:.78rem;font-weight:700}
+.top .user-level{font-size:.6rem;color:var(--gold)}
+.top .xp-bar{width:80px;height:6px;background:var(--card);border-radius:3px;overflow:hidden}
+.top .xp-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--lo1));border-radius:3px}
+.top button{background:none;border:1px solid var(--border);color:var(--muted);padding:.2rem .5rem;border-radius:4px;font-size:.65rem;cursor:pointer;font-family:inherit}
 
-/* LEVELS MAP */
-.levels-section{margin-bottom:1.5rem}
-.levels-title{font-size:.85rem;font-weight:700;margin-bottom:.8rem;color:var(--muted)}
-.levels-track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:.5rem 0 .3rem;position:relative;scrollbar-width:none;-ms-overflow-style:none}
-.levels-track::-webkit-scrollbar{display:none}
-.level-node{display:flex;flex-direction:column;align-items:center;min-width:85px;position:relative;z-index:1}
-.level-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;border:2px solid;transition:all .5s;position:relative}
-.level-dot.locked{background:var(--surface);border-color:var(--border);color:var(--muted);opacity:.4}
-.level-dot.reached{border-width:3px}
-.level-dot.current{animation:currentPulse 1.5s ease-in-out infinite}
-@keyframes currentPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(50,224,196,.3)}50%{transform:scale(1.08);box-shadow:0 0 20px 4px rgba(50,224,196,.2)}}
-.level-name{font-size:.58rem;font-weight:600;margin-top:.3rem;text-align:center;max-width:80px;line-height:1.2}
-.level-xp{font-size:.5rem;color:var(--muted)}
-.level-connector{width:20px;height:3px;background:var(--border);flex-shrink:0;margin-top:-18px}
-.level-connector.active{background:linear-gradient(90deg,var(--accent2),var(--accent))}
+/* PROF BAR */
+.prof-bar{background:rgba(245,158,11,.06);border-bottom:1px solid rgba(245,158,11,.15);padding:.3rem 1rem;display:flex;align-items:center;gap:.8rem;font-size:.7rem}
+.prof-bar a{color:var(--gold);text-decoration:none;font-weight:600}
+.prof-bar a:hover{text-decoration:underline}
 
-/* DANCING CHARACTER */
-.dancer-slot{position:absolute;top:-40px;left:50%;transform:translateX(-50%);z-index:2}
+/* HERO */
+.hero{text-align:center;padding:2rem 1rem 1rem}
+.hero .char{margin:0 auto .5rem}
+.hero h2{font-size:1.1rem;font-weight:800}
+.hero .sub{font-size:.78rem;color:var(--muted);margin-top:.2rem}
 
-/* LEVEL UP CELEBRATION */
-.celebration{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;flex-direction:column}
-.celebration.active{display:flex;animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.celebration .big-char{font-size:5rem;animation:bounce 1s ease-in-out infinite}
-@keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.1)}}
-.celebration .level-up-text{font-size:1.5rem;font-weight:900;margin-top:1rem;animation:glow2 1.5s ease-in-out infinite}
-@keyframes glow2{0%,100%{text-shadow:0 0 10px rgba(50,224,196,.5)}50%{text-shadow:0 0 30px rgba(50,224,196,.8)}}
-.celebration .confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall 2s ease-in forwards}
-@keyframes fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.celebration .close-btn{margin-top:1.5rem;padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
+/* 4 BIG BUTTONS */
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;max-width:600px;margin:1.5rem auto;padding:0 1rem}
+.big-btn{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:1.5rem 1rem;text-align:center;text-decoration:none;color:var(--text);transition:all .2s;cursor:pointer;position:relative;overflow:hidden}
+.big-btn:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.big-btn .icon{font-size:2.2rem;margin-bottom:.5rem}
+.big-btn h3{font-size:1rem;font-weight:800;margin-bottom:.2rem}
+.big-btn p{font-size:.7rem;color:var(--muted);line-height:1.3}
+.big-btn .badge{position:absolute;top:.5rem;right:.5rem;font-size:.5rem;font-weight:800;padding:.15rem .4rem;border-radius:4px}
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-bottom:1.5rem}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem;text-align:center}
-.stat .n{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace}
-.stat .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;margin-top:.1rem}
+.big-btn.cours{border-color:rgba(50,224,196,.3)}.big-btn.cours:hover{border-color:var(--accent2);background:rgba(50,224,196,.04)}
+.big-btn.cours h3{color:var(--accent2)}
 
-/* SECTIONS */
-.section-title{font-size:.85rem;font-weight:700;margin:1.5rem 0 .8rem;display:flex;align-items:center;gap:.5rem}
-.lo-badge{font-size:.55rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;color:#fff}
-.actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;margin-bottom:1rem}
-.action{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-decoration:none;color:inherit;transition:all .2s;display:block}
-.action:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.2)}
-.action .ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;margin-bottom:.5rem}
-.action h3{font-size:.82rem;font-weight:700;margin-bottom:.2rem}
-.action p{font-size:.68rem;color:var(--muted);line-height:1.3}
+.big-btn.activites{border-color:rgba(245,158,11,.3)}.big-btn.activites:hover{border-color:var(--gold);background:rgba(245,158,11,.04)}
+.big-btn.activites h3{color:var(--gold)}
+
+.big-btn.profil{border-color:rgba(59,130,246,.3)}.big-btn.profil:hover{border-color:var(--lo2);background:rgba(59,130,246,.04)}
+.big-btn.profil h3{color:var(--lo2)}
+
+.big-btn.projet{border-color:rgba(16,185,129,.3)}.big-btn.projet:hover{border-color:var(--lo1);background:rgba(16,185,129,.04)}
+.big-btn.projet h3{color:var(--lo1)}
+
+/* QUICK STATS */
+.stats-row{display:flex;justify-content:center;gap:1.5rem;padding:.8rem;font-size:.72rem;color:var(--muted)}
+.stats-row .val{font-weight:900;font-family:'JetBrains Mono',monospace;margin-right:.2rem}
+
+/* FAKE LOCK */
+.fake-lock{position:absolute;inset:0;background:rgba(10,15,26,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;z-index:2}
+.fake-lock .lock-icon{font-size:1.5rem;margin-bottom:.3rem}
+.fake-lock .lock-text{font-size:.6rem;color:var(--gold);font-weight:700;text-align:center;padding:0 .5rem}
+.fake-lock .lock-bar{width:60%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.fake-lock .lock-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--accent2));border-radius:2px}
 </style>
 </head>
 <body>
-<script>
-if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; }
-</script>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
 
-<div class="topbar">
-  <h1>DataQuest</h1>
-  <div class="topbar-right">
-    <a href="../index.html">Hub Cours</a>
-    <a href="teacher.html" id="teacherLink" style="display:none">Mon Espace</a>
-    <a href="docs.html" style="color:var(--gold)">Documents</a>
-    <a href="profile.html" style="color:var(--accent2)">Mon Profil</a>
-    <a href="scores.html">Classement</a>
-    <a href="avatar-shop.html" style="color:var(--gold)">Mon Avatar</a>
-    <a href="cards.html" style="color:var(--gold)">🃏 Cartes</a>
-    <a href="settings.html">Paramètres</a>
-    <button onclick="doLogout()">Déconnexion</button>
-  </div>
-</div>
-
-<div class="main">
-  <!-- WELCOME CARD -->
-  <div class="welcome" id="welcomeCard">
-    <div class="avatar avatar-glow" id="avatar">?</div>
-    <div class="welcome-info">
-      <div class="welcome-name" id="wName">Chargement...</div>
-      <div class="welcome-level" id="wLevel"></div>
-      <div class="welcome-xp" id="wXP"></div>
-      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-      <a href="profile.html" style="font-size:.72rem;color:var(--accent2);text-decoration:none;margin-top:.3rem;display:inline-block">Voir mon profil complet →</a>
+<div class="top">
+  <div class="logo">🎮 DataQuest</div>
+  <div class="user">
+    <div>
+      <div class="user-name" id="userName">...</div>
+      <div class="user-level" id="userLevel">...</div>
     </div>
-  </div>
-  
-  <!-- LEVELS MAP -->
-  <div class="levels-section">
-    <div class="levels-title">Parcours des niveaux</div>
-    <div class="levels-track" id="levelsTrack"></div>
-  </div>
-  
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat"><div class="n" id="statXP" style="color:var(--accent2)">0</div><div class="l">XP total</div></div>
-    <div class="stat"><div class="n" id="statModules" style="color:var(--lo1)">0/20</div><div class="l">Modules</div></div>
-    <div class="stat"><div class="n" id="statGames" style="color:var(--lo4)">0</div><div class="l">Parties jouées</div></div>
-    <div class="stat"><div class="n" id="statExercises" style="color:var(--lo2)">0</div><div class="l">Exercices faits</div></div>
-    <div class="stat"><div class="n" id="statStreak" style="color:var(--gold)">0</div><div class="l">Série (jours)</div></div>
-  </div>
-  
-  <!-- GAMES -->
-  <div class="section-title"><span class="lo-badge" style="background:var(--gold)">DÉFI</span> Défis & conception</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">
-    <a class="action" href="duel-sql.html" style="border-color:var(--gold);background:linear-gradient(135deg,rgba(245,158,11,.03),rgba(239,68,68,.03))"><div class="ic" style="background:rgba(245,158,11,.15);color:#f59e0b">VS</div><h3 style="color:var(--gold)">Duel SQL</h3><p>Défiez un camarade !</p><span style="font-size:.55rem;color:var(--lo1);font-weight:700">+20 XP max</span></a>
-    <a class="action" href="pipeline-bdd.html" style="border-color:var(--lo4);background:linear-gradient(135deg,rgba(139,92,246,.03),rgba(59,130,246,.03))"><div class="ic" style="background:rgba(139,92,246,.15);color:#8b5cf6">BDD</div><h3 style="color:var(--lo4)">Pipeline BDD</h3><p>Dict → DF → MCD → MLD → SQL</p><span style="font-size:.55rem;color:var(--lo1);font-weight:700">+20 XP max/cas</span></a>
-  </div>
-  <a class="action" href="projet-veloshop.html" style="border-color:var(--lo1);background:linear-gradient(135deg,rgba(16,185,129,.03),rgba(50,224,196,.03))"><div class="ic" style="background:rgba(16,185,129,.15);color:#10b981">TEAM</div><h3 style="color:var(--lo1)">Projets en équipe</h3><p>6 cas en équipe — BDD complète de A à Z</p><span style="font-size:.55rem;color:var(--gold);font-weight:700">Débloqué par le prof</span></a>
-  
-  <div class="section-title"><span class="lo-badge" style="background:var(--accent2)">JEUX</span> Jeux pédagogiques</div>
-  <div class="actions">
-    
-    <a class="action" href="join-master.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">JOIN</div><h3>Join Master</h3><p>Visualisez les jointures SQL</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="normalisation-puzzle.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">NF</div><h3>Normalisation Puzzle</h3><p>1NF → 2NF → 3NF drag & drop</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="query-racer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">SQL</div><h3>Query Racer</h3><p>Course SQL chronométrée</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="constraint-catcher.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">PK</div><h3>Constraint Catcher</h3><p>Trouvez les contraintes manquantes</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="table-designer.html"><div class="ic" style="background:rgba(16,185,129,.1);color:#10b981">DDL</div><h3>Table Designer</h3><p>Créez des tables visuellement</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="df-explorer.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">DF</div><h3>DF Explorer</h3><p>Dépendances fonctionnelles</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="erd-builder.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">MCD</div><h3>ERD Builder</h3><p>Construisez un MCD complet</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="block-animations.html"><div class="ic" style="background:rgba(99,102,241,.1);color:#6366f1">VIS</div><h3>Block Animations</h3><p>SELECT, JOIN, INSERT animés</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">Démo (0 XP)</span></a>
-    <a class="action" href="quiz-live.html"><div class="ic" style="background:rgba(239,68,68,.1);color:#ef4444">QUIZ</div><h3>Quiz Live</h3><p>Kahoot — 4 banques de questions</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">+20 XP max</span></a>
-    <a class="action" href="sql-editor.html"><div class="ic" style="background:rgba(50,224,196,.1);color:#32E0C4">LIVE</div><h3>SQL Editor Live</h3><p>Requêtes sur Supabase</p><span style="font-size:.55rem;color:var(--muted);font-weight:700;display:block;margin-top:.2rem">Libre (0 XP)</span></a>
-  </div>
-  
-  <!-- QUICK ACCESS -->
-  <div class="section-title"><span class="lo-badge" style="background:var(--lo2)">COURS</span> Accès rapide</div>
-  <div class="actions">
-    <a class="action" href="../jeux/exercices_gescom/index.html"><div class="ic" style="background:rgba(59,130,246,.1);color:#3b82f6">P1</div><h3>Exercices GESCOM P1</h3><p>29 exercices SQL basiques</p></a>
-    <a class="action" href="../jeux/exercices_gescom_avances/index.html"><div class="ic" style="background:rgba(139,92,246,.1);color:#8b5cf6">P2</div><h3>Exercices GESCOM P2</h3><p>28 exercices avancés</p></a>
-    <a class="action" href="../jeux/cas_footlocker/index.html"><div class="ic" style="background:rgba(245,158,11,.1);color:#f59e0b">PRO</div><h3>Cas FootLocker</h3><p>Cas professionnel complet</p></a>
-    <a class="action" href="../index.html"><div class="ic" style="background:rgba(148,163,184,.1);color:#94a3b8">HUB</div><h3>Hub principal</h3><p>Tous les modules et boss fights</p></a>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    <button onclick="localStorage.clear();window.location.href='login.html'">Déconnexion</button>
   </div>
 </div>
 
-<!-- LEVEL UP CELEBRATION MODAL -->
-<div class="celebration" id="celebration">
-  <div class="big-char" id="celebChar"></div>
-  <div class="level-up-text" id="celebText" style="color:var(--accent2)">LEVEL UP!</div>
-  <div id="celebLevel" style="font-size:1.1rem;color:var(--muted);margin-top:.5rem"></div>
-  <button class="close-btn" onclick="closeCelebration()">Continuer</button>
+<div class="prof-bar" id="profBar" style="display:none">
+  <span style="color:var(--gold);font-weight:800">👑 PROF</span>
+  <a href="teacher.html">Dashboard</a>
+  <a href="teacher.html?tab=docs">Corrigés</a>
+  <a href="teacher.html?tab=access">🔒 Accès</a>
+  <a href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads" target="_blank">📥 Fichiers</a>
 </div>
 
-<script src="characters.js?v=1774960559"></script>
-<script src="supabase-config.js?v=1774960559"></script>
+<div class="hero">
+  <div class="char" id="heroChar" style="width:60px;height:80px"></div>
+  <h2 id="heroName">Bienvenue !</h2>
+  <div class="sub" id="heroSub">Que voulez-vous faire aujourd'hui ?</div>
+</div>
+
+<div class="stats-row">
+  <span><span class="val" id="sXP" style="color:var(--accent2)">0</span>XP</span>
+  <span><span class="val" id="sCards" style="color:var(--gold)">0</span>Cartes</span>
+  <span><span class="val" id="sGames" style="color:var(--lo1)">0</span>Jeux</span>
+  <span><span class="val" id="sDuels" style="color:var(--error)">0</span>Duels</span>
+</div>
+
+<div class="grid4">
+  <a href="../index.html" class="big-btn cours">
+    <div class="icon">📚</div>
+    <h3>Mes Cours</h3>
+    <p>20 chapitres · LO1 à LO4<br>Mini-jeux · Fiches mémo</p>
+    <span class="badge" style="background:rgba(50,224,196,.1);color:var(--accent2)" id="coursProgress">0/20</span>
+  </a>
+  
+  <a href="activites.html" class="big-btn activites" id="btnActivites">
+    <div class="icon">🎮</div>
+    <h3>Mes Activités</h3>
+    <p>Jeux · Duels · Exercices SQL<br>Pipeline · Cas pro</p>
+    <span class="badge" style="background:rgba(245,158,11,.1);color:var(--gold)">10+ jeux</span>
+  </a>
+  
+  <a href="profile.html" class="big-btn profil">
+    <div class="icon">👤</div>
+    <h3>Mon Profil</h3>
+    <p>Avatar · XP · Classement<br>🃏 Cartes · Documents</p>
+    <span class="badge" style="background:rgba(59,130,246,.1);color:var(--lo2)" id="profileBadge">Niv. 1</span>
+  </a>
+  
+  <a href="projet-veloshop.html" class="big-btn projet" id="btnProjet">
+    <div class="icon">🏗️</div>
+    <h3>Mon Projet</h3>
+    <p>VéloShop en équipe<br>6 étapes · SQL · App</p>
+    <span class="badge" style="background:rgba(16,185,129,.1);color:var(--lo1)">Équipe</span>
+  </a>
+</div>
+
+<script src="characters.js?v=1774980000"></script>
+<script src="supabase-config.js?v=1774980000"></script>
 <script>
-const student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+var student = JSON.parse(localStorage.getItem('cq_student') || 'null');
 if (!student) window.location.href = 'login.html';
 
-// Characters are now rendered by characters.js
+var isTeacher = student && student.role === 'teacher';
+if (isTeacher) document.getElementById('profBar').style.display = '';
 
-// Show teacher link if applicable
-if (student && student.role === 'teacher') {
-  document.getElementById('teacherLink').style.display = '';
-}
+// Set user info
+document.getElementById('userName').textContent = student.first_name + ' ' + student.last_name;
+document.getElementById('heroName').textContent = 'Salut ' + student.first_name + ' !';
 
-function doLogout() {
-  supabase.signOut();
-  window.location.href = 'login.html';
-}
+// Create character
+try { createCharacter(0, document.getElementById('heroChar'), 50); } catch(e) {}
 
+// Load XP + stats
+var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+var AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
 
-// ===== FAUX BLOCAGE — motive l'élève à commencer =====
-function applyFakeLocks(xp, gamesPlayed, exercisesDone) {
-  if (student.role === 'teacher') return; // Prof voit tout
-  
-  var locks = [
-    { selector: '[href="duel-sql.html"]', need: 1, type: 'games', label: 'Jouez à 1 mini-jeu pour débloquer', current: gamesPlayed },
-    { selector: '[href="pipeline-bdd.html"]', need: 30, type: 'xp', label: 'Atteignez 30 XP pour débloquer', current: xp },
-    { selector: '[href="team-projects.html"]', need: 50, type: 'xp', label: 'Atteignez 50 XP pour débloquer', current: xp },
-    { selector: '[href="quiz-live.html"]', need: 2, type: 'games', label: 'Jouez à 2 mini-jeux pour débloquer', current: gamesPlayed },
-  ];
-  
-  for (var i = 0; i < locks.length; i++) {
-    var lock = locks[i];
-    var el = document.querySelector(lock.selector);
-    if (!el) continue;
-    
-    var unlocked = lock.current >= lock.need;
-    if (unlocked) continue; // Already unlocked
-    
-    // Apply fake lock overlay
-    el.style.position = 'relative';
-    el.style.pointerEvents = 'none';
-    
-    var pct = Math.min(100, Math.round(lock.current / lock.need * 100));
-    
-    var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,15,26,.82);z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:inherit;cursor:default';
-    overlay.innerHTML = '<div style="font-size:1.3rem;margin-bottom:.3rem">🔒</div>' +
-      '<div style="font-size:.65rem;color:#F59E0B;font-weight:700;text-align:center;padding:0 .5rem">' + lock.label + '</div>' +
-      '<div style="width:70%;height:5px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:.4rem;overflow:hidden">' +
-        '<div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#F59E0B,#32E0C4);border-radius:3px;transition:width 1s"></div>' +
-      '</div>' +
-      '<div style="font-size:.55rem;color:#94a3b8;margin-top:.2rem">' + lock.current + '/' + lock.need + (lock.type === 'xp' ? ' XP' : ' jeux') + '</div>';
-    
-    el.appendChild(overlay);
-  }
-}
-
-
-async function loadDashboard() {
-  if (!student) return;
-  
-  const isTeacher = student.role === 'teacher';
-  
-  // Calculate XP from progress
-  const progress = await supabase.query('cq_student_progress', { 
-    select: '*', 
-    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
-  }) || [];
-  
-  const progressList = Array.isArray(progress) ? progress : [];
-  // XP from course modules
-  let xpFromCourse = 0;
-  let modulesCompleted = 0;
-  for (const p of progressList) {
-    xpFromCourse += (p.credits_earned || 0) + (p.game_score || 0);
-    if (p.completed_at) modulesCompleted++;
-  }
-  
-  // Game scores
-  const gameScores = await supabase.query('cq_game_scores', {
-    select: 'id,game_id,score',
-    filter: { 'student_id': 'eq.' + student.id, 'unit_id': 'eq.4' }
-  }) || [];
-  const gamesPlayed = Array.isArray(gameScores) ? gameScores.length : 0;
-  
-  // XP from exercises/games (capped per game, reduced ratio)
-  // Best score per game, capped at 100, then /5 → max 20 XP per game
-  let xpFromGames = 0;
-  if (Array.isArray(gameScores)) {
-    const bestPerGame = {};
-    for (const g of gameScores) {
-      if (!bestPerGame[g.game_id] || g.score > bestPerGame[g.game_id]) {
-        bestPerGame[g.game_id] = g.score;
-      }
+fetch(SB + '/cq_game_scores?student_id=eq.' + student.id + '&select=game_id,score', { headers: { 'apikey': AK } })
+  .then(function(r) { return r.json(); })
+  .then(function(scores) {
+    if (!Array.isArray(scores)) scores = [];
+    var best = {}, games = {};
+    for (var i = 0; i < scores.length; i++) {
+      var gid = scores[i].game_id, sc = scores[i].score || 0;
+      if (!best[gid] || sc > best[gid]) best[gid] = sc;
+      games[gid] = true;
     }
-    xpFromGames = Object.values(bestPerGame).reduce((a, s) => a + Math.min(Math.floor(s / 5), 20), 0);
-  }
-  
-  // TOTAL XP = course + games (course is primary, games are bonus)
-  const totalXP = xpFromCourse + xpFromGames;
-  
-  // Count unique exercises done
-  const exercisesDone = Array.isArray(gameScores) ? new Set(gameScores.map(g => g.game_id)).size : 0;
-  
-  // Level
-  const level = getLevel(totalXP);
-  const prevLevelStored = localStorage.getItem('cq_prev_level_' + student.id);
-  
-  // WELCOME CARD
-  if (isTeacher) {
-    document.getElementById('avatar').style.borderColor = '#F59E0B';
-    document.getElementById('avatar').style.background = 'rgba(245,158,11,.12)';
-    // Prof gets the SQL Overlord character (dancing)
-    const avatarEl2 = document.getElementById('avatar');
-    avatarEl2.innerHTML = '';
-    avatarEl2.style.width = '70px';
-    avatarEl2.style.height = '90px';
-    avatarEl2.style.borderRadius = '12px';
-    avatarEl2.style.border = 'none';
-    avatarEl2.style.overflow = 'visible';
-    const profChar = createCharacter(8, avatarEl2, 60);
-    profChar.classList.add('dancing');
-    document.getElementById('wName').textContent = student.first_name + ' — Enseignant(e)';
-    document.getElementById('wLevel').innerHTML = '<span style="color:#F59E0B;font-weight:700">PROF</span>';
-    document.getElementById('wXP').textContent = 'Accédez à votre espace via "Mon Espace" dans la navigation';
-    document.getElementById('xpFill').style.width = '100%';
-    document.getElementById('xpFill').style.background = 'linear-gradient(90deg, #F59E0B, #EF4444)';
-    document.querySelector('.welcome').style.borderColor = 'rgba(245,158,11,.3)';
-    document.querySelector('.welcome::before')
-  } else {
-    const charIdx = level.index;
-    document.getElementById('avatar').style.borderColor = level.color;
-    document.getElementById('avatar').style.background = level.color + '15';
-    document.getElementById('avatar').style.color = level.color;
-    // Create animated character
-    const avatarEl = document.getElementById('avatar');
-    avatarEl.innerHTML = '';
-    avatarEl.style.width = '70px';
-    avatarEl.style.height = '90px';
-    avatarEl.style.borderRadius = '12px';
-    avatarEl.style.border = 'none';
-    avatarEl.style.overflow = 'visible';
-    const char = createCharacter(charIdx, avatarEl, 60);
-    char.classList.add('dancing');
-    document.getElementById('wName').textContent = student.first_name + ' ' + student.last_name;
-    document.getElementById('wLevel').innerHTML = '<span style="color:' + level.color + ';font-weight:700">' + level.name + '</span> <span style="font-size:.7rem;color:var(--muted)">(Nv. ' + (level.index + 1) + '/9)</span>';
-    document.getElementById('wXP').textContent = totalXP + ' XP (cours: ' + xpFromCourse + ' + exos: ' + xpFromGames + ')' + (level.nextMin > level.xp ? ' — prochain à ' + level.nextMin + ' XP' : ' — MAX!');
-    document.getElementById('xpFill').style.width = Math.round(level.progress * 100) + '%';
-    document.getElementById('xpFill').style.background = 'linear-gradient(90deg, ' + level.color + ', ' + level.color + 'aa)';
-    document.querySelector('.welcome').style.borderColor = level.color + '30';
-  }
-  
-  // STATS
-  document.getElementById('statXP').textContent = totalXP;
-  document.getElementById('statModules').textContent = modulesCompleted + '/20';
-  document.getElementById('statGames').textContent = gamesPlayed;
-  document.getElementById('statExercises').textContent = exercisesDone;
-  document.getElementById('statStreak').textContent = student.streak_days || 0;
-  
-  // LEVELS MAP
-  renderLevelsTrack(totalXP, level, isTeacher);
-  
-  // CHECK LEVEL UP
-  if (!isTeacher && prevLevelStored && parseInt(prevLevelStored) < level.index) {
-    showCelebration(level);
-  }
-  localStorage.setItem('cq_prev_level_' + student.id, level.index);
-}
-
-function renderLevelsTrack(xp, currentLevel, isTeacher) {
-  const track = document.getElementById('levelsTrack');
-  let html = '';
-  
-  for (let i = 0; i < XP_LEVELS.length; i++) {
-    const lvl = XP_LEVELS[i];
-    let reached = xp >= lvl.min;
-    const isCurrent = i === currentLevel.index && !isTeacher;
-    const isLocked = !reached && !isTeacher;
-    if (isTeacher) reached = true; // Prof sees all levels as reached
+    var xp = 0;
+    for (var k in best) xp += Math.min(20, Math.floor(best[k] / 5));
+    var gamesPlayed = Object.keys(games).length;
+    var duels = scores.filter(function(s) { return s.game_id === 'duel-sql'; }).length;
     
-    // Connector (except before first)
-    if (i > 0) {
-      html += '<div class="level-connector ' + (reached ? 'active' : '') + '"></div>';
+    document.getElementById('sXP').textContent = xp;
+    document.getElementById('sGames').textContent = gamesPlayed;
+    document.getElementById('sDuels').textContent = duels;
+    
+    // Level
+    var level = getLevel ? getLevel(xp) : { name: 'Data Padawan', index: 0, progress: 0 };
+    document.getElementById('userLevel').textContent = level.name + ' · ' + xp + ' XP';
+    document.getElementById('xpFill').style.width = (level.progress || 0) + '%';
+    document.getElementById('profileBadge').textContent = 'Niv. ' + (level.index + 1);
+    
+    // Update character with level
+    try { 
+      document.getElementById('heroChar').innerHTML = '';
+      createCharacter(level.index, document.getElementById('heroChar'), 50); 
+    } catch(e) {}
+    
+    // Cards count
+    var cards = JSON.parse(localStorage.getItem('dq_cards_' + student.id) || '[]');
+    document.getElementById('sCards').textContent = cards.length;
+    
+    // Fake lock on activities if no games played
+    if (!isTeacher && gamesPlayed === 0) {
+      // Don't lock — let them explore
     }
-    
-    html += '<div class="level-node">';
-    html += '<div class="level-dot ' + (isLocked ? 'locked' : 'reached') + (isCurrent && !isTeacher ? ' current' : '') + '" style="' +
-      (reached ? 'background:' + lvl.color + '18;border-color:' + lvl.color + ';color:' + lvl.color : '') + '">';
-    
-    // Dancing character: on current level (student) or on ALL levels (prof)
-    if (isCurrent || isTeacher) {
-      html += '<div class="dancer-slot" data-level="' + i + '"></div>';
-    }
-    
-    html += (i + 1);
-    html += '</div>';
-    html += '<div class="level-name" style="color:' + (reached ? lvl.color : 'var(--muted)') + '">' + lvl.name + '</div>';
-    html += '<div class="level-xp">' + lvl.min + ' XP</div>';
-    html += '</div>';
-  }
-  
-  track.innerHTML = html;
-  
-  // Add dancing character on current level
-  document.querySelectorAll('.dancer-slot').forEach(slot => {
-    const lvlIdx = parseInt(slot.dataset.level);
-    const miniChar = createCharacter(lvlIdx, null, 36);
-    miniChar.classList.add('dancing');
-    miniChar.style.position = 'absolute';
-    miniChar.style.top = '-40px';
-    miniChar.style.left = '50%';
-    miniChar.style.transform = 'translateX(-50%)';
-    slot.style.position = 'absolute';
-    slot.style.top = '-40px';
-    slot.style.left = '50%';
-    slot.style.transform = 'translateX(-50%)';
-    slot.appendChild(miniChar);
-  });
-}
-
-function showCelebration(level) {
-  const cel = document.getElementById('celebration');
-  const charIdx = level.index;
-  
-  // Add confetti
-  let confettiHtml = '';
-  const colors = ['#32E0C4', '#F59E0B', '#3b82f6', '#ef4444', '#8b5cf6', '#10b981', '#ec4899'];
-  for (let i = 0; i < 30; i++) {
-    const x = Math.random() * 100;
-    const delay = Math.random() * 1.5;
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    confettiHtml += '<div class="confetti" style="left:' + x + '%;background:' + color + ';animation-delay:' + delay + 's"></div>';
-  }
-  cel.innerHTML = confettiHtml + 
-    '<div id="celebCharContainer" style="width:120px;height:140px;margin:0 auto"></div>' +
-    '<div class="level-up-text" style="color:' + level.color + '">LEVEL UP!</div>' +
-    '<div style="font-size:1.1rem;color:var(--muted);margin-top:.5rem">' + level.name + '</div>' +
-    '<button class="close-btn" onclick="closeCelebration()">Continuer</button>';
-  cel.classList.add('active');
-  // Add dancing character to celebration
-  const celebContainer = document.getElementById('celebCharContainer');
-  if (celebContainer) {
-    const bigChar = createCharacter(level.index, celebContainer, 100);
-    bigChar.classList.add('dancing');
-  }
-}
-
-function closeCelebration() {
-  document.getElementById('celebration').classList.remove('active');
-}
-
-loadDashboard();
+  })
+  .catch(function() {});
 </script>
-<script src="presence-tracker.js?v=1774960559"></script>
-<script src="duel-notify.js?v=1774960559"></script>
-
-<div id="dqDuelBtn" onclick="window.location.href=this.getAttribute('data-href')" style="position:fixed;bottom:20px;right:20px;z-index:9998;background:linear-gradient(135deg,#F59E0B,#d97706);color:#fff;padding:.5rem 1rem;border-radius:25px;font-family:Outfit,sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(245,158,11,.4);display:flex;align-items:center;gap:.4rem;transition:transform .2s;animation:dqPulseBtn 3s infinite" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-  <span>⚔️</span> DUEL
-  <style>@keyframes dqPulseBtn{0%,100%{box-shadow:0 4px 15px rgba(245,158,11,.4)}50%{box-shadow:0 4px 25px rgba(245,158,11,.6)}}</style>
-</div>
-<script>
-(function(){
-  var b = document.getElementById('dqDuelBtn');
-  if (!b) return;
-  var path = window.location.pathname;
-  if (path.indexOf('duel-sql') > -1) { b.style.display = 'none'; return; }
-  if (path.indexOf('/jeux/') > -1) b.setAttribute('data-href', '../../app/duel-sql.html');
-  else if (path.indexOf('/app/') > -1) b.setAttribute('data-href', 'duel-sql.html');
-  else b.setAttribute('data-href', 'app/duel-sql.html');
-})();
-</script>
+<script src="presence-tracker.js?v=1774980000"></script>
 </body>
 </html>
