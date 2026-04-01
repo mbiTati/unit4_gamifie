@@ -183,6 +183,46 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 
+
+// ===== FAUX BLOCAGE — motive l'élève à commencer =====
+function applyFakeLocks(xp, gamesPlayed, exercisesDone) {
+  if (student.role === 'teacher') return; // Prof voit tout
+  
+  var locks = [
+    { selector: '[href="duel-sql.html"]', need: 1, type: 'games', label: 'Jouez à 1 mini-jeu pour débloquer', current: gamesPlayed },
+    { selector: '[href="pipeline-bdd.html"]', need: 30, type: 'xp', label: 'Atteignez 30 XP pour débloquer', current: xp },
+    { selector: '[href="team-projects.html"]', need: 50, type: 'xp', label: 'Atteignez 50 XP pour débloquer', current: xp },
+    { selector: '[href="quiz-live.html"]', need: 2, type: 'games', label: 'Jouez à 2 mini-jeux pour débloquer', current: gamesPlayed },
+  ];
+  
+  for (var i = 0; i < locks.length; i++) {
+    var lock = locks[i];
+    var el = document.querySelector(lock.selector);
+    if (!el) continue;
+    
+    var unlocked = lock.current >= lock.need;
+    if (unlocked) continue; // Already unlocked
+    
+    // Apply fake lock overlay
+    el.style.position = 'relative';
+    el.style.pointerEvents = 'none';
+    
+    var pct = Math.min(100, Math.round(lock.current / lock.need * 100));
+    
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,15,26,.82);z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:inherit;cursor:default';
+    overlay.innerHTML = '<div style="font-size:1.3rem;margin-bottom:.3rem">🔒</div>' +
+      '<div style="font-size:.65rem;color:#F59E0B;font-weight:700;text-align:center;padding:0 .5rem">' + lock.label + '</div>' +
+      '<div style="width:70%;height:5px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:.4rem;overflow:hidden">' +
+        '<div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#F59E0B,#32E0C4);border-radius:3px;transition:width 1s"></div>' +
+      '</div>' +
+      '<div style="font-size:.55rem;color:#94a3b8;margin-top:.2rem">' + lock.current + '/' + lock.need + (lock.type === 'xp' ? ' XP' : ' jeux') + '</div>';
+    
+    el.appendChild(overlay);
+  }
+}
+
+
 async function loadDashboard() {
   if (!student) return;
   
