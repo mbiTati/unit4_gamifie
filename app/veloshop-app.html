@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VéloShop — Application de gestion</title>
+<style>
+:root{--bg:#f8fafc;--surface:#fff;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--primary:#0D7377;--primary-light:#e0f7fa;--accent:#F59E0B;--success:#10b981;--error:#ef4444;--sidebar:#0f172a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--sidebar);color:#e2e8f0;padding:1rem 0;flex-shrink:0;display:flex;flex-direction:column}
+.sidebar .logo{padding:0 1rem 1rem;font-size:1.1rem;font-weight:900;color:#32E0C4;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.sidebar .logo span{font-size:1.3rem}
+.nav-item{padding:.5rem 1rem;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;transition:all .15s;color:#94a3b8;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#e2e8f0}
+.nav-item.active{background:rgba(50,224,196,.08);color:#32E0C4;border-left-color:#32E0C4;font-weight:700}
+.nav-badge{background:var(--accent);color:#fff;font-size:.55rem;padding:.1rem .35rem;border-radius:8px;font-weight:700;margin-left:auto}
+
+/* MAIN */
+.main-content{flex:1;padding:1.5rem;overflow-y:auto}
+.page-title{font-size:1.3rem;font-weight:800;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.page-title .badge{font-size:.6rem;background:var(--primary-light);color:var(--primary);padding:.2rem .5rem;border-radius:4px;font-weight:700}
+
+/* KPI CARDS */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.5rem}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.kpi-label{font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:1.8rem;font-weight:900;margin-top:.3rem}
+.kpi-change{font-size:.65rem;margin-top:.2rem}
+.kpi-change.up{color:var(--success)}
+.kpi-change.down{color:var(--error)}
+
+/* TABLE */
+.data-table{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem}
+.data-table table{width:100%;border-collapse:collapse}
+.data-table th{background:#f1f5f9;text-align:left;padding:.6rem .8rem;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border)}
+.data-table td{padding:.5rem .8rem;font-size:.8rem;border-bottom:1px solid var(--border)}
+.data-table tr:hover{background:#f8fafc}
+.status{padding:.15rem .5rem;border-radius:4px;font-size:.65rem;font-weight:700}
+.status.stock{background:#ecfdf5;color:#059669}
+.status.low{background:#fef3c7;color:#d97706}
+.status.out{background:#fee2e2;color:#dc2626}
+.status.encours{background:#e0f7fa;color:#0D7377}
+.status.terminee{background:#ecfdf5;color:#059669}
+.status.annulee{background:#f1f5f9;color:#64748b}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{padding:.4rem .6rem;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.78rem}
+.toolbar .btn-add{background:var(--primary);color:#fff;border:none;padding:.4rem 1rem;border-radius:6px;font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer}
+
+/* CHART placeholder */
+.chart-placeholder{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem}
+
+/* FAKE WATERMARK */
+.watermark{position:fixed;bottom:10px;right:10px;font-size:.6rem;color:var(--muted);opacity:.5}
+
+/* DEMO BANNER */
+.demo-banner{background:linear-gradient(135deg,#F59E0B,#d97706);color:#fff;padding:.5rem 1rem;text-align:center;font-size:.78rem;font-weight:700}
+.demo-banner a{color:#fff;text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="demo-banner">
+  Interface de démonstration — Votre BDD alimenterait cette application !
+  <a href="projet-veloshop.html">← Retour au projet</a>
+</div>
+
+<div style="display:flex;flex:1">
+<div class="sidebar">
+  <div class="logo"><span>🚲</span> VéloShop</div>
+  <div class="nav-item active" onclick="showPage('dashboard')">📊 Tableau de bord</div>
+  <div class="nav-item" onclick="showPage('velos')">🚲 Vélos <span class="nav-badge">47</span></div>
+  <div class="nav-item" onclick="showPage('clients')">👥 Clients <span class="nav-badge">23</span></div>
+  <div class="nav-item" onclick="showPage('ventes')">💰 Ventes</div>
+  <div class="nav-item" onclick="showPage('reparations')">🔧 Réparations <span class="nav-badge">3</span></div>
+  <div class="nav-item" onclick="showPage('categories')">📁 Catégories</div>
+  <div class="nav-item" style="margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding-top:.8rem" onclick="showPage('sql')">💻 Requêtes SQL</div>
+</div>
+
+<div class="main-content">
+  <!-- DASHBOARD -->
+  <div id="page-dashboard">
+    <div class="page-title">📊 Tableau de bord <span class="badge">Avril 2026</span></div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Chiffre d'affaires</div><div class="kpi-value" style="color:var(--primary)">CHF 18'450</div><div class="kpi-change up">↑ +12% vs mars</div></div>
+      <div class="kpi"><div class="kpi-label">Vélos en stock</div><div class="kpi-value">47</div><div class="kpi-change down">↓ 3 en rupture</div></div>
+      <div class="kpi"><div class="kpi-label">Clients actifs</div><div class="kpi-value">23</div><div class="kpi-change up">↑ +4 ce mois</div></div>
+      <div class="kpi"><div class="kpi-label">Réparations en cours</div><div class="kpi-value" style="color:var(--accent)">3</div><div class="kpi-change">sur 8 ce mois</div></div>
+    </div>
+    <div class="chart-placeholder">
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:.5rem">Ventes par catégorie (avril 2026)</div>
+      <div style="display:flex;gap:.3rem;align-items:flex-end;height:120px">
+        <div style="flex:1;text-align:center"><div style="background:linear-gradient(var(--primary),#0D7377);height:80px;border-radius:4px 4px 0 0"></div><div style="font-size:.6rem;margin-top:.2rem">VTT</div><div style="font-size:.65rem;font-weight:700">CHF 5'200</div></div>
+        <div style="flex:1;text-align:center"><div style="background:linear-gradient(#3b82f6,#2563eb);height:100px;border-radius:4px 4px 0 0"></div><div style="font-size:.6rem;margin-top:.2rem">Route</div><div style="font-size:.65rem;font-weight:700">CHF 6'800</div></div>
+        <div style="flex:1;text-align:center"><div style="background:linear-gradient(#8b5cf6,#7c3aed);height:45px;border-radius:4px 4px 0 0"></div><div style="font-size:.6rem;margin-top:.2rem">Ville</div><div style="font-size:.65rem;font-weight:700">CHF 2'100</div></div>
+        <div style="flex:1;text-align:center"><div style="background:linear-gradient(#F59E0B,#d97706);height:65px;border-radius:4px 4px 0 0"></div><div style="font-size:.6rem;margin-top:.2rem">Électrique</div><div style="font-size:.65rem;font-weight:700">CHF 3'850</div></div>
+        <div style="flex:1;text-align:center"><div style="background:linear-gradient(#10b981,#059669);height:20px;border-radius:4px 4px 0 0"></div><div style="font-size:.6rem;margin-top:.2rem">Enfant</div><div style="font-size:.65rem;font-weight:700">CHF 500</div></div>
+      </div>
+      <div style="font-size:.55rem;color:var(--muted);margin-top:.5rem;text-align:center">SELECT c.nom, SUM(lv.quantite * lv.prix_unitaire) FROM categorie c JOIN velo v ... GROUP BY c.nom</div>
+    </div>
+    <div style="font-size:.82rem;font-weight:700;margin-bottom:.5rem">Dernières ventes</div>
+    <div class="data-table">
+      <table>
+        <tr><th>Date</th><th>Client</th><th>Articles</th><th>Remise</th><th>Total</th></tr>
+        <tr><td>01.04.2026</td><td>Sophie Müller</td><td>Trek Marlin 7 (VTT)</td><td>-</td><td>CHF 1'290</td></tr>
+        <tr><td>31.03.2026</td><td>Pierre Rochat</td><td>Giant Defy (Route) × 1, Casque × 1</td><td>5%</td><td>CHF 2'375</td></tr>
+        <tr><td>29.03.2026</td><td>Amélie Favre</td><td>Scott E-Ride (Électrique)</td><td>-</td><td>CHF 3'490</td></tr>
+        <tr><td>28.03.2026</td><td>Lucas Bonvin</td><td>BMC Roadmachine, Kit entretien</td><td>10%</td><td>CHF 4'050</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- VELOS -->
+  <div id="page-velos" style="display:none">
+    <div class="page-title">🚲 Gestion des vélos</div>
+    <div class="toolbar">
+      <input placeholder="Rechercher un vélo..." style="width:200px">
+      <select><option>Toutes catégories</option><option>VTT</option><option>Route</option><option>Ville</option><option>Électrique</option><option>Enfant</option></select>
+      <button class="btn-add">+ Ajouter un vélo</button>
+    </div>
+    <div class="data-table">
+      <table>
+        <tr><th>ID</th><th>Marque</th><th>Modèle</th><th>Catégorie</th><th>Taille</th><th>Prix</th><th>Stock</th></tr>
+        <tr><td>1</td><td>Trek</td><td>Marlin 7</td><td>VTT</td><td>M</td><td>CHF 1'290</td><td><span class="status stock">12</span></td></tr>
+        <tr><td>2</td><td>Giant</td><td>Defy Advanced</td><td>Route</td><td>L</td><td>CHF 2'490</td><td><span class="status stock">5</span></td></tr>
+        <tr><td>3</td><td>Scott</td><td>E-Ride 920</td><td>Électrique</td><td>M</td><td>CHF 3'490</td><td><span class="status low">2</span></td></tr>
+        <tr><td>4</td><td>BMC</td><td>Roadmachine</td><td>Route</td><td>S</td><td>CHF 4'500</td><td><span class="status stock">3</span></td></tr>
+        <tr><td>5</td><td>Cube</td><td>Touring Hybrid</td><td>Électrique</td><td>L</td><td>CHF 2'890</td><td><span class="status out">0</span></td></tr>
+        <tr><td>6</td><td>Specialized</td><td>Sirrus 2.0</td><td>Ville</td><td>M</td><td>CHF 890</td><td><span class="status stock">8</span></td></tr>
+        <tr><td>7</td><td>Puky</td><td>Cyke 20</td><td>Enfant</td><td>-</td><td>CHF 490</td><td><span class="status stock">6</span></td></tr>
+      </table>
+    </div>
+    <div style="font-size:.6rem;color:var(--muted)">Requête : SELECT v.*, c.nom as categorie FROM velo v JOIN categorie c ON v.id_categorie = c.id_categorie ORDER BY v.marque</div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div id="page-clients" style="display:none">
+    <div class="page-title">👥 Clients</div>
+    <div class="toolbar">
+      <input placeholder="Rechercher un client..." style="width:200px">
+      <button class="btn-add">+ Nouveau client</button>
+    </div>
+    <div class="data-table">
+      <table>
+        <tr><th>ID</th><th>Nom</th><th>Prénom</th><th>Téléphone</th><th>Email</th><th>Ville</th><th>Achats</th></tr>
+        <tr><td>1</td><td>Müller</td><td>Sophie</td><td>078 123 45 67</td><td>sophie.muller@gmail.com</td><td>1205 Genève</td><td>CHF 3'200</td></tr>
+        <tr><td>2</td><td>Rochat</td><td>Pierre</td><td>079 234 56 78</td><td>p.rochat@bluewin.ch</td><td>1003 Lausanne</td><td>CHF 5'490</td></tr>
+        <tr><td>3</td><td>Favre</td><td>Amélie</td><td>076 345 67 89</td><td>amelie.f@proton.me</td><td>1260 Nyon</td><td>CHF 3'490</td></tr>
+        <tr><td>4</td><td>Bonvin</td><td>Lucas</td><td>077 456 78 90</td><td>lucas.bonvin@outlook.com</td><td>1820 Montreux</td><td>CHF 4'050</td></tr>
+        <tr><td>5</td><td>Nguyen</td><td>Linh</td><td>078 567 89 01</td><td>linh.n@gmail.com</td><td>1227 Carouge</td><td>CHF 1'780</td></tr>
+      </table>
+    </div>
+    <div style="font-size:.6rem;color:var(--muted)">Requête : SELECT c.*, COALESCE(SUM(v.total), 0) as achats FROM client c LEFT JOIN vente v ON c.id_client = v.id_client GROUP BY c.id_client</div>
+  </div>
+
+  <!-- REPARATIONS -->
+  <div id="page-reparations" style="display:none">
+    <div class="page-title">🔧 Réparations</div>
+    <div class="toolbar">
+      <select><option>Tous les statuts</option><option>En cours</option><option>Terminée</option><option>Annulée</option></select>
+      <button class="btn-add">+ Nouvelle réparation</button>
+    </div>
+    <div class="data-table">
+      <table>
+        <tr><th>ID</th><th>Date</th><th>Client</th><th>Vélo</th><th>Problème</th><th>Statut</th><th>Coût</th></tr>
+        <tr><td>1</td><td>28.03.2026</td><td>Sophie Müller</td><td>Trek Marlin 7</td><td>Dérailleur cassé</td><td><span class="status encours">En cours</span></td><td>CHF 85</td></tr>
+        <tr><td>2</td><td>25.03.2026</td><td>Linh Nguyen</td><td>Cube Touring</td><td>Batterie HS</td><td><span class="status encours">En cours</span></td><td>CHF 350</td></tr>
+        <tr><td>3</td><td>20.03.2026</td><td>Lucas Bonvin</td><td>BMC Roadmachine</td><td>Révision complète</td><td><span class="status terminee">Terminée</span></td><td>CHF 120</td></tr>
+        <tr><td>4</td><td>15.03.2026</td><td>Pierre Rochat</td><td>Giant Defy</td><td>Crevaison + réglage freins</td><td><span class="status terminee">Terminée</span></td><td>CHF 45</td></tr>
+        <tr><td>5</td><td>10.03.2026</td><td>Sophie Müller</td><td>Puky Cyke</td><td>Client a annulé</td><td><span class="status annulee">Annulée</span></td><td>-</td></tr>
+      </table>
+    </div>
+    <div style="font-size:.6rem;color:var(--muted)">Requête : SELECT r.*, cl.nom, cl.prenom, CONCAT(v.marque, ' ', v.modele) as velo FROM reparation r JOIN client cl ON ... JOIN velo v ON ... ORDER BY r.date_depot DESC</div>
+  </div>
+
+  <!-- VENTES -->
+  <div id="page-ventes" style="display:none">
+    <div class="page-title">💰 Ventes</div>
+    <div class="data-table">
+      <table>
+        <tr><th>N° Vente</th><th>Date</th><th>Client</th><th>Nb articles</th><th>Remise</th><th>Total</th></tr>
+        <tr><td>V-001</td><td>01.04.2026</td><td>Sophie Müller</td><td>1</td><td>0%</td><td>CHF 1'290</td></tr>
+        <tr><td>V-002</td><td>31.03.2026</td><td>Pierre Rochat</td><td>2</td><td>5%</td><td>CHF 2'375</td></tr>
+        <tr><td>V-003</td><td>29.03.2026</td><td>Amélie Favre</td><td>1</td><td>0%</td><td>CHF 3'490</td></tr>
+        <tr><td>V-004</td><td>28.03.2026</td><td>Lucas Bonvin</td><td>2</td><td>10%</td><td>CHF 4'050</td></tr>
+      </table>
+    </div>
+    <div style="font-size:.6rem;color:var(--muted)">Requête : SELECT v.id_vente, v.date_vente, cl.nom, COUNT(lv.id_velo) as nb, v.remise_pct, v.total FROM vente v JOIN client cl ON ... JOIN ligne_vente lv ON ... GROUP BY v.id_vente</div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div id="page-categories" style="display:none">
+    <div class="page-title">📁 Catégories</div>
+    <div class="data-table">
+      <table>
+        <tr><th>ID</th><th>Nom</th><th>Description</th><th>Nb vélos</th><th>Stock total</th></tr>
+        <tr><td>1</td><td>VTT</td><td>Vélo tout terrain pour sentiers et montagne</td><td>12</td><td>35</td></tr>
+        <tr><td>2</td><td>Route</td><td>Vélo de route léger pour la vitesse</td><td>8</td><td>18</td></tr>
+        <tr><td>3</td><td>Ville</td><td>Vélo urbain pour déplacements quotidiens</td><td>10</td><td>24</td></tr>
+        <tr><td>4</td><td>Électrique</td><td>Vélo à assistance électrique</td><td>6</td><td>9</td></tr>
+        <tr><td>5</td><td>Enfant</td><td>Vélo adapté aux enfants (14-24 pouces)</td><td>5</td><td>15</td></tr>
+      </table>
+    </div>
+    <div style="font-size:.6rem;color:var(--muted)">Requête : SELECT c.*, COUNT(v.id_velo) as nb, SUM(v.stock) as stock_total FROM categorie c LEFT JOIN velo v ON ... GROUP BY c.id_categorie</div>
+  </div>
+
+  <!-- SQL -->
+  <div id="page-sql" style="display:none">
+    <div class="page-title">💻 Requêtes SQL <span class="badge">Console admin</span></div>
+    <div style="background:#0d1117;border-radius:8px;padding:1rem;margin-bottom:1rem">
+      <div style="font-size:.65rem;color:#8b949e;margin-bottom:.3rem">Requête SQL</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#58a6ff;line-height:1.6">
+        <span style="color:#ff7b72">SELECT</span> c.nom <span style="color:#ff7b72">AS</span> categorie,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#d2a8ff">COUNT</span>(v.id_velo) <span style="color:#ff7b72">AS</span> nb_modeles,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#d2a8ff">SUM</span>(v.stock) <span style="color:#ff7b72">AS</span> stock_total,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#d2a8ff">AVG</span>(v.prix) <span style="color:#ff7b72">AS</span> prix_moyen<br>
+        <span style="color:#ff7b72">FROM</span> categorie c<br>
+        <span style="color:#ff7b72">JOIN</span> velo v <span style="color:#ff7b72">ON</span> c.id_categorie = v.id_categorie<br>
+        <span style="color:#ff7b72">GROUP BY</span> c.nom<br>
+        <span style="color:#ff7b72">ORDER BY</span> stock_total <span style="color:#ff7b72">DESC</span>;
+      </div>
+    </div>
+    <div class="data-table">
+      <table>
+        <tr><th>categorie</th><th>nb_modeles</th><th>stock_total</th><th>prix_moyen</th></tr>
+        <tr><td>VTT</td><td>12</td><td>35</td><td>CHF 1'450</td></tr>
+        <tr><td>Ville</td><td>10</td><td>24</td><td>CHF 780</td></tr>
+        <tr><td>Route</td><td>8</td><td>18</td><td>CHF 2'890</td></tr>
+        <tr><td>Enfant</td><td>5</td><td>15</td><td>CHF 420</td></tr>
+        <tr><td>Électrique</td><td>6</td><td>9</td><td>CHF 3'120</td></tr>
+      </table>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);margin-top:1rem;padding:1rem;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+      <strong>C'est ça que votre BDD alimenterait !</strong><br>
+      Chaque page de cette application correspond à une requête SQL que vous écrivez dans le projet.
+      Le tableau de bord = GROUP BY + SUM + COUNT. Les listes = SELECT + JOIN. Les filtres = WHERE.
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="watermark">VéloShop v1.0 — Interface de démonstration DataQuest</div>
+
+<script>
+function showPage(name) {
+  var pages = document.querySelectorAll('[id^="page-"]');
+  for (var i = 0; i < pages.length; i++) pages[i].style.display = 'none';
+  document.getElementById('page-' + name).style.display = '';
+  var items = document.querySelectorAll('.nav-item');
+  for (var j = 0; j < items.length; j++) items[j].classList.remove('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
