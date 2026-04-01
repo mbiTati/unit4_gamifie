@@ -101,7 +101,7 @@
     <button class="btn btn-gold" onclick="showSlides()" style="margin-top:.5rem">🎬 Découvrir le projet (présentation)</button>
     <a href="veloshop-app.html" target="_blank" class="btn btn-primary" style="margin-top:.3rem;text-decoration:none;display:inline-block">💻 Voir l'application VéloShop</a>
     <a href="veloshop-corrige.html" id="profCorrige" target="_blank" style="display:none;margin-top:.3rem;text-decoration:none;background:linear-gradient(135deg,#F59E0B,#d97706);color:#fff;padding:.4rem .8rem;border-radius:6px;font-size:.78rem;font-weight:700">👑 Corrigé complet</a>
-    <a href="veloshop-app.html" target="_blank" class="btn btn-primary" style="margin-top:.3rem;text-decoration:none;display:inline-block">💻 Voir l'application VéloShop (démo)</a>
+    
   </div>
 
   <!-- PROF: Team creation -->
@@ -149,13 +149,12 @@ var sqlDB = null;
 
 // ==================== SLIDES ====================
 var SLIDES = [
-  {title:'🚲 VéloShop Genève',body:'<p style="font-size:1.2rem;color:var(--accent2)">Un magasin de vélos à Genève vous mandate pour créer leur base de données</p><p>Vous travaillez en équipe comme des <strong style="color:var(--gold)">Data Analystes Juniors</strong></p>',bg:'linear-gradient(135deg,#0D7377,#0a0f1a)'},
-  {title:'Le problème',body:'<p>Le gérant, <strong style="color:var(--gold)">Marc Dubois</strong>, gère tout sur papier et Excel.</p><p>Il perd du temps, fait des erreurs, et ne peut pas suivre son stock facilement.</p><div class="highlight">💬 <em>"Je ne sais même pas combien de vélos j\'ai en stock, ni quel client a une réparation en cours !"</em></div>'},
-  {title:'Ce qu\'il veut',body:'<div class="highlight" style="text-align:left">✅ Gérer ses <strong>clients</strong> (nom, prénom, téléphone, email, adresse)<br>✅ Suivre ses <strong>vélos</strong> (marque, modèle, type, taille, prix, stock)<br>✅ Organiser par <strong>catégorie</strong> (VTT, Route, Ville, Électrique, Enfant)<br>✅ Planifier les <strong>réparations</strong> (date, problème, statut, coût)<br>✅ Enregistrer les <strong>ventes</strong> (date, quantité, remise)<br>✅ Connaître son <strong>chiffre d\'affaires</strong> par mois</div>'},
-  {title:'Les règles métier',body:'<div class="highlight" style="text-align:left">📌 Un vélo appartient à <strong>une seule catégorie</strong><br>📌 Un client peut acheter <strong>plusieurs vélos</strong> (via des ventes)<br>📌 Une vente peut contenir <strong>plusieurs vélos</strong> (ligne de vente)<br>📌 Une réparation concerne <strong>un seul vélo d\'un client</strong><br>📌 Le prix de vente peut avoir une <strong>remise</strong> (%)<br>📌 Les réparations ont un statut : <strong>en cours / terminée / annulée</strong></div>'},
-  {title:'Votre mission',body:'<div class="highlight" style="text-align:left;font-size:.9rem"><strong>Étape 1</strong> — Dictionnaire des données + règles de gestion<br><strong>Étape 2</strong> — MCD (Modèle Conceptuel de Données)<br><strong>Étape 3</strong> — MLD (Modèle Logique de Données)<br><strong>Étape 4</strong> — Code SQL : CREATE TABLE<br><strong>Étape 5</strong> — INSERT + Requêtes SELECT<br><strong>Étape 6</strong> — Tests + Documentation utilisateur</div><p style="color:var(--gold);font-weight:700;margin-top:.5rem">⏱ Vous avez 3 séances. Le chef d\'équipe soumet le travail.</p>'},
-  {title:'Les tables attendues',body:'<div class="highlight" style="text-align:left;font-family:JetBrains Mono,monospace;font-size:.85rem"><span style="color:var(--accent2)">CATEGORIE</span>(id, nom, description)<br><span style="color:var(--accent2)">CLIENT</span>(id, nom, prénom, téléphone, email, adresse)<br><span style="color:var(--accent2)">VELO</span>(id, id_categorie, marque, modèle, type, taille, prix, stock)<br><span style="color:var(--accent2)">REPARATION</span>(id, id_client, id_velo, date, problème, statut, coût)<br><span style="color:var(--accent2)">VENTE</span>(id, id_client, date, remise_pct, total)<br><span style="color:var(--accent2)">LIGNE_VENTE</span>(id_vente, id_velo, quantité, prix_unitaire)</div><p style="font-size:.75rem;color:var(--muted)">⚠ LIGNE_VENTE = clé composite (relation N:M entre VENTE et VELO)</p>'},
-  {title:'C\'est parti ! 🚀',body:'<p style="font-size:1.2rem">Formez vos équipes et commencez !</p><p style="color:var(--muted)">Le chef d\'équipe 👑 soumet les livrables à chaque étape.</p><p style="color:var(--muted)">Vous pouvez tester votre SQL directement dans l\'éditeur intégré.</p>'},
+  {title:'Bienvenue chez VéloShop !',body:'<div style="font-size:4rem;margin-bottom:.5rem">🚲</div><p style="font-size:1.2rem;color:var(--accent2)">Un magasin de vélos à Genève vous mandate pour créer leur base de données</p><p style="margin-top:.5rem">Vous travaillez en équipe comme des <strong style="color:var(--gold)">Data Analystes Juniors</strong></p>'},
+  {title:'Le problème de Marc',body:'<div style="font-size:3rem;margin-bottom:.5rem">😰</div><p>Le gérant, <strong style="color:var(--gold)">Marc Dubois</strong>, gère tout sur papier et Excel.</p><p>Il perd du temps, fait des erreurs, et ne peut pas suivre son stock facilement.</p><div class="highlight"><em>"Je ne sais même pas combien de vélos j\'ai en stock, ni quel client a une réparation en cours !"</em></div>'},
+  {title:'Ce que Marc veut',body:'<div style="font-size:3rem;margin-bottom:.5rem">📋</div><div class="highlight" style="text-align:left">✅ Gérer ses <strong>clients</strong> (qui sont-ils ? où habitent-ils ?)<br>✅ Suivre ses <strong>vélos</strong> (quels modèles ? combien en stock ?)<br>✅ Organiser par <strong>catégorie</strong> (VTT, Route, Ville, Électrique, Enfant)<br>✅ Planifier les <strong>réparations</strong> (quel vélo ? quel problème ? c\'est fini ?)<br>✅ Enregistrer les <strong>ventes</strong> (qui a acheté quoi ? avec quelle remise ?)<br>✅ Connaître son <strong>chiffre d\'affaires</strong> par mois</div>'},
+  {title:'Les règles du magasin',body:'<div style="font-size:3rem;margin-bottom:.5rem">📌</div><div class="highlight" style="text-align:left">📌 Un vélo appartient à <strong>une seule catégorie</strong><br>📌 Un client peut acheter <strong>plusieurs vélos</strong> (via des ventes)<br>📌 Une vente peut contenir <strong>plusieurs vélos différents</strong><br>📌 Une réparation concerne <strong>un seul vélo d\'un client</strong><br>📌 Le prix de vente peut avoir une <strong>remise</strong> (0% à 50%)<br>📌 Les réparations ont un statut : <strong>en cours / terminée / annulée</strong></div>'},
+  {title:'Votre mission',body:'<div style="font-size:3rem;margin-bottom:.5rem">🎯</div><div class="highlight" style="text-align:left;font-size:.9rem"><strong>1.</strong> Analyser les besoins → dictionnaire de données<br><strong>2.</strong> Dessiner le MCD (entités, associations, cardinalités)<br><strong>3.</strong> Écrire le MLD (schéma relationnel avec PK et FK)<br><strong>4.</strong> Coder le SQL — CREATE TABLE<br><strong>5.</strong> Peupler la base et écrire des requêtes<br><strong>6.</strong> Tester et documenter pour Marc</div><p style="color:var(--gold);font-weight:700;margin-top:.8rem">Le chef d\'équipe 👑 soumet le travail à chaque étape.</p>'},
+  {title:'À vous de jouer !',body:'<div style="font-size:3rem;margin-bottom:.5rem">🚀</div><p style="font-size:1.2rem">Combien de tables faut-il ?<br>Quelles colonnes dans chaque table ?<br>Quelles relations entre elles ?</p><p style="color:var(--muted);margin-top:.5rem">C\'est à vous de le découvrir en analysant les besoins de Marc.</p><p style="color:var(--accent2);font-weight:700;margin-top:.5rem">Votre BDD alimentera une vraie application !</p>'},
 ];
 
 var currentSlide = 0;
@@ -169,6 +168,7 @@ function renderSlide() {
   var dots = '';
   for (var d = 0; d < SLIDES.length; d++) dots += '<div class="slide-dot ' + (d === currentSlide ? 'active' : '') + '"></div>';
   document.getElementById('slideContent').innerHTML =
+    '<button onclick="closeSlides()" style="position:fixed;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.75rem;font-weight:600;z-index:1001">✕ Fermer</button>' +
     '<h2 style="color:' + (s.title.indexOf('🚲') > -1 ? 'var(--accent2)' : 'var(--text)') + '">' + s.title + '</h2>' +
     s.body +
     '<div class="slide-dots">' + dots + '</div>' +
@@ -185,6 +185,8 @@ function renderSlide() {
 function nextSlide() { if (currentSlide < SLIDES.length - 1) { currentSlide++; renderSlide(); } }
 function prevSlide() { if (currentSlide > 0) { currentSlide--; renderSlide(); } }
 function closeSlides() { document.getElementById('slidesOverlay').classList.remove('active'); }
+// Close button always visible
+document.getElementById('slidesOverlay').addEventListener('click', function(e) { if (e.target === this) closeSlides(); });
 // Close on Escape
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeSlides();
