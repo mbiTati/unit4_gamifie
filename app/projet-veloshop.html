@@ -86,8 +86,11 @@
   <h1>🚲 Projet VéloShop</h1>
   <div class="topbar-right">
     <a href="home.html">Accueil</a>
-    <a href="team-projects.html">Tous les projets</a>
-    <a href="scores.html">Classement</a>
+    <a href="team-projects.html">Projets</a>
+    <a id="btnCorrige" href="veloshop-corrige.html" style="display:none;color:#F59E0B;border-color:rgba(245,158,11,.4);font-weight:700">👑 Corrigé</a>
+    <a id="btnApp" href="veloshop-app.html" target="_blank" style="display:none;color:#32E0C4;border-color:rgba(50,224,196,.4)">💻 App démo</a>
+    <a id="btnCards" href="cards.html" style="display:none;color:#F59E0B;border-color:rgba(245,158,11,.4)">🃏 Cartes</a>
+    <a id="btnStorage" href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads" target="_blank" style="display:none;color:#ef4444;border-color:rgba(239,68,68,.3)">📥 Fichiers</a>
     <button onclick="localStorage.clear();window.location.href='login.html'">Déconnexion</button>
   </div>
 </div>
@@ -100,7 +103,7 @@
     <p style="color:var(--muted);font-size:.82rem;margin-top:.3rem">Créez la base de données complète d'un magasin de vélos</p>
     <button class="btn btn-gold" onclick="showSlides()" style="margin-top:.5rem">🎬 Découvrir le projet (présentation)</button>
     <a href="veloshop-app.html" target="_blank" class="btn btn-primary" style="margin-top:.3rem;text-decoration:none;display:inline-block">💻 Voir l'application VéloShop</a>
-    <a href="veloshop-corrige.html" id="profCorrige" target="_blank" style="display:none;margin-top:.3rem;text-decoration:none;background:linear-gradient(135deg,#F59E0B,#d97706);color:#fff;padding:.4rem .8rem;border-radius:6px;font-size:.78rem;font-weight:700">👑 Corrigé complet</a>
+    
     
   </div>
 
@@ -755,8 +758,12 @@ async function loadSubmissions() {
 (function() {
   if (isTeacher) {
     document.getElementById('profPanel').style.display = '';
-    var corBtn = document.getElementById('profCorrige');
-    if (corBtn) corBtn.style.display = 'inline-block';
+    // Show all prof buttons in topbar
+    var profBtns = ['btnCorrige','btnApp','btnCards','btnStorage'];
+    for (var pb = 0; pb < profBtns.length; pb++) {
+      var btn = document.getElementById(profBtns[pb]);
+      if (btn) btn.style.display = '';
+    }
   }
 
   // Load saved step states
