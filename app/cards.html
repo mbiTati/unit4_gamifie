@@ -93,6 +93,9 @@
 
 <div class="main">
   <!-- STATS -->
+  <div id="profCardBanner" style="display:none;background:rgba(245,158,11,.04);border:1px dashed var(--gold);border-radius:8px;padding:.6rem;margin-bottom:.8rem;font-size:.72rem">
+    <span style="color:var(--gold);font-weight:700">👑 Mode prof :</span> Vous voyez toutes les 34 cartes. Packs illimités pour tester.
+  </div>
   <div class="stats">
     <div class="stat"><div class="n" id="totalCards" style="color:var(--gold)">0</div><div class="l">Cartes</div></div>
     <div class="stat"><div class="n" id="commonCount" style="color:#9ca3af">0</div><div class="l">Communes</div></div>
@@ -164,9 +167,9 @@ var myCards = JSON.parse(localStorage.getItem('dq_cards_' + (student ? student.i
 var packsAvailable = 0;
 
 function getPacksAvailable() {
-  // 1 pack per completed chapter (based on XP milestones)
+  if (student && student.role === 'teacher') return 99; // Prof: unlimited
   var totalXP = parseInt(localStorage.getItem('dq_total_xp') || '0');
-  var packsEarned = Math.floor(totalXP / 25); // 1 pack every 25 XP
+  var packsEarned = Math.floor(totalXP / 25);
   var packsOpened = parseInt(localStorage.getItem('dq_packs_opened_' + (student ? student.id : '')) || '0');
   return Math.max(0, packsEarned - packsOpened);
 }
@@ -275,6 +278,10 @@ function closeReveal() {
 
 // ==================== RENDER ====================
 function renderAll() {
+  if (student && student.role === 'teacher') {
+    var pb = document.getElementById('profCardBanner');
+    if (pb) pb.style.display = '';
+  }
   packsAvailable = getPacksAvailable();
 
   // Stats
@@ -306,10 +313,13 @@ function renderAll() {
   document.getElementById('packContainer').innerHTML = packHTML;
 
   // Collection grid
+  // Prof sees ALL cards
+  var isProf = student && student.role === 'teacher';
+  
   var gridHTML = '';
   for (var k = 0; k < ALL_CARDS.length; k++) {
     var c = ALL_CARDS[k];
-    var owned = uniqueCards.indexOf(c.id) > -1;
+    var owned = uniqueCards.indexOf(c.id) > -1 || isProf;
     if (owned) {
       gridHTML += '<div class="card-slot"><div class="cc ' + c.rarity + '" style="height:100%">';
       gridHTML += '<div class="cc-rarity">' + c.rarity + '</div>';

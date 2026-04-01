@@ -119,8 +119,16 @@
     
     <!-- Prof: view submissions -->
     <div style="margin-top:.8rem;border-top:1px solid var(--border);padding-top:.5rem">
-      <div style="font-size:.78rem;font-weight:700;margin-bottom:.3rem">Soumissions reçues</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem">
+        <div style="font-size:.78rem;font-weight:700">📥 Soumissions reçues</div>
+        <button class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="loadSubmissions()">🔄 Rafraîchir</button>
+      </div>
       <div id="submissionsList" style="font-size:.72rem;color:var(--muted)">Chargement...</div>
+    </div>
+    <div style="margin-top:.5rem;border-top:1px solid var(--border);padding-top:.5rem">
+      <div style="font-size:.78rem;font-weight:700;margin-bottom:.3rem">📎 Fichiers uploadés</div>
+      <div style="font-size:.65rem;color:var(--muted);margin-bottom:.3rem">Les fichiers des élèves sont dans Supabase Storage → bucket <code>team-uploads/veloshop/</code></div>
+      <a href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads" target="_blank" style="color:var(--accent2);font-size:.72rem;font-weight:700;text-decoration:none">Ouvrir Supabase Storage →</a>
     </div>
   </div>
 
@@ -346,7 +354,7 @@ var STEPS = [
     type: 'sql',
     check: { tables: ['categorie','client','velo','reparation','vente','ligne_vente'], minInserts: 20 } },
   { name: 'Tests + Documentation', icon: '📄',
-    instructions: '<strong>Documentez et testez votre travail :</strong><br><br><strong>Plan de tests (5 cas minimum) :</strong><br>— 2 cas normaux (insertion, requête qui fonctionne)<br>— 2 cas limites (valeur NULL, chaîne vide, prix = 0)<br>— 1 cas erroné (FK invalide, doublon de PK)<br>Pour chaque test : description, SQL exécuté, résultat attendu, résultat obtenu, statut ✅/❌<br><br><strong>Guide utilisateur (2-3 pages) :</strong><br>— Comment ajouter un client, un vélo, une vente<br>— Les requêtes utiles au quotidien (stock, CA, réparations en cours)<br>— Captures d\'écran des résultats',
+    instructions: '<strong>Testez et documentez votre travail :</strong><br><br><strong>Plan de tests :</strong><br>— Testez au moins 5 scénarios différents<br>— Mélangez des cas qui marchent et des cas qui doivent échouer<br>— Pour chaque test : décrivez ce que vous faites, le SQL, et le résultat<br><br><strong>Guide utilisateur pour Marc :</strong><br>— Imaginez que Marc ne connaît rien au SQL<br>— Expliquez-lui comment utiliser la BDD au quotidien<br>— Ajoutez des captures d\'écran de l\'application<br><br><em style="color:var(--gold)">Pensez : quelles erreurs un utilisateur pourrait faire ?</em>',
     type: 'upload', accept: '.docx,.pdf,.doc' },
 ];
 
@@ -670,24 +678,76 @@ async function loadSubmissions() {
     var allStudents = await supabase.query('cq_students', { select: 'id,first_name,last_name' });
     if (!Array.isArray(allStudents)) allStudents = [];
     var nameMap = {};
-    for (var i = 0; i < allStudents.length; i++) nameMap[allStudents[i].id] = allStudents[i].first_name + ' ' + allStudents[i].last_name.charAt(0) + '.';
+    for (var i = 0; i < allStudents.length; i++) nameMap[allStudents[i].id] = allStudents[i].first_name + ' ' + allStudents[i].last_name;
 
-    var html = '';
-    if (subs.length === 0) { html = 'Aucune soumission pour le moment.'; }
+    // Group by team
+    var byTeam = {};
     for (var j = 0; j < subs.length; j++) {
       var s = subs[j];
-      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.4rem .6rem;margin-bottom:.3rem">';
-      html += '<span style="color:var(--accent2);font-weight:700">Équipe ' + s.team_number + '</span>';
-      html += ' — Étape ' + (s.step_number + 1) + ' (' + STEPS[s.step_number].name + ')';
-      html += ' — par ' + (nameMap[s.submitted_by] || '?');
-      html += ' <span style="color:var(--muted)">' + new Date(s.created_at).toLocaleString('fr-CH') + '</span>';
-      if (s.content) html += '<div style="font-size:.6rem;color:var(--muted);margin-top:.2rem">Fichiers : ' + s.content + '</div>';
-      if (s.sql_code) html += '<details style="margin-top:.2rem"><summary style="font-size:.6rem;color:var(--accent2);cursor:pointer">Voir le SQL</summary><pre style="font-size:.6rem;color:var(--text);background:var(--bg);padding:.3rem;border-radius:4px;max-height:200px;overflow:auto;margin-top:.2rem">' + s.sql_code.replace(/</g,'&lt;') + '</pre></details>';
+      var key = 'Équipe ' + s.team_number;
+      if (!byTeam[key]) byTeam[key] = [];
+      byTeam[key].push(s);
+    }
+
+    var html = '';
+    if (subs.length === 0) {
+      html = '<div style="padding:.5rem;text-align:center;color:var(--muted)">Aucune soumission pour le moment.</div>';
+    }
+
+    for (var team in byTeam) {
+      var teamSubs = byTeam[team];
+      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem;margin-bottom:.5rem">';
+      html += '<div style="font-size:.78rem;font-weight:700;color:var(--accent2);margin-bottom:.4rem">' + team + ' — ' + teamSubs.length + ' soumission(s)</div>';
+      
+      for (var k = 0; k < teamSubs.length; k++) {
+        var sub = teamSubs[k];
+        var stepName = STEPS[sub.step_number] ? STEPS[sub.step_number].name : 'Étape ' + (sub.step_number + 1);
+        var submitter = nameMap[sub.submitted_by] || 'Inconnu';
+        var date = new Date(sub.created_at).toLocaleString('fr-CH');
+        
+        html += '<div style="padding:.3rem 0;border-top:1px solid var(--border);margin-top:.3rem">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+        html += '<span style="font-weight:700;color:var(--gold)">Étape ' + (sub.step_number + 1) + '</span>';
+        html += '<span style="font-size:.6rem;color:var(--muted)">' + date + ' — ' + submitter + '</span>';
+        html += '</div>';
+        html += '<div style="font-size:.65rem;color:var(--muted)">' + stepName + '</div>';
+        
+        if (sub.content && sub.content.indexOf('.') > -1) {
+          // File submissions — show download links
+          var files = sub.content.split(', ');
+          for (var fi = 0; fi < files.length; fi++) {
+            var fpath = 'veloshop/equipe' + sub.team_number + '/etape' + (sub.step_number + 1) + '/' + files[fi];
+            var furl = 'https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + fpath;
+            html += '<a href="' + furl + '" target="_blank" download style="display:inline-flex;align-items:center;gap:.2rem;background:rgba(50,224,196,.06);border:1px solid rgba(50,224,196,.15);padding:.15rem .4rem;border-radius:4px;font-size:.62rem;color:var(--accent2);text-decoration:none;margin:.2rem .2rem 0 0">📎 ' + files[fi] + ' ⬇</a>';
+          }
+        }
+        
+        if (sub.sql_code) {
+          html += '<details style="margin-top:.3rem"><summary style="font-size:.62rem;color:var(--accent2);cursor:pointer">📝 Voir le code SQL soumis</summary>';
+          html += '<pre style="font-size:.6rem;color:var(--text);background:var(--bg);padding:.4rem;border-radius:4px;max-height:250px;overflow:auto;margin-top:.2rem;line-height:1.4">' + sub.sql_code.replace(/</g,'&lt;') + '</pre>';
+          html += '<button onclick="navigator.clipboard.writeText(this.parentElement.querySelector(\'pre\').textContent)" style="font-size:.55rem;margin-top:.2rem;padding:.15rem .4rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;font-family:inherit">📋 Copier le SQL</button>';
+          html += '</details>';
+        }
+        
+        html += '</div>';
+      }
       html += '</div>';
     }
+
+    // Summary
+    var stepsComplete = {};
+    for (var m = 0; m < subs.length; m++) {
+      var skey = subs[m].team_number + '-' + subs[m].step_number;
+      stepsComplete[skey] = true;
+    }
+    var totalTeams = Object.keys(byTeam).length;
+    html += '<div style="margin-top:.5rem;padding:.4rem;background:rgba(50,224,196,.04);border-radius:6px;font-size:.68rem;color:var(--accent2)">';
+    html += '<strong>' + totalTeams + ' équipe(s)</strong> ont soumis — <strong>' + Object.keys(stepsComplete).length + '</strong> étapes au total';
+    html += '</div>';
+
     document.getElementById('submissionsList').innerHTML = html;
   } catch(e) {
-    document.getElementById('submissionsList').innerHTML = 'Tables non encore créées. Exécutez les migrations SQL.';
+    document.getElementById('submissionsList').innerHTML = '<div style="color:var(--error)">Erreur : ' + e.message + '. Les tables cq_team_submissions existent-elles ?</div>';
   }
 }
 
