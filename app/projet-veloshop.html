@@ -99,6 +99,8 @@
     <h2 style="font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--lo1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">VéloShop Genève</h2>
     <p style="color:var(--muted);font-size:.82rem;margin-top:.3rem">Créez la base de données complète d'un magasin de vélos</p>
     <button class="btn btn-gold" onclick="showSlides()" style="margin-top:.5rem">🎬 Découvrir le projet (présentation)</button>
+    <a href="veloshop-app.html" target="_blank" class="btn btn-primary" style="margin-top:.3rem;text-decoration:none;display:inline-block">💻 Voir l'application VéloShop</a>
+    <a href="veloshop-corrige.html" id="profCorrige" target="_blank" style="display:none;margin-top:.3rem;text-decoration:none;background:linear-gradient(135deg,#F59E0B,#d97706);color:#fff;padding:.4rem .8rem;border-radius:6px;font-size:.78rem;font-weight:700">👑 Corrigé complet</a>
     <a href="veloshop-app.html" target="_blank" class="btn btn-primary" style="margin-top:.3rem;text-decoration:none;display:inline-block">💻 Voir l'application VéloShop (démo)</a>
   </div>
 
@@ -485,6 +487,88 @@ function runSQL(stepIdx) {
   }
 
   output += '<div style="margin-top:.3rem;color:var(--muted);font-size:.6rem">' + successCount + ' instructions OK, ' + errors + ' erreur(s)</div>';
+  
+  // ===== SMART HINTS — Guide l'élève s'il fait une erreur =====
+  var hints = [];
+  var step = STEPS[stepIdx];
+  if (step.check && step.check.tables) {
+    var allTables = [];
+    try { var tlist = sqlDB.exec("SELECT name FROM sqlite_master WHERE type='table'"); if(tlist.length>0) allTables = tlist[0].values.map(function(v){return v[0].toLowerCase();}); } catch(e){}
+    
+    // Check each expected table
+    for (var ti = 0; ti < step.check.tables.length; ti++) {
+      var tName = step.check.tables[ti];
+      if (allTables.indexOf(tName) === -1) {
+        // Table not found — give a hint
+        if (code.toLowerCase().indexOf('create table') === -1) {
+          hints.push('💡 Vous n\'avez pas encore écrit de CREATE TABLE. Commencez par : CREATE TABLE ' + tName + ' (...)');
+        } else if (code.toLowerCase().indexOf(tName) === -1) {
+          hints.push('💡 La table <strong>' + tName + '</strong> n\'est pas dans votre code. Ajoutez : CREATE TABLE ' + tName + ' (...)');
+        }
+      } else {
+        // Table exists — check columns and constraints
+        try {
+          var info = sqlDB.exec("PRAGMA table_info(" + tName + ")");
+          if (info.length > 0) {
+            var cols = info[0].values.map(function(v){ return v[1].toLowerCase(); });
+            var hasPK = info[0].values.some(function(v){ return v[5] > 0; });
+            
+            if (!hasPK) hints.push('⚠️ <strong>' + tName + '</strong> : pas de PRIMARY KEY détectée');
+            if (cols.length < 3) hints.push('⚠️ <strong>' + tName + '</strong> : seulement ' + cols.length + ' colonnes — il en faut plus');
+            
+            // Check specific tables
+            if (tName === 'velo' && cols.indexOf('id_categorie') === -1) {
+              hints.push('💡 <strong>velo</strong> : il manque la colonne id_categorie (FK vers categorie)');
+            }
+            if (tName === 'reparation' && cols.indexOf('id_client') === -1) {
+              hints.push('💡 <strong>reparation</strong> : il manque id_client (FK vers client)');
+            }
+            if (tName === 'reparation' && cols.indexOf('statut') === -1) {
+              hints.push('💡 <strong>reparation</strong> : il manque la colonne statut (en_cours/terminee/annulee)');
+            }
+            if (tName === 'vente' && cols.indexOf('id_client') === -1) {
+              hints.push('💡 <strong>vente</strong> : il manque id_client (FK vers client)');
+            }
+            if (tName === 'ligne_vente' && cols.indexOf('quantite') === -1) {
+              hints.push('💡 <strong>ligne_vente</strong> : il manque la colonne quantite');
+            }
+          }
+        } catch(e) {}
+      }
+    }
+    
+    // Check for common SQL errors in the code
+    if (code.toLowerCase().indexOf('foreing') > -1) hints.push('🔤 Faute de frappe : FOREING → FOREIGN');
+    if (code.toLowerCase().indexOf('interger') > -1) hints.push('🔤 Faute de frappe : INTERGER → INTEGER');
+    if (code.toLowerCase().indexOf('vaccum') > -1 || code.toLowerCase().indexOf('primay') > -1) hints.push('🔤 Vérifiez l\'orthographe des mots-clés SQL');
+    if (code.indexOf('AUTO_INCREMENT') > -1) hints.push('💡 SQLite utilise AUTOINCREMENT (sans underscore). MySQL utilise AUTO_INCREMENT.');
+    
+    // Check INSERT count for step 5
+    if (step.check.minInserts > 0) {
+      var insertCount = (code.match(/INSERT INTO/gi) || []).length;
+      if (insertCount < step.check.minInserts) {
+        hints.push('📊 Vous avez ' + insertCount + ' INSERT — il en faut au minimum ' + step.check.minInserts + ' (5 par table × 6 tables)');
+      }
+      // Check SELECT count
+      var selectCount = (code.match(/SELECT/gi) || []).length;
+      if (selectCount < 10 && stepIdx === 4) {
+        hints.push('📊 Vous avez ' + selectCount + ' SELECT — il en faut au minimum 10 variées');
+      }
+    }
+    
+    // Display hints
+    if (hints.length > 0) {
+      output += '<div style="margin-top:.6rem;padding:.5rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:6px">';
+      output += '<div style="font-weight:700;color:var(--gold);font-size:.72rem;margin-bottom:.3rem">Conseils pour améliorer :</div>';
+      for (var hi = 0; hi < hints.length; hi++) {
+        output += '<div style="font-size:.68rem;color:var(--text);margin-bottom:.2rem">' + hints[hi] + '</div>';
+      }
+      output += '</div>';
+    } else if (tablesFound === step.check.tables.length) {
+      output += '<div style="margin-top:.5rem;padding:.5rem;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:6px;font-size:.72rem;color:var(--lo1);font-weight:700">🎉 Excellent ! Toutes les tables sont créées et semblent correctes !</div>';
+    }
+  }
+
   resultDiv.innerHTML = output;
 
   // Save SQL code
@@ -607,7 +691,11 @@ async function loadSubmissions() {
 
 // ==================== INIT ====================
 (function() {
-  if (isTeacher) document.getElementById('profPanel').style.display = '';
+  if (isTeacher) {
+    document.getElementById('profPanel').style.display = '';
+    var corBtn = document.getElementById('profCorrige');
+    if (corBtn) corBtn.style.display = 'inline-block';
+  }
 
   // Load saved step states
   stepStates = JSON.parse(localStorage.getItem('dq_veloshop_steps') || '{}');

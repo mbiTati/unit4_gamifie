@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VéloShop — Corrigé Prof</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(239,68,68,.05));border-bottom:1px solid var(--gold);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.topbar h1{font-size:.9rem;font-weight:800;color:var(--gold)}
+.topbar a{color:var(--muted);text-decoration:none;font-size:.72rem;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px}
+.main{max-width:900px;margin:0 auto;padding:1rem}
+.section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.section h2{font-size:.95rem;font-weight:800;color:var(--gold);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.section h3{font-size:.82rem;font-weight:700;color:var(--accent2);margin:.6rem 0 .3rem}
+pre{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.6rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent2);overflow-x:auto;line-height:1.5;margin:.4rem 0}
+.note{background:rgba(245,158,11,.06);border-left:3px solid var(--gold);padding:.5rem .8rem;font-size:.72rem;margin:.5rem 0;border-radius:0 6px 6px 0}
+table{border-collapse:collapse;width:100%;margin:.4rem 0;font-size:.72rem}
+th{background:var(--surface);color:var(--accent2);padding:.3rem .5rem;text-align:left;border:1px solid var(--border)}
+td{padding:.3rem .5rem;border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<script>
+var s=JSON.parse(localStorage.getItem('cq_student')||'null');
+if(!s||s.role!=='teacher')document.body.innerHTML='<div style="text-align:center;padding:5rem;color:#F59E0B;font-size:1.2rem;font-weight:700">🔒 Accès réservé au prof</div>';
+</script>
+<div class="topbar">
+  <h1>👑 CORRIGÉ PROF — VéloShop</h1>
+  <div><a href="projet-veloshop.html">← Retour au projet</a> <a href="veloshop-app.html">💻 App démo</a></div>
+</div>
+<div class="main">
+
+<div class="section">
+<h2>📋 Étape 1 — Dictionnaire des données</h2>
+<table>
+<tr><th>Table</th><th>Colonne</th><th>Type MySQL</th><th>Null?</th><th>Description</th></tr>
+<tr><td rowspan="3">CATEGORIE</td><td>id_categorie</td><td>INT AUTO_INCREMENT</td><td>NOT NULL</td><td>PK</td></tr>
+<tr><td>nom</td><td>VARCHAR(50)</td><td>NOT NULL</td><td>Nom unique</td></tr>
+<tr><td>description</td><td>TEXT</td><td>NULL OK</td><td>Description libre</td></tr>
+<tr><td rowspan="8">CLIENT</td><td>id_client</td><td>INT AUTO_INCREMENT</td><td>NOT NULL</td><td>PK</td></tr>
+<tr><td>nom</td><td>VARCHAR(100)</td><td>NOT NULL</td><td></td></tr>
+<tr><td>prenom</td><td>VARCHAR(100)</td><td>NOT NULL</td><td></td></tr>
+<tr><td>telephone</td><td>VARCHAR(20)</td><td>NULL OK</td><td>Format suisse</td></tr>
+<tr><td>email</td><td>VARCHAR(150)</td><td>NOT NULL</td><td>UNIQUE</td></tr>
+<tr><td>adresse</td><td>VARCHAR(200)</td><td>NULL OK</td><td></td></tr>
+<tr><td>npa</td><td>VARCHAR(10)</td><td>NULL OK</td><td>Code postal</td></tr>
+<tr><td>ville</td><td>VARCHAR(100)</td><td>NULL OK</td><td></td></tr>
+<tr><td rowspan="8">VELO</td><td>id_velo</td><td>INT AUTO_INCREMENT</td><td>NOT NULL</td><td>PK</td></tr>
+<tr><td>id_categorie</td><td>INT</td><td>NOT NULL</td><td>FK → CATEGORIE</td></tr>
+<tr><td>marque</td><td>VARCHAR(100)</td><td>NOT NULL</td><td></td></tr>
+<tr><td>modele</td><td>VARCHAR(100)</td><td>NOT NULL</td><td></td></tr>
+<tr><td>type_velo</td><td>VARCHAR(20)</td><td>NULL OK</td><td>neuf/occasion</td></tr>
+<tr><td>taille</td><td>VARCHAR(5)</td><td>NULL OK</td><td>S/M/L/XL</td></tr>
+<tr><td>prix</td><td>DECIMAL(10,2)</td><td>NOT NULL</td><td>En CHF</td></tr>
+<tr><td>stock</td><td>INT DEFAULT 0</td><td>NOT NULL</td><td>≥ 0</td></tr>
+<tr><td rowspan="8">REPARATION</td><td>id_reparation</td><td>INT AUTO_INCREMENT</td><td>NOT NULL</td><td>PK</td></tr>
+<tr><td>id_client</td><td>INT</td><td>NOT NULL</td><td>FK → CLIENT</td></tr>
+<tr><td>id_velo</td><td>INT</td><td>NOT NULL</td><td>FK → VELO</td></tr>
+<tr><td>date_depot</td><td>DATE</td><td>NOT NULL</td><td></td></tr>
+<tr><td>probleme</td><td>TEXT</td><td>NOT NULL</td><td></td></tr>
+<tr><td>statut</td><td>VARCHAR(20) DEFAULT 'en_cours'</td><td>NOT NULL</td><td>en_cours/terminee/annulee</td></tr>
+<tr><td>cout_estime</td><td>DECIMAL(10,2)</td><td>NULL OK</td><td></td></tr>
+<tr><td>cout_final</td><td>DECIMAL(10,2)</td><td>NULL OK</td><td></td></tr>
+<tr><td rowspan="5">VENTE</td><td>id_vente</td><td>INT AUTO_INCREMENT</td><td>NOT NULL</td><td>PK</td></tr>
+<tr><td>id_client</td><td>INT</td><td>NOT NULL</td><td>FK → CLIENT</td></tr>
+<tr><td>date_vente</td><td>DATE</td><td>NOT NULL</td><td></td></tr>
+<tr><td>remise_pct</td><td>DECIMAL(5,2) DEFAULT 0</td><td></td><td>0-50%</td></tr>
+<tr><td>total</td><td>DECIMAL(10,2)</td><td>NOT NULL</td><td></td></tr>
+<tr><td rowspan="4">LIGNE_VENTE</td><td>id_vente</td><td>INT</td><td>NOT NULL</td><td>PK composite + FK → VENTE</td></tr>
+<tr><td>id_velo</td><td>INT</td><td>NOT NULL</td><td>PK composite + FK → VELO</td></tr>
+<tr><td>quantite</td><td>INT DEFAULT 1</td><td>NOT NULL</td><td>≥ 1</td></tr>
+<tr><td>prix_unitaire</td><td>DECIMAL(10,2)</td><td>NOT NULL</td><td>Prix au moment de la vente</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🔷 Étape 2 — MCD (Cardinalités)</h2>
+<pre>
+CATEGORIE ──(1,N)── contient ──(1,1)── VELO
+CLIENT    ──(0,N)── passe    ──(1,1)── VENTE
+CLIENT    ──(0,N)── demande  ──(1,1)── REPARATION
+VELO      ──(0,N)── subit    ──(1,1)── REPARATION
+VENTE     ──(1,N)── contient ──(1,1)── LIGNE_VENTE ──(1,1)── concerne ──(0,N)── VELO
+</pre>
+<div class="note">LIGNE_VENTE est la table de liaison de la relation N:M entre VENTE et VELO. Elle porte l'attribut "quantité" et "prix_unitaire".</div>
+</div>
+
+<div class="section">
+<h2>📐 Étape 3 — MLD</h2>
+<pre>
+CATEGORIE(id_categorie PK, nom, description)
+CLIENT(id_client PK, nom, prenom, telephone, email UNIQUE, adresse, npa, ville)
+VELO(id_velo PK, id_categorie FK→CATEGORIE, marque, modele, type_velo, taille, prix, stock)
+REPARATION(id_reparation PK, id_client FK→CLIENT, id_velo FK→VELO, date_depot, probleme, statut, cout_estime, cout_final)
+VENTE(id_vente PK, id_client FK→CLIENT, date_vente, remise_pct, total)
+LIGNE_VENTE(#id_vente FK→VENTE, #id_velo FK→VELO, quantite, prix_unitaire)   — PK composite
+</pre>
+</div>
+
+<div class="section">
+<h2>💻 Étape 4 — SQL CREATE TABLE (solution complète)</h2>
+<pre>
+CREATE TABLE categorie (
+  id_categorie INTEGER PRIMARY KEY AUTOINCREMENT,
+  nom VARCHAR(50) NOT NULL UNIQUE,
+  description TEXT
+);
+
+CREATE TABLE client (
+  id_client INTEGER PRIMARY KEY AUTOINCREMENT,
+  nom VARCHAR(100) NOT NULL,
+  prenom VARCHAR(100) NOT NULL,
+  telephone VARCHAR(20),
+  email VARCHAR(150) NOT NULL UNIQUE,
+  adresse VARCHAR(200),
+  npa VARCHAR(10),
+  ville VARCHAR(100)
+);
+
+CREATE TABLE velo (
+  id_velo INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_categorie INTEGER NOT NULL,
+  marque VARCHAR(100) NOT NULL,
+  modele VARCHAR(100) NOT NULL,
+  type_velo VARCHAR(20) CHECK(type_velo IN ('neuf','occasion')),
+  taille VARCHAR(5),
+  prix DECIMAL(10,2) NOT NULL CHECK(prix >= 0),
+  stock INTEGER NOT NULL DEFAULT 0 CHECK(stock >= 0),
+  FOREIGN KEY (id_categorie) REFERENCES categorie(id_categorie)
+);
+
+CREATE TABLE reparation (
+  id_reparation INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_client INTEGER NOT NULL,
+  id_velo INTEGER NOT NULL,
+  date_depot DATE NOT NULL,
+  probleme TEXT NOT NULL,
+  statut VARCHAR(20) NOT NULL DEFAULT 'en_cours'
+    CHECK(statut IN ('en_cours','terminee','annulee')),
+  cout_estime DECIMAL(10,2),
+  cout_final DECIMAL(10,2),
+  FOREIGN KEY (id_client) REFERENCES client(id_client),
+  FOREIGN KEY (id_velo) REFERENCES velo(id_velo)
+);
+
+CREATE TABLE vente (
+  id_vente INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_client INTEGER NOT NULL,
+  date_vente DATE NOT NULL,
+  remise_pct DECIMAL(5,2) DEFAULT 0 CHECK(remise_pct BETWEEN 0 AND 50),
+  total DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (id_client) REFERENCES client(id_client)
+);
+
+CREATE TABLE ligne_vente (
+  id_vente INTEGER NOT NULL,
+  id_velo INTEGER NOT NULL,
+  quantite INTEGER NOT NULL DEFAULT 1 CHECK(quantite >= 1),
+  prix_unitaire DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (id_vente, id_velo),
+  FOREIGN KEY (id_vente) REFERENCES vente(id_vente) ON DELETE CASCADE,
+  FOREIGN KEY (id_velo) REFERENCES velo(id_velo)
+);
+</pre>
+<div class="note">Note : l'éditeur DataQuest utilise SQLite. AUTO_INCREMENT s'écrit AUTOINCREMENT. En MySQL réel : INT AUTO_INCREMENT PRIMARY KEY.</div>
+</div>
+
+<div class="section">
+<h2>🔍 Étape 5 — INSERT + Requêtes (solution complète)</h2>
+
+<h3>INSERT — Catégories</h3>
+<pre>
+INSERT INTO categorie (nom, description) VALUES
+  ('VTT', 'Vélo tout terrain pour sentiers et montagne'),
+  ('Route', 'Vélo de route léger pour la vitesse'),
+  ('Ville', 'Vélo urbain pour les déplacements quotidiens'),
+  ('Électrique', 'Vélo à assistance électrique'),
+  ('Enfant', 'Vélo adapté aux enfants');
+</pre>
+
+<h3>INSERT — Clients</h3>
+<pre>
+INSERT INTO client (nom, prenom, telephone, email, adresse, npa, ville) VALUES
+  ('Müller', 'Sophie', '078 123 45 67', 'sophie.muller@gmail.com', 'Rue du Lac 12', '1205', 'Genève'),
+  ('Rochat', 'Pierre', '079 234 56 78', 'p.rochat@bluewin.ch', 'Av. de la Gare 5', '1003', 'Lausanne'),
+  ('Favre', 'Amélie', '076 345 67 89', 'amelie.f@proton.me', 'Chemin des Vignes 8', '1260', 'Nyon'),
+  ('Bonvin', 'Lucas', '077 456 78 90', 'lucas.bonvin@outlook.com', 'Grand-Rue 22', '1820', 'Montreux'),
+  ('Nguyen', 'Linh', '078 567 89 01', 'linh.n@gmail.com', 'Rue Ancienne 3', '1227', 'Carouge');
+</pre>
+
+<h3>INSERT — Vélos</h3>
+<pre>
+INSERT INTO velo (id_categorie, marque, modele, type_velo, taille, prix, stock) VALUES
+  (1, 'Trek', 'Marlin 7', 'neuf', 'M', 1290.00, 12),
+  (2, 'Giant', 'Defy Advanced', 'neuf', 'L', 2490.00, 5),
+  (4, 'Scott', 'E-Ride 920', 'neuf', 'M', 3490.00, 2),
+  (2, 'BMC', 'Roadmachine', 'neuf', 'S', 4500.00, 3),
+  (4, 'Cube', 'Touring Hybrid', 'occasion', 'L', 2890.00, 0),
+  (3, 'Specialized', 'Sirrus 2.0', 'neuf', 'M', 890.00, 8),
+  (5, 'Puky', 'Cyke 20', 'neuf', NULL, 490.00, 6);
+</pre>
+
+<h3>INSERT — Réparations</h3>
+<pre>
+INSERT INTO reparation (id_client, id_velo, date_depot, probleme, statut, cout_estime, cout_final) VALUES
+  (1, 1, '2026-03-28', 'Dérailleur cassé', 'en_cours', 85.00, NULL),
+  (5, 5, '2026-03-25', 'Batterie HS', 'en_cours', 350.00, NULL),
+  (4, 4, '2026-03-20', 'Révision complète', 'terminee', 120.00, 120.00),
+  (2, 2, '2026-03-15', 'Crevaison + réglage freins', 'terminee', 50.00, 45.00),
+  (1, 7, '2026-03-10', 'Client a annulé', 'annulee', 30.00, NULL);
+</pre>
+
+<h3>INSERT — Ventes + Lignes</h3>
+<pre>
+INSERT INTO vente (id_client, date_vente, remise_pct, total) VALUES
+  (1, '2026-04-01', 0, 1290.00),
+  (2, '2026-03-31', 5, 2375.00),
+  (3, '2026-03-29', 0, 3490.00),
+  (4, '2026-03-28', 10, 4050.00),
+  (5, '2026-03-25', 0, 890.00);
+
+INSERT INTO ligne_vente (id_vente, id_velo, quantite, prix_unitaire) VALUES
+  (1, 1, 1, 1290.00),
+  (2, 2, 1, 2490.00),
+  (3, 3, 1, 3490.00),
+  (4, 4, 1, 4500.00),
+  (5, 6, 1, 890.00);
+</pre>
+
+<h3>10 Requêtes SELECT</h3>
+<pre>
+-- 1. Vélos électriques
+SELECT * FROM velo WHERE id_categorie = 4;
+
+-- 2. Les 5 vélos les plus chers
+SELECT marque, modele, prix FROM velo ORDER BY prix DESC LIMIT 5;
+
+-- 3. Nombre de vélos par catégorie
+SELECT c.nom, COUNT(v.id_velo) as nb FROM categorie c
+LEFT JOIN velo v ON c.id_categorie = v.id_categorie GROUP BY c.nom;
+
+-- 4. Chiffre d'affaires total
+SELECT SUM(total) as ca_total FROM vente;
+
+-- 5. Ventes avec nom client (JOIN 2 tables)
+SELECT v.date_vente, cl.nom, cl.prenom, v.total
+FROM vente v JOIN client cl ON v.id_client = cl.id_client;
+
+-- 6. Détail ventes (JOIN 3 tables)
+SELECT cl.nom, ve.marque, ve.modele, lv.quantite, lv.prix_unitaire
+FROM ligne_vente lv
+JOIN vente v ON lv.id_vente = v.id_vente
+JOIN client cl ON v.id_client = cl.id_client
+JOIN velo ve ON lv.id_velo = ve.id_velo;
+
+-- 7. Clients ayant dépensé plus de 2000 CHF
+SELECT cl.nom, cl.prenom, SUM(v.total) as total_achats
+FROM client cl JOIN vente v ON cl.id_client = v.id_client
+GROUP BY cl.id_client HAVING total_achats > 2000;
+
+-- 8. Vélos jamais vendus
+SELECT marque, modele FROM velo
+WHERE id_velo NOT IN (SELECT id_velo FROM ligne_vente);
+
+-- 9. UPDATE — augmenter prix électriques de 5%
+UPDATE velo SET prix = prix * 1.05 WHERE id_categorie = 4;
+
+-- 10. VIEW — stock par catégorie
+CREATE VIEW stock_par_categorie AS
+SELECT c.nom, COUNT(v.id_velo) as nb_modeles, SUM(v.stock) as stock_total
+FROM categorie c LEFT JOIN velo v ON c.id_categorie = v.id_categorie
+GROUP BY c.nom;
+
+SELECT * FROM stock_par_categorie;
+</pre>
+</div>
+
+<div class="section">
+<h2>📄 Étape 6 — Plan de tests</h2>
+<table>
+<tr><th>#</th><th>Type</th><th>Test</th><th>Résultat attendu</th></tr>
+<tr><td>1</td><td>Normal</td><td>INSERT un nouveau client</td><td>✅ 1 ligne insérée</td></tr>
+<tr><td>2</td><td>Normal</td><td>SELECT velo JOIN categorie</td><td>✅ 7 lignes avec nom catégorie</td></tr>
+<tr><td>3</td><td>Limite</td><td>INSERT velo avec prix = 0</td><td>✅ Accepté (CHECK prix >= 0)</td></tr>
+<tr><td>4</td><td>Limite</td><td>INSERT client avec email existant</td><td>❌ Erreur UNIQUE constraint</td></tr>
+<tr><td>5</td><td>Erroné</td><td>INSERT velo avec id_categorie = 999</td><td>❌ Erreur FOREIGN KEY constraint</td></tr>
+</table>
+</div>
+
+</div>
+</body>
+</html>
