@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataQuest — Mes Cartes Collector</title>
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--card:#1a2332;--text:#e2e8f0;--muted:#94a3b8;--border:#1e3a5f;--accent:#0D7377;--accent2:#32E0C4;--gold:#F59E0B;--error:#ef4444;--lo1:#10b981;--lo2:#3b82f6;--lo4:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.topbar h1{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,var(--gold),#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-right{display:flex;gap:.4rem;flex-wrap:wrap}
+.topbar-right a{color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:600;border:1px solid var(--border);padding:.2rem .5rem;border-radius:4px}
+.main{max-width:900px;margin:0 auto;padding:1rem}
+
+/* STATS */
+.stats{display:flex;gap:.8rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;text-align:center;flex:1;min-width:100px}
+.stat .n{font-size:1.5rem;font-weight:900;font-family:'JetBrains Mono',monospace}
+.stat .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* PACK */
+.pack-area{text-align:center;margin-bottom:2rem}
+.pack{display:inline-block;width:160px;height:220px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border:3px solid var(--gold);border-radius:15px;cursor:pointer;position:relative;overflow:hidden;transition:all .3s;box-shadow:0 0 30px rgba(245,158,11,.2)}
+.pack:hover{transform:scale(1.05);box-shadow:0 0 50px rgba(245,158,11,.4)}
+.pack.disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+.pack-glow{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(245,158,11,.15),transparent,rgba(50,224,196,.15),transparent);animation:packRotate 3s linear infinite}
+@keyframes packRotate{to{transform:rotate(360deg)}}
+.pack-inner{position:absolute;inset:3px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.pack-icon{font-size:3rem;margin-bottom:.5rem}
+.pack-label{font-size:.85rem;font-weight:800;color:var(--gold)}
+.pack-sub{font-size:.6rem;color:var(--muted);margin-top:.2rem}
+.pack-count{font-size:.7rem;color:var(--accent2);font-weight:700;margin-top:.5rem}
+
+/* REVEAL OVERLAY */
+.reveal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column}
+.reveal-overlay.active{display:flex}
+.reveal-cards{display:flex;gap:1rem;perspective:1000px}
+.reveal-card{width:150px;height:210px;cursor:pointer;position:relative;transform-style:preserve-3d}
+.reveal-card .card-back{position:absolute;inset:0;background:linear-gradient(135deg,#1a1a2e,#0f3460);border:2px solid var(--gold);border-radius:12px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 0 20px rgba(245,158,11,.3)}
+.reveal-card .card-front{position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden}
+.reveal-card.flipped{animation:cardFlip .6s forwards}
+@keyframes cardFlip{to{transform:rotateY(180deg)}}
+.reveal-card.flipped .card-back{pointer-events:none}
+
+/* COLLECTOR CARD */
+.cc{width:100%;height:100%;border-radius:12px;padding:.5rem;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.cc.common{background:linear-gradient(135deg,#374151,#1f2937);border:2px solid #6b7280}
+.cc.rare{background:linear-gradient(135deg,#1e3a5f,#1e40af);border:2px solid #3b82f6}
+.cc.epic{background:linear-gradient(135deg,#4c1d95,#7c3aed);border:2px solid #8b5cf6}
+.cc.legendary{background:linear-gradient(135deg,#78350f,#d97706);border:2px solid #F59E0B;box-shadow:0 0 25px rgba(245,158,11,.3)}
+.cc-rarity{position:absolute;top:.3rem;right:.3rem;font-size:.45rem;font-weight:800;padding:.1rem .3rem;border-radius:3px;text-transform:uppercase}
+.cc.common .cc-rarity{background:rgba(107,114,128,.3);color:#9ca3af}
+.cc.rare .cc-rarity{background:rgba(59,130,246,.3);color:#93c5fd}
+.cc.epic .cc-rarity{background:rgba(139,92,246,.3);color:#c4b5fd}
+.cc.legendary .cc-rarity{background:rgba(245,158,11,.3);color:#fde68a}
+.cc-icon{font-size:2.5rem;text-align:center;margin:.3rem 0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.cc-name{font-size:.7rem;font-weight:800;text-align:center;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.cc-type{font-size:.45rem;text-align:center;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem}
+.cc-desc{font-size:.5rem;text-align:center;color:rgba(255,255,255,.7);margin-top:auto;padding:.3rem;background:rgba(0,0,0,.3);border-radius:4px;line-height:1.3;font-style:italic}
+.cc-power{display:flex;justify-content:space-between;margin-top:.3rem;font-size:.5rem;font-weight:700}
+.cc-power span{background:rgba(0,0,0,.3);padding:.1rem .3rem;border-radius:3px}
+
+/* COLLECTION GRID */
+.section-title{font-size:.9rem;font-weight:800;margin-bottom:.6rem}
+.collection{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
+.collection .card-slot{width:100%;aspect-ratio:.72;border-radius:10px;overflow:hidden;transition:transform .2s;cursor:pointer}
+.collection .card-slot:hover{transform:scale(1.05)}
+.collection .card-slot.empty{background:var(--card);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--muted)}
+.collection .card-slot.empty .q{font-size:2rem;opacity:.2}
+
+/* CLOSE BUTTON */
+.close-btn{position:fixed;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:600;z-index:1001}
+</style>
+</head>
+<body>
+<script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
+<div class="topbar">
+  <h1>🃏 Cartes Collector</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="profile.html">Mon Profil</a>
+    <a href="scores.html">Classement</a>
+  </div>
+</div>
+
+<!-- REVEAL OVERLAY -->
+<div class="reveal-overlay" id="revealOverlay">
+  <button class="close-btn" onclick="closeReveal()">✕ Fermer</button>
+  <div style="font-size:1.2rem;font-weight:800;color:var(--gold);margin-bottom:1rem" id="revealTitle">Cliquez sur chaque carte pour la retourner !</div>
+  <div class="reveal-cards" id="revealCards"></div>
+  <div style="margin-top:1.5rem;font-size:.75rem;color:var(--muted)" id="revealSub"></div>
+</div>
+
+<div class="main">
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="n" id="totalCards" style="color:var(--gold)">0</div><div class="l">Cartes</div></div>
+    <div class="stat"><div class="n" id="commonCount" style="color:#9ca3af">0</div><div class="l">Communes</div></div>
+    <div class="stat"><div class="n" id="rareCount" style="color:#3b82f6">0</div><div class="l">Rares</div></div>
+    <div class="stat"><div class="n" id="epicCount" style="color:#8b5cf6">0</div><div class="l">Épiques</div></div>
+    <div class="stat"><div class="n" id="legendCount" style="color:var(--gold)">0</div><div class="l">Légendaires</div></div>
+  </div>
+
+  <!-- PACK TO OPEN -->
+  <div class="pack-area">
+    <div id="packContainer"></div>
+  </div>
+
+  <!-- COLLECTION -->
+  <div class="section-title">Ma collection (<span id="collectionCount">0</span>/<span id="totalPossible">0</span>)</div>
+  <div class="collection" id="collectionGrid"></div>
+</div>
+
+<script>
+var student = JSON.parse(localStorage.getItem('cq_student') || 'null');
+
+// ==================== ALL CARDS ====================
+var ALL_CARDS = [
+  // PERSONNAGES (Legendary/Epic)
+  {id:'c_overlord',name:'SQL Overlord',type:'Personnage',icon:'👑',rarity:'legendary',desc:'Le maître absolu des bases de données. Rien ne lui résiste.',atk:99,def:99},
+  {id:'c_wizard',name:'Data Wizard',type:'Personnage',icon:'🧙',rarity:'legendary',desc:'Il transforme le chaos en données structurées d\'un coup de baguette.',atk:90,def:85},
+  {id:'c_sensei',name:'Database Sensei',type:'Personnage',icon:'🥋',rarity:'epic',desc:'Sage et patient, il enseigne l\'art de la normalisation.',atk:75,def:90},
+  {id:'c_architect',name:'Schema Architect',type:'Personnage',icon:'📐',rarity:'epic',desc:'Elle dessine des MCD parfaits les yeux fermés.',atk:80,def:70},
+  {id:'c_warrior',name:'Join Warrior',type:'Personnage',icon:'⚔️',rarity:'epic',desc:'Spécialiste du combat multi-tables. Aucune jointure ne lui fait peur.',atk:85,def:65},
+  {id:'c_rookie',name:'Query Rookie',type:'Personnage',icon:'🐣',rarity:'common',desc:'Tout juste sorti de l\'œuf, mais déjà motivé !',atk:20,def:30},
+  {id:'c_padawan',name:'Data Padawan',type:'Personnage',icon:'🌱',rarity:'common',desc:'Premier pas dans le monde des données.',atk:15,def:25},
+  {id:'c_hacker',name:'Index Hacker',type:'Personnage',icon:'💻',rarity:'rare',desc:'Optimise les requêtes en un clin d\'œil.',atk:70,def:50},
+  {id:'c_guardian',name:'FK Guardian',type:'Personnage',icon:'🛡️',rarity:'rare',desc:'Protège l\'intégrité référentielle coûte que coûte.',atk:55,def:85},
+  {id:'c_detective',name:'Bug Detective',type:'Personnage',icon:'🔍',rarity:'rare',desc:'Trouve les erreurs SQL que personne ne voit.',atk:65,def:60},
+
+  // CONCEPTS (Rare/Common)
+  {id:'c_select',name:'SELECT',type:'Requête',icon:'🔎',rarity:'common',desc:'La base de tout. Sans SELECT, pas de données.',atk:40,def:20},
+  {id:'c_join',name:'INNER JOIN',type:'Requête',icon:'🔗',rarity:'rare',desc:'Unit deux tables par leur point commun.',atk:65,def:45},
+  {id:'c_leftjoin',name:'LEFT JOIN',type:'Requête',icon:'↩️',rarity:'rare',desc:'Garde tout le côté gauche, même sans correspondance.',atk:60,def:50},
+  {id:'c_groupby',name:'GROUP BY',type:'Requête',icon:'📊',rarity:'common',desc:'Regroupe les lignes pour calculer des agrégats.',atk:50,def:35},
+  {id:'c_having',name:'HAVING',type:'Requête',icon:'🎯',rarity:'rare',desc:'Filtre les groupes après agrégation. Le WHERE des GROUP BY.',atk:55,def:40},
+  {id:'c_subquery',name:'Sous-requête',type:'Requête',icon:'🎭',rarity:'epic',desc:'Une requête dans une requête. Inception SQL.',atk:75,def:55},
+  {id:'c_view',name:'CREATE VIEW',type:'Requête',icon:'👁️',rarity:'rare',desc:'Une fenêtre virtuelle sur vos données.',atk:50,def:65},
+  {id:'c_insert',name:'INSERT INTO',type:'DML',icon:'➕',rarity:'common',desc:'Ajoute des données. Nourrit la base.',atk:35,def:25},
+  {id:'c_update',name:'UPDATE SET',type:'DML',icon:'✏️',rarity:'common',desc:'Modifie ce qui existe. Attention au WHERE oublié !',atk:45,def:30},
+  {id:'c_delete',name:'DELETE FROM',type:'DML',icon:'🗑️',rarity:'common',desc:'Supprime avec précaution. Pas de CTRL+Z en SQL.',atk:40,def:20},
+
+  // CONCEPTS BDD (Epic/Rare)
+  {id:'c_pk',name:'PRIMARY KEY',type:'Contrainte',icon:'🔑',rarity:'common',desc:'L\'identifiant unique. Chaque ligne a le sien.',atk:30,def:80},
+  {id:'c_fk',name:'FOREIGN KEY',type:'Contrainte',icon:'🔐',rarity:'rare',desc:'Le lien entre deux tables. L\'intégrité référentielle.',atk:35,def:85},
+  {id:'c_unique',name:'UNIQUE',type:'Contrainte',icon:'⭐',rarity:'common',desc:'Pas de doublons autorisés. Un seul email par client.',atk:25,def:70},
+  {id:'c_notnull',name:'NOT NULL',type:'Contrainte',icon:'🚫',rarity:'common',desc:'Interdit le vide. Ce champ est obligatoire.',atk:20,def:60},
+  {id:'c_check',name:'CHECK',type:'Contrainte',icon:'✅',rarity:'rare',desc:'Vérifie une condition. Le prix doit être positif !',atk:30,def:75},
+  {id:'c_cascade',name:'ON DELETE CASCADE',type:'Contrainte',icon:'💥',rarity:'epic',desc:'Suppression en chaîne. Dangereux mais puissant.',atk:80,def:40},
+  {id:'c_1nf',name:'1NF',type:'Normalisation',icon:'1️⃣',rarity:'common',desc:'Première forme normale : valeurs atomiques.',atk:30,def:55},
+  {id:'c_2nf',name:'2NF',type:'Normalisation',icon:'2️⃣',rarity:'rare',desc:'Élimine les dépendances partielles.',atk:45,def:60},
+  {id:'c_3nf',name:'3NF',type:'Normalisation',icon:'3️⃣',rarity:'rare',desc:'Élimine les dépendances transitives.',atk:55,def:65},
+  {id:'c_acid',name:'ACID',type:'Concept',icon:'⚗️',rarity:'epic',desc:'Atomicité, Cohérence, Isolation, Durabilité. Les 4 piliers.',atk:70,def:90},
+
+  // REQUÊTES SPÉCIALES (Legendary/Epic)
+  {id:'c_trigger',name:'TRIGGER',type:'Avancé',icon:'⚡',rarity:'legendary',desc:'S\'exécute automatiquement. Le gardien invisible de la BDD.',atk:85,def:80},
+  {id:'c_index',name:'INDEX',type:'Performance',icon:'🚀',rarity:'epic',desc:'Accélère les recherches. La turbo de vos SELECT.',atk:60,def:70},
+  {id:'c_transaction',name:'TRANSACTION',type:'Avancé',icon:'🔄',rarity:'epic',desc:'Tout ou rien. COMMIT ou ROLLBACK.',atk:75,def:75},
+  {id:'c_wildcard',name:'Joker SQL',type:'Spécial',icon:'🃏',rarity:'legendary',desc:'La carte mystère. Elle peut tout faire... si vous savez l\'utiliser.',atk:95,def:95},
+];
+
+// ==================== PACK LOGIC ====================
+var myCards = JSON.parse(localStorage.getItem('dq_cards_' + (student ? student.id : '')) || '[]');
+var packsAvailable = 0;
+
+function getPacksAvailable() {
+  // 1 pack per completed chapter (based on XP milestones)
+  var totalXP = parseInt(localStorage.getItem('dq_total_xp') || '0');
+  var packsEarned = Math.floor(totalXP / 25); // 1 pack every 25 XP
+  var packsOpened = parseInt(localStorage.getItem('dq_packs_opened_' + (student ? student.id : '')) || '0');
+  return Math.max(0, packsEarned - packsOpened);
+}
+
+function drawCards(n) {
+  var pool = [];
+  // Weighted by rarity
+  for (var i = 0; i < ALL_CARDS.length; i++) {
+    var card = ALL_CARDS[i];
+    var weight = card.rarity === 'common' ? 50 : card.rarity === 'rare' ? 30 : card.rarity === 'epic' ? 15 : 5;
+    for (var w = 0; w < weight; w++) pool.push(card);
+  }
+  // Guarantee at least 1 rare+ in a pack
+  var drawn = [];
+  var hasRare = false;
+  for (var d = 0; d < n; d++) {
+    var pick;
+    if (d === n - 1 && !hasRare) {
+      // Force a rare+
+      var rarePool = ALL_CARDS.filter(function(c) { return c.rarity !== 'common'; });
+      pick = rarePool[Math.floor(Math.random() * rarePool.length)];
+    } else {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+    }
+    if (pick.rarity !== 'common') hasRare = true;
+    drawn.push(pick);
+  }
+  return drawn;
+}
+
+function openPack() {
+  packsAvailable = getPacksAvailable();
+  if (packsAvailable <= 0) return;
+
+  var drawn = drawCards(3);
+
+  // Save
+  for (var i = 0; i < drawn.length; i++) {
+    if (myCards.indexOf(drawn[i].id) === -1) myCards.push(drawn[i].id);
+  }
+  localStorage.setItem('dq_cards_' + student.id, JSON.stringify(myCards));
+  var opened = parseInt(localStorage.getItem('dq_packs_opened_' + student.id) || '0');
+  localStorage.setItem('dq_packs_opened_' + student.id, String(opened + 1));
+
+  // Show reveal
+  showReveal(drawn);
+  renderAll();
+}
+
+// ==================== REVEAL ANIMATION ====================
+function showReveal(cards) {
+  document.getElementById('revealOverlay').classList.add('active');
+  document.getElementById('revealTitle').textContent = 'Cliquez sur chaque carte pour la retourner !';
+  document.getElementById('revealSub').textContent = '';
+
+  var html = '';
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    html += '<div class="reveal-card" onclick="flipCard(this,' + i + ')" data-idx="' + i + '">';
+    html += '<div class="card-back">🃏</div>';
+    html += '<div class="card-front"><div class="cc ' + c.rarity + '">';
+    html += '<div class="cc-rarity">' + c.rarity + '</div>';
+    html += '<div class="cc-icon">' + c.icon + '</div>';
+    html += '<div class="cc-name">' + c.name + '</div>';
+    html += '<div class="cc-type">' + c.type + '</div>';
+    html += '<div class="cc-desc">' + c.desc + '</div>';
+    html += '<div class="cc-power"><span>ATK ' + c.atk + '</span><span>DEF ' + c.def + '</span></div>';
+    html += '</div></div></div>';
+  }
+
+  document.getElementById('revealCards').innerHTML = html;
+  _revealedCount = 0;
+  _revealCards = cards;
+}
+
+var _revealedCount = 0;
+var _revealCards = [];
+
+function flipCard(el, idx) {
+  if (el.classList.contains('flipped')) return;
+  el.classList.add('flipped');
+  _revealedCount++;
+
+  // Sparkle effect for rare+
+  var c = _revealCards[idx];
+  if (c.rarity === 'legendary') {
+    el.style.filter = 'drop-shadow(0 0 20px #F59E0B)';
+    document.getElementById('revealSub').innerHTML = '<span style="color:var(--gold);font-size:1rem;font-weight:900">★ LÉGENDAIRE ! ★</span>';
+  } else if (c.rarity === 'epic') {
+    el.style.filter = 'drop-shadow(0 0 15px #8b5cf6)';
+  }
+
+  if (_revealedCount >= 3) {
+    document.getElementById('revealTitle').textContent = 'Pack ouvert !';
+    var newCount = 0;
+    for (var i = 0; i < _revealCards.length; i++) {
+      if (myCards.filter(function(id) { return id === _revealCards[i].id; }).length <= 1) newCount++;
+    }
+    document.getElementById('revealSub').innerHTML += '<br><span style="color:var(--accent2)">' + newCount + ' nouvelle(s) carte(s) ajoutée(s) à votre collection !</span>';
+  }
+}
+
+function closeReveal() {
+  document.getElementById('revealOverlay').classList.remove('active');
+}
+
+// ==================== RENDER ====================
+function renderAll() {
+  packsAvailable = getPacksAvailable();
+
+  // Stats
+  var counts = { common: 0, rare: 0, epic: 0, legendary: 0 };
+  var uniqueCards = [];
+  for (var i = 0; i < myCards.length; i++) {
+    if (uniqueCards.indexOf(myCards[i]) === -1) uniqueCards.push(myCards[i]);
+  }
+  for (var j = 0; j < uniqueCards.length; j++) {
+    var card = ALL_CARDS.filter(function(c) { return c.id === uniqueCards[j]; })[0];
+    if (card) counts[card.rarity]++;
+  }
+
+  document.getElementById('totalCards').textContent = uniqueCards.length;
+  document.getElementById('commonCount').textContent = counts.common;
+  document.getElementById('rareCount').textContent = counts.rare;
+  document.getElementById('epicCount').textContent = counts.epic;
+  document.getElementById('legendCount').textContent = counts.legendary;
+  document.getElementById('collectionCount').textContent = uniqueCards.length;
+  document.getElementById('totalPossible').textContent = ALL_CARDS.length;
+
+  // Pack
+  var packHTML = '';
+  if (packsAvailable > 0) {
+    packHTML = '<div class="pack" onclick="openPack()"><div class="pack-glow"></div><div class="pack-inner"><div class="pack-icon">🃏</div><div class="pack-label">OUVRIR LE PACK</div><div class="pack-sub">3 cartes aléatoires</div><div class="pack-count">' + packsAvailable + ' pack' + (packsAvailable > 1 ? 's' : '') + ' disponible' + (packsAvailable > 1 ? 's' : '') + '</div></div></div>';
+  } else {
+    packHTML = '<div class="pack disabled"><div class="pack-inner"><div class="pack-icon" style="opacity:.3">🃏</div><div class="pack-label" style="color:var(--muted)">Pas de pack</div><div class="pack-sub">Gagnez des XP pour obtenir des packs !</div><div class="pack-count">1 pack tous les 25 XP</div></div></div>';
+  }
+  document.getElementById('packContainer').innerHTML = packHTML;
+
+  // Collection grid
+  var gridHTML = '';
+  for (var k = 0; k < ALL_CARDS.length; k++) {
+    var c = ALL_CARDS[k];
+    var owned = uniqueCards.indexOf(c.id) > -1;
+    if (owned) {
+      gridHTML += '<div class="card-slot"><div class="cc ' + c.rarity + '" style="height:100%">';
+      gridHTML += '<div class="cc-rarity">' + c.rarity + '</div>';
+      gridHTML += '<div class="cc-icon">' + c.icon + '</div>';
+      gridHTML += '<div class="cc-name">' + c.name + '</div>';
+      gridHTML += '<div class="cc-type">' + c.type + '</div>';
+      gridHTML += '<div class="cc-desc">' + c.desc + '</div>';
+      gridHTML += '<div class="cc-power"><span>ATK ' + c.atk + '</span><span>DEF ' + c.def + '</span></div>';
+      gridHTML += '</div></div>';
+    } else {
+      gridHTML += '<div class="card-slot empty"><div><div class="q">?</div><div>' + c.name + '</div></div></div>';
+    }
+  }
+  document.getElementById('collectionGrid').innerHTML = gridHTML;
+}
+
+// Load XP from Supabase to calculate packs
+(function() {
+  var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+  var AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+  if (!student) { renderAll(); return; }
+  fetch(SB + '/cq_game_scores?student_id=eq.' + student.id + '&select=game_id,score', { headers: { 'apikey': AK } })
+    .then(function(r) { return r.json(); })
+    .then(function(scores) {
+      if (!Array.isArray(scores)) { renderAll(); return; }
+      var best = {};
+      for (var i = 0; i < scores.length; i++) {
+        var gid = scores[i].game_id, sc = scores[i].score || 0;
+        if (!best[gid] || sc > best[gid]) best[gid] = sc;
+      }
+      var xp = 0;
+      for (var k in best) xp += Math.min(20, Math.floor(best[k] / 5));
+      localStorage.setItem('dq_total_xp', String(xp));
+      renderAll();
+    })
+    .catch(function() { renderAll(); });
+})();
+</script>
+</body>
+</html>
