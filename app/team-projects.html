@@ -316,6 +316,9 @@ function renderProjects() {
 }
 
 function openProject(id) {
+  // VéloShop has its own enriched page
+  if (id === 'veloshop') { window.location.href = 'projet-veloshop.html'; return; }
+
   currentProject = PROJECTS.find(function(p) { return p.id === id; });
   if (!currentProject) return;
   
