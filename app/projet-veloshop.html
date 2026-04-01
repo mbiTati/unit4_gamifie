@@ -76,15 +76,24 @@
 </head>
 <body>
 <script>if(!localStorage.getItem('cq_student'))window.location.href='login.html';</script>
-<script src="nav.js?v=1775083295"></script>
-
 
 <!-- SLIDES PRESENTATION -->
 <div class="slides-overlay" id="slidesOverlay">
   <div class="slide" id="slideContent"></div>
 </div>
 
-
+<div class="topbar">
+  <h1>🚲 Projet VéloShop</h1>
+  <div class="topbar-right">
+    <a href="home.html">Accueil</a>
+    <a href="team-projects.html">Projets</a>
+    <a id="btnCorrige" href="veloshop-corrige.html" style="display:none;color:#F59E0B;border-color:rgba(245,158,11,.4);font-weight:700">👑 Corrigé</a>
+    <a id="btnApp" href="veloshop-app.html" target="_blank" style="display:none;color:#32E0C4;border-color:rgba(50,224,196,.4)">💻 App démo</a>
+    <a id="btnCards" href="cards.html" style="display:none;color:#F59E0B;border-color:rgba(245,158,11,.4)">🃏 Cartes</a>
+    <a id="btnStorage" href="https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads" target="_blank" style="display:none;color:#ef4444;border-color:rgba(239,68,68,.3)">📥 Fichiers</a>
+    <button onclick="localStorage.clear();window.location.href='login.html'">Déconnexion</button>
+  </div>
+</div>
 
 <div class="main">
   <!-- INTRO -->
