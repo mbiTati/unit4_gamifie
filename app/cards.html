@@ -129,46 +129,46 @@ var student = JSON.parse(localStorage.getItem('cq_student') || 'null');
 // ==================== ALL CARDS ====================
 var ALL_CARDS = [
   // PERSONNAGES (Legendary/Epic)
-  {id:'c_overlord',name:'SQL Overlord',type:'Personnage',icon:'👑',rarity:'legendary',desc:'Le maître absolu des bases de données. Rien ne lui résiste.',atk:99,def:99},
-  {id:'c_wizard',name:'Data Wizard',type:'Personnage',icon:'🧙',rarity:'legendary',desc:'Il transforme le chaos en données structurées d\'un coup de baguette.',atk:90,def:85},
-  {id:'c_sensei',name:'Database Sensei',type:'Personnage',icon:'🥋',rarity:'epic',desc:'Sage et patient, il enseigne l\'art de la normalisation.',atk:75,def:90},
-  {id:'c_architect',name:'Schema Architect',type:'Personnage',icon:'📐',rarity:'epic',desc:'Elle dessine des MCD parfaits les yeux fermés.',atk:80,def:70},
-  {id:'c_warrior',name:'Join Warrior',type:'Personnage',icon:'⚔️',rarity:'epic',desc:'Spécialiste du combat multi-tables. Aucune jointure ne lui fait peur.',atk:85,def:65},
-  {id:'c_rookie',name:'Query Rookie',type:'Personnage',icon:'🐣',rarity:'common',desc:'Tout juste sorti de l\'œuf, mais déjà motivé !',atk:20,def:30},
-  {id:'c_padawan',name:'Data Padawan',type:'Personnage',icon:'🌱',rarity:'common',desc:'Premier pas dans le monde des données.',atk:15,def:25},
-  {id:'c_hacker',name:'Index Hacker',type:'Personnage',icon:'💻',rarity:'rare',desc:'Optimise les requêtes en un clin d\'œil.',atk:70,def:50},
-  {id:'c_guardian',name:'FK Guardian',type:'Personnage',icon:'🛡️',rarity:'rare',desc:'Protège l\'intégrité référentielle coûte que coûte.',atk:55,def:85},
-  {id:'c_detective',name:'Bug Detective',type:'Personnage',icon:'🔍',rarity:'rare',desc:'Trouve les erreurs SQL que personne ne voit.',atk:65,def:60},
+  {id:'c_overlord',name:'SQL Overlord',type:'Personnage',icon:'👑',rarity:'legendary',desc:'Le maître absolu des bases de données. Rien ne lui résiste.',atk:99,def:99,quote:'Le pouvoir est dans les données.'},
+  {id:'c_wizard',name:'Data Wizard',type:'Personnage',icon:'🧙',rarity:'legendary',desc:'Il transforme le chaos en données structurées d\'un coup de baguette.',atk:90,def:85,quote:'La magie, c\'est la logique bien appliquée.'},
+  {id:'c_sensei',name:'Database Sensei',type:'Personnage',icon:'🥋',rarity:'epic',desc:'Sage et patient, il enseigne l\'art de la normalisation.',atk:75,def:90,quote:'La patience est la clé de la maîtrise.'},
+  {id:'c_architect',name:'Schema Architect',type:'Personnage',icon:'📐',rarity:'epic',desc:'Elle dessine des MCD parfaits les yeux fermés.',atk:80,def:70,quote:'Un bon schéma vaut mille lignes de code.'},
+  {id:'c_warrior',name:'Join Warrior',type:'Personnage',icon:'⚔️',rarity:'epic',desc:'Spécialiste du combat multi-tables. Aucune jointure ne lui fait peur.',atk:85,def:65,quote:'L\'union fait la force.'},
+  {id:'c_rookie',name:'Query Rookie',type:'Personnage',icon:'🐣',rarity:'common',desc:'Tout juste sorti de l\'œuf, mais déjà motivé !',atk:20,def:30,quote:'Chaque requête commence par un premier SELECT.'},
+  {id:'c_padawan',name:'Data Padawan',type:'Personnage',icon:'🌱',rarity:'common',desc:'Premier pas dans le monde des données.',atk:15,def:25,quote:'Chaque expert était autrefois un débutant.'},
+  {id:'c_hacker',name:'Index Hacker',type:'Personnage',icon:'💻',rarity:'rare',desc:'Optimise les requêtes en un clin d\'œil.',atk:70,def:50,quote:'La vitesse, c\'est l\'intelligence du code.'},
+  {id:'c_guardian',name:'FK Guardian',type:'Personnage',icon:'🛡️',rarity:'rare',desc:'Protège l\'intégrité référentielle coûte que coûte.',atk:55,def:85,quote:'Sans intégrité, pas de confiance.'},
+  {id:'c_detective',name:'Bug Detective',type:'Personnage',icon:'🔍',rarity:'rare',desc:'Trouve les erreurs SQL que personne ne voit.',atk:65,def:60,quote:'Le diable est dans les détails.'},
 
   // CONCEPTS (Rare/Common)
-  {id:'c_select',name:'SELECT',type:'Requête',icon:'🔎',rarity:'common',desc:'La base de tout. Sans SELECT, pas de données.',atk:40,def:20},
-  {id:'c_join',name:'INNER JOIN',type:'Requête',icon:'🔗',rarity:'rare',desc:'Unit deux tables par leur point commun.',atk:65,def:45},
-  {id:'c_leftjoin',name:'LEFT JOIN',type:'Requête',icon:'↩️',rarity:'rare',desc:'Garde tout le côté gauche, même sans correspondance.',atk:60,def:50},
-  {id:'c_groupby',name:'GROUP BY',type:'Requête',icon:'📊',rarity:'common',desc:'Regroupe les lignes pour calculer des agrégats.',atk:50,def:35},
-  {id:'c_having',name:'HAVING',type:'Requête',icon:'🎯',rarity:'rare',desc:'Filtre les groupes après agrégation. Le WHERE des GROUP BY.',atk:55,def:40},
-  {id:'c_subquery',name:'Sous-requête',type:'Requête',icon:'🎭',rarity:'epic',desc:'Une requête dans une requête. Inception SQL.',atk:75,def:55},
-  {id:'c_view',name:'CREATE VIEW',type:'Requête',icon:'👁️',rarity:'rare',desc:'Une fenêtre virtuelle sur vos données.',atk:50,def:65},
-  {id:'c_insert',name:'INSERT INTO',type:'DML',icon:'➕',rarity:'common',desc:'Ajoute des données. Nourrit la base.',atk:35,def:25},
-  {id:'c_update',name:'UPDATE SET',type:'DML',icon:'✏️',rarity:'common',desc:'Modifie ce qui existe. Attention au WHERE oublié !',atk:45,def:30},
-  {id:'c_delete',name:'DELETE FROM',type:'DML',icon:'🗑️',rarity:'common',desc:'Supprime avec précaution. Pas de CTRL+Z en SQL.',atk:40,def:20},
+  {id:'c_select',name:'SELECT',type:'Requête',icon:'🔎',rarity:'common',desc:'La base de tout. Sans SELECT, pas de données.',atk:40,def:20,quote:'Tout commence par une question.'},
+  {id:'c_join',name:'INNER JOIN',type:'Requête',icon:'🔗',rarity:'rare',desc:'Unit deux tables par leur point commun.',atk:65,def:45,quote:'L\'union fait la force.'},
+  {id:'c_leftjoin',name:'LEFT JOIN',type:'Requête',icon:'↩️',rarity:'rare',desc:'Garde tout le côté gauche, même sans correspondance.',atk:60,def:50,quote:'Ne laisser personne derrière.'},
+  {id:'c_groupby',name:'GROUP BY',type:'Requête',icon:'📊',rarity:'common',desc:'Regroupe les lignes pour calculer des agrégats.',atk:50,def:35,quote:'Ensemble, on est plus forts.'},
+  {id:'c_having',name:'HAVING',type:'Requête',icon:'🎯',rarity:'rare',desc:'Filtre les groupes après agrégation. Le WHERE des GROUP BY.',atk:55,def:40,quote:'Filtrer, c\'est choisir.'},
+  {id:'c_subquery',name:'Sous-requête',type:'Requête',icon:'🎭',rarity:'epic',desc:'Une requête dans une requête. Inception SQL.',atk:75,def:55,quote:'Penser dans la pensée.'},
+  {id:'c_view',name:'CREATE VIEW',type:'Requête',icon:'👁️',rarity:'rare',desc:'Une fenêtre virtuelle sur vos données.',atk:50,def:65,quote:'Voir les choses autrement.'},
+  {id:'c_insert',name:'INSERT INTO',type:'DML',icon:'➕',rarity:'common',desc:'Ajoute des données. Nourrit la base.',atk:35,def:25,quote:'Chaque donnée compte.'},
+  {id:'c_update',name:'UPDATE SET',type:'DML',icon:'✏️',rarity:'common',desc:'Modifie ce qui existe. Attention au WHERE oublié !',atk:45,def:30,quote:'Évoluer, c\'est grandir.'},
+  {id:'c_delete',name:'DELETE FROM',type:'DML',icon:'🗑️',rarity:'common',desc:'Supprime avec précaution. Pas de CTRL+Z en SQL.',atk:40,def:20,quote:'Supprimer avec sagesse.'},
 
   // CONCEPTS BDD (Epic/Rare)
-  {id:'c_pk',name:'PRIMARY KEY',type:'Contrainte',icon:'🔑',rarity:'common',desc:'L\'identifiant unique. Chaque ligne a le sien.',atk:30,def:80},
-  {id:'c_fk',name:'FOREIGN KEY',type:'Contrainte',icon:'🔐',rarity:'rare',desc:'Le lien entre deux tables. L\'intégrité référentielle.',atk:35,def:85},
-  {id:'c_unique',name:'UNIQUE',type:'Contrainte',icon:'⭐',rarity:'common',desc:'Pas de doublons autorisés. Un seul email par client.',atk:25,def:70},
-  {id:'c_notnull',name:'NOT NULL',type:'Contrainte',icon:'🚫',rarity:'common',desc:'Interdit le vide. Ce champ est obligatoire.',atk:20,def:60},
-  {id:'c_check',name:'CHECK',type:'Contrainte',icon:'✅',rarity:'rare',desc:'Vérifie une condition. Le prix doit être positif !',atk:30,def:75},
-  {id:'c_cascade',name:'ON DELETE CASCADE',type:'Contrainte',icon:'💥',rarity:'epic',desc:'Suppression en chaîne. Dangereux mais puissant.',atk:80,def:40},
-  {id:'c_1nf',name:'1NF',type:'Normalisation',icon:'1️⃣',rarity:'common',desc:'Première forme normale : valeurs atomiques.',atk:30,def:55},
-  {id:'c_2nf',name:'2NF',type:'Normalisation',icon:'2️⃣',rarity:'rare',desc:'Élimine les dépendances partielles.',atk:45,def:60},
-  {id:'c_3nf',name:'3NF',type:'Normalisation',icon:'3️⃣',rarity:'rare',desc:'Élimine les dépendances transitives.',atk:55,def:65},
-  {id:'c_acid',name:'ACID',type:'Concept',icon:'⚗️',rarity:'epic',desc:'Atomicité, Cohérence, Isolation, Durabilité. Les 4 piliers.',atk:70,def:90},
+  {id:'c_pk',name:'PRIMARY KEY',type:'Contrainte',icon:'🔑',rarity:'common',desc:'L\'identifiant unique. Chaque ligne a le sien.',atk:30,def:80,quote:'Tu es unique, ne l\'oublie jamais.'},
+  {id:'c_fk',name:'FOREIGN KEY',type:'Contrainte',icon:'🔐',rarity:'rare',desc:'Le lien entre deux tables. L\'intégrité référentielle.',atk:35,def:85,quote:'Les liens font la solidité.'},
+  {id:'c_unique',name:'UNIQUE',type:'Contrainte',icon:'⭐',rarity:'common',desc:'Pas de doublons autorisés. Un seul email par client.',atk:25,def:70,quote:'Être unique est une force.'},
+  {id:'c_notnull',name:'NOT NULL',type:'Contrainte',icon:'🚫',rarity:'common',desc:'Interdit le vide. Ce champ est obligatoire.',atk:20,def:60,quote:'Le vide n\'est pas une option.'},
+  {id:'c_check',name:'CHECK',type:'Contrainte',icon:'✅',rarity:'rare',desc:'Vérifie une condition. Le prix doit être positif !',atk:30,def:75,quote:'Vérifier, c\'est protéger.'},
+  {id:'c_cascade',name:'ON DELETE CASCADE',type:'Contrainte',icon:'💥',rarity:'epic',desc:'Suppression en chaîne. Dangereux mais puissant.',atk:80,def:40,quote:'Un grand pouvoir implique une grande responsabilité.'},
+  {id:'c_1nf',name:'1NF',type:'Normalisation',icon:'1️⃣',rarity:'common',desc:'Première forme normale : valeurs atomiques.',atk:30,def:55,quote:'Simplifier pour mieux régner.'},
+  {id:'c_2nf',name:'2NF',type:'Normalisation',icon:'2️⃣',rarity:'rare',desc:'Élimine les dépendances partielles.',atk:45,def:60,quote:'Chaque chose à sa place.'},
+  {id:'c_3nf',name:'3NF',type:'Normalisation',icon:'3️⃣',rarity:'rare',desc:'Élimine les dépendances transitives.',atk:55,def:65,quote:'L\'ordre mène à la perfection.'},
+  {id:'c_acid',name:'ACID',type:'Concept',icon:'⚗️',rarity:'epic',desc:'Atomicité, Cohérence, Isolation, Durabilité. Les 4 piliers.',atk:70,def:90,quote:'Les fondations ne se négocient pas.'},
 
   // REQUÊTES SPÉCIALES (Legendary/Epic)
-  {id:'c_trigger',name:'TRIGGER',type:'Avancé',icon:'⚡',rarity:'legendary',desc:'S\'exécute automatiquement. Le gardien invisible de la BDD.',atk:85,def:80},
-  {id:'c_index',name:'INDEX',type:'Performance',icon:'🚀',rarity:'epic',desc:'Accélère les recherches. La turbo de vos SELECT.',atk:60,def:70},
-  {id:'c_transaction',name:'TRANSACTION',type:'Avancé',icon:'🔄',rarity:'epic',desc:'Tout ou rien. COMMIT ou ROLLBACK.',atk:75,def:75},
-  {id:'c_wildcard',name:'Joker SQL',type:'Spécial',icon:'🃏',rarity:'legendary',desc:'La carte mystère. Elle peut tout faire... si vous savez l\'utiliser.',atk:95,def:95},
+  {id:'c_trigger',name:'TRIGGER',type:'Avancé',icon:'⚡',rarity:'legendary',desc:'S\'exécute automatiquement. Le gardien invisible de la BDD.',atk:85,def:80,quote:'Toujours prêt, toujours vigilant.'},
+  {id:'c_index',name:'INDEX',type:'Performance',icon:'🚀',rarity:'epic',desc:'Accélère les recherches. La turbo de vos SELECT.',atk:60,def:70,quote:'La vitesse est un super-pouvoir.'},
+  {id:'c_transaction',name:'TRANSACTION',type:'Avancé',icon:'🔄',rarity:'epic',desc:'Tout ou rien. COMMIT ou ROLLBACK.',atk:75,def:75,quote:'Tout ou rien, pas de demi-mesure.'},
+  {id:'c_wildcard',name:'Joker SQL',type:'Spécial',icon:'🃏',rarity:'legendary',desc:'La carte mystère. Elle peut tout faire... si vous savez l\'utiliser.',atk:95,def:95,quote:'Le mystère est la plus grande force.'},
 ];
 
 // ==================== PACK LOGIC ====================
@@ -245,6 +245,7 @@ function showReveal(cards) {
     html += '<div class="cc-name">' + c.name + '</div>';
     html += '<div class="cc-type">' + c.type + '</div>';
     html += '<div class="cc-desc">' + c.desc + '</div>';
+    if (c.quote) html += '<div style="font-style:italic;font-size:.6rem;color:#F59E0B;margin-top:.3rem;opacity:.9">« ' + c.quote + ' »</div>';
     html += '<div class="cc-power"><span>ATK ' + c.atk + '</span><span>DEF ' + c.def + '</span></div>';
     html += '</div></div></div>';
   }
@@ -336,6 +337,7 @@ function renderAll() {
       gridHTML += '<div class="cc-name">' + c.name + '</div>';
       gridHTML += '<div class="cc-type">' + c.type + '</div>';
       gridHTML += '<div class="cc-desc">' + c.desc + '</div>';
+      if (c.quote) gridHTML += '<div style="font-style:italic;font-size:.55rem;color:#F59E0B;margin-top:.2rem;opacity:.85">« ' + c.quote + ' »</div>';
       gridHTML += '<div class="cc-power"><span>ATK ' + c.atk + '</span><span>DEF ' + c.def + '</span></div>';
       gridHTML += '</div></div>';
     } else {
@@ -367,5 +369,7 @@ function renderAll() {
     .catch(function() { renderAll(); });
 })();
 </script>
+<script src="profile-tabs.js?v=1775260800"></script>
+<script src="prof-bar.js?v=1775260800"></script>
 </body>
 </html>

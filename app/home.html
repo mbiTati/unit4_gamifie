@@ -142,7 +142,10 @@ document.getElementById('userName').textContent = student.first_name + ' ' + stu
 document.getElementById('heroName').textContent = 'Salut ' + student.first_name + ' !';
 
 // Create character
-try { createCharacter(0, document.getElementById('heroChar'), 50); } catch(e) {}
+try { 
+  var charEl = createCharacter(0, document.getElementById('heroChar'), 50); 
+  if (charEl) charEl.classList.add('dancing');
+} catch(e) {}
 
 // Load XP + stats
 var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
@@ -176,7 +179,8 @@ fetch(SB + '/cq_game_scores?student_id=eq.' + student.id + '&select=game_id,scor
     // Update character with level
     try { 
       document.getElementById('heroChar').innerHTML = '';
-      createCharacter(level.index, document.getElementById('heroChar'), 50); 
+      var charEl2 = createCharacter(level.index, document.getElementById('heroChar'), 50); 
+      if (charEl2) charEl2.classList.add('dancing');
     } catch(e) {}
     
     // Cards count
@@ -190,6 +194,7 @@ fetch(SB + '/cq_game_scores?student_id=eq.' + student.id + '&select=game_id,scor
   })
   .catch(function() {});
 </script>
+<script src="prof-bar.js?v=1775260800"></script>
 <script src="presence-tracker.js?v=1774980000"></script>
 </body>
 </html>

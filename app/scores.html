@@ -218,6 +218,15 @@ async function loadScores() {
   renderBoard('Exo', byExo2, 'exercisesDone', 'Exercices', 'totalGameScore', 'Score');
   renderBoard('Score', byScore2, 'totalGameScore', 'Score', 'exercisesDone', 'Exercices');
   renderBoard('Duels', byDuels, 'duelScore', 'Pts duel', 'duelCount', 'Duels');
+  
+  // Teacher badge
+  if (isTeacher) {
+    var obs = document.createElement('div');
+    obs.style.cssText = 'max-width:800px;margin:.5rem auto;padding:.5rem 1rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;font-family:Outfit,sans-serif;font-size:.75rem;color:#F59E0B;text-align:center;font-weight:700';
+    obs.textContent = '👁️ Mode Observateur — Vous voyez le classement de vos élèves';
+    var mainEl = document.querySelector('.main');
+    if (mainEl) mainEl.insertBefore(obs, mainEl.firstChild);
+  }
 }
 
 function renderBoard(suffix, data, mainKey, mainLabel, secKey, secLabel) {
@@ -332,5 +341,7 @@ loadLocks(function() {
   }
 });
 </script>
+<script src="profile-tabs.js?v=1775260800"></script>
+<script src="prof-bar.js?v=1775260800"></script>
 </body>
 </html>

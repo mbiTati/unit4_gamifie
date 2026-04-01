@@ -243,7 +243,7 @@ let allGameScores = [];
 function showTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  ['progress','comments','manage','live','exercises','docs','tools'].forEach(t => {
+  ['progress','comments','manage','live','exercises','docs','tools','access'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
@@ -1010,7 +1010,10 @@ function renderDocs() {
 
 renderDocs();
 
-
+// Load locks and render access panel
+loadLocks(function() {
+  renderAccessPanel();
+});
 
 // ===== ACCESS CONTROL PANEL =====
 function renderAccessPanel() {
