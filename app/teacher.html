@@ -15,10 +15,10 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 .main{max-width:1100px;margin:0 auto;padding:1rem 1.5rem}
 
 /* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;margin-bottom:1rem}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
-.kpi .n{font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono',monospace}
-.kpi .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+.kpis{display:flex;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.4rem .8rem;text-align:center;flex:1;min-width:80px}
+.kpi .n{font-size:1.2rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.kpi .l{font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 
 /* Alerts */
 .alert{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:.5rem .8rem;margin-bottom:.5rem;font-size:.78rem;display:flex;align-items:center;gap:.5rem}
@@ -609,10 +609,22 @@ function renderData() {
   const atRisk = stats.filter(s => s.atRisk || s.quizAvg < 40 && s.quizAvg >= 0);
   document.getElementById('kA').textContent = atRisk.length;
   
-  // Alerts
-  document.getElementById('alerts').innerHTML = atRisk.map(s =>
-    `<div class="alert"><strong>⚠ ${s.first_name} ${s.last_name}</strong> — progression ${s.pct}%${s.quizAvg >= 0 && s.quizAvg < 40 ? ', quiz ' + s.quizAvg + '%' : ''}</div>`
-  ).join('');
+  // Alerts — compact
+  if (atRisk.length > 0) {
+    var alertHtml = '<details style="background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.12);border-radius:8px;padding:.4rem .6rem;cursor:pointer">';
+    alertHtml += '<summary style="font-size:.72rem;font-weight:700;color:var(--error);list-style:none;display:flex;align-items:center;gap:.3rem">';
+    alertHtml += '<span>\u26a0</span> ' + atRisk.length + ' \u00e9l\u00e8ve' + (atRisk.length > 1 ? 's' : '') + ' en difficult\u00e9';
+    alertHtml += '</summary>';
+    alertHtml += '<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">';
+    for (var ai = 0; ai < atRisk.length; ai++) {
+      var ar = atRisk[ai];
+      alertHtml += '<span style="font-size:.62rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);padding:.15rem .4rem;border-radius:4px;color:var(--error);font-weight:600">' + ar.first_name + ' ' + ar.last_name.charAt(0) + '. ' + ar.pct + '%</span>';
+    }
+    alertHtml += '</div></details>';
+    document.getElementById('alerts').innerHTML = alertHtml;
+  } else {
+    document.getElementById('alerts').innerHTML = '';
+  }
   
   // Comment badge
   const badge = document.getElementById('commentBadge');
