@@ -106,6 +106,7 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <button class="tab" onclick="showTab('tools',this)">Outils & SQL</button>
   
     <button class="tab" onclick="showTab('access')">🔒 Accès</button>
+    <button class="tab" onclick="showTab('projets',this)" style="color:var(--lo1)">📋 Projets</button>
   </div>
   
   <!-- FILTERS -->
@@ -226,6 +227,17 @@ if (!localStorage.getItem('cq_student')) { window.location.href = 'login.html'; 
     <div id="lockMsg" style="font-size:.72rem;margin-top:.5rem;min-height:1.5rem"></div>
   </div>
 
+  <!-- PROJETS REVIEW TAB -->
+  <div id="tab-projets" style="display:none">
+    <div style="font-size:1rem;font-weight:800;margin-bottom:.3rem;color:var(--lo1)">📋 Suivi des projets en équipe</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem">Consultez les soumissions, commentez et validez chaque étape.</div>
+    <div style="margin-bottom:1rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <select id="projReviewSelect" onchange="loadProjectReview()" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.3rem .5rem;font-size:.72rem;font-family:inherit"></select>
+      <button onclick="loadProjectReview()" style="background:var(--lo1);color:#fff;border:none;padding:.3rem .8rem;border-radius:4px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit">Actualiser</button>
+    </div>
+    <div id="projReviewContent" style="display:grid;gap:.8rem"></div>
+  </div>
+
 <script src="lock-manager.js?v=1774963800"></script>
 <script src="supabase-config.js?v=1774960217"></script>
 <script>
@@ -243,7 +255,7 @@ let allGameScores = [];
 function showTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  ['progress','comments','manage','live','exercises','docs','tools','access'].forEach(t => {
+  ['progress','comments','manage','live','exercises','docs','tools','access','projets'].forEach(t => {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
@@ -1055,6 +1067,169 @@ function toggleAccess(key) {
     if (msg) msg.innerHTML = '<span style="color:var(--lo1)">Modifié !</span>';
     setTimeout(function() { if (msg) msg.innerHTML = ''; }, 2000);
   });
+}
+
+// ===== PROJECT REVIEW SYSTEM =====
+var PROJ_NAMES = {
+  'veloshop': 'VéloShop', 'techrepair': 'TechRepair', 'swissevent': 'SwissEvent',
+  'meethub': 'MeetHub', 'hotelview': 'HotelView', 'saasboard': 'SaaSBoard'
+};
+var PROJ_STEPS = ['Recueil des besoins', 'Dictionnaire des données', 'MCD', 'MLD + SQL', 'Requêtes', 'Tests + Documentation'];
+
+// Populate project selector
+(function() {
+  var sel = document.getElementById('projReviewSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- Choisir un projet --</option>';
+  for (var pid in PROJ_NAMES) {
+    sel.innerHTML += '<option value="' + pid + '">' + PROJ_NAMES[pid] + '</option>';
+  }
+})();
+
+async function loadProjectReview() {
+  var projectId = document.getElementById('projReviewSelect').value;
+  var container = document.getElementById('projReviewContent');
+  if (!projectId) { container.innerHTML = '<div style="color:var(--muted);font-size:.75rem">Sélectionnez un projet.</div>'; return; }
+  
+  container.innerHTML = '<div style="color:var(--muted);font-size:.75rem">Chargement...</div>';
+  
+  var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+  var AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+  
+  try {
+    // Load teams
+    var teamsRes = await fetch(SB + '/cq_team_members?project_id=eq.' + projectId + '&unit_id=eq.4&order=team_number.asc', { headers: { 'apikey': AK } });
+    var teamMembers = await teamsRes.json();
+    if (!Array.isArray(teamMembers)) teamMembers = [];
+    
+    // Load step progress
+    var stepsRes = await fetch(SB + '/cq_team_step_progress?project_id=eq.' + projectId + '&unit_id=eq.4&order=team_number.asc,step_index.asc', { headers: { 'apikey': AK } });
+    var stepProgress = await stepsRes.json();
+    if (!Array.isArray(stepProgress)) stepProgress = [];
+    
+    // Load students for names
+    var studentsRes = await fetch(SB + '/cq_students?select=id,first_name,last_name&role=eq.student', { headers: { 'apikey': AK } });
+    var studentsList = await studentsRes.json();
+    if (!Array.isArray(studentsList)) studentsList = [];
+    var studentMap = {};
+    for (var si = 0; si < studentsList.length; si++) {
+      studentMap[studentsList[si].id] = studentsList[si].first_name + ' ' + studentsList[si].last_name;
+    }
+    
+    // Group by team
+    var teams = {};
+    for (var ti = 0; ti < teamMembers.length; ti++) {
+      var tm = teamMembers[ti];
+      if (!teams[tm.team_number]) teams[tm.team_number] = [];
+      teams[tm.team_number].push(studentMap[tm.student_id] || tm.student_id);
+    }
+    
+    // Group steps by team
+    var stepsByTeam = {};
+    for (var spi = 0; spi < stepProgress.length; spi++) {
+      var sp = stepProgress[spi];
+      if (!stepsByTeam[sp.team_number]) stepsByTeam[sp.team_number] = {};
+      stepsByTeam[sp.team_number][sp.step_index] = sp;
+    }
+    
+    if (Object.keys(teams).length === 0) {
+      container.innerHTML = '<div style="color:var(--muted);font-size:.75rem">Aucune équipe créée pour ce projet. Allez dans Projets en équipe pour créer les équipes.</div>';
+      return;
+    }
+    
+    var html = '';
+    for (var tn in teams) {
+      var members = teams[tn];
+      var tSteps = stepsByTeam[tn] || {};
+      var completed = 0;
+      for (var cs = 0; cs < 6; cs++) { if (tSteps[cs] && tSteps[cs].done) completed++; }
+      
+      html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;overflow:hidden">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">';
+      html += '<div><span style="font-size:.85rem;font-weight:800;color:var(--accent2)">Équipe ' + tn + '</span>';
+      html += '<span style="font-size:.65rem;color:var(--muted);margin-left:.5rem">' + members.join(', ') + '</span></div>';
+      html += '<span style="font-size:.7rem;font-weight:700;color:' + (completed >= 6 ? 'var(--lo1)' : 'var(--gold)') + '">' + completed + '/6</span>';
+      html += '</div>';
+      
+      for (var si2 = 0; si2 < 6; si2++) {
+        var step = tSteps[si2];
+        var stepName = PROJ_STEPS[si2] || ('Étape ' + (si2+1));
+        var isDone = step && step.done;
+        var borderColor = isDone ? 'var(--lo1)' : 'var(--border)';
+        var statusIcon = isDone ? '<span style="color:var(--lo1)">✓</span>' : '<span style="color:var(--muted)">—</span>';
+        
+        html += '<div style="border:1px solid ' + borderColor + ';border-radius:6px;padding:.4rem .6rem;margin-bottom:.3rem;background:' + (isDone ? 'rgba(16,185,129,.02)' : 'transparent') + '">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+        html += '<span style="font-size:.72rem;font-weight:700">' + statusIcon + ' ' + stepName + '</span>';
+        if (isDone) {
+          html += '<span style="font-size:.6rem;color:var(--lo1);font-weight:700">' + (step.score || 0) + '% — ' + new Date(step.submitted_at).toLocaleDateString('fr-CH') + '</span>';
+        }
+        html += '</div>';
+        
+        if (isDone && step.work) {
+          html += '<div style="font-size:.65rem;color:var(--text);margin-top:.3rem;padding:.3rem;background:rgba(255,255,255,.02);border-radius:4px;max-height:120px;overflow-y:auto;white-space:pre-wrap;border:1px solid var(--border)">' + step.work.substring(0, 2000).replace(/</g, '&lt;') + '</div>';
+          html += '<div style="margin-top:.3rem;display:flex;gap:.3rem;align-items:center">';
+          html += '<textarea id="fb_' + tn + '_' + si2 + '" placeholder="Votre commentaire..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-size:.65rem;font-family:inherit;resize:vertical;min-height:28px"></textarea>';
+          html += '<button onclick="sendStepFeedback(\'' + projectId + '\',' + tn + ',' + si2 + ')" style="background:var(--lo2);color:#fff;border:none;padding:.3rem .6rem;border-radius:4px;font-size:.62rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Envoyer</button>';
+          html += '<button onclick="validateStep(\'' + projectId + '\',' + tn + ',' + si2 + ')" style="background:var(--lo1);color:#fff;border:none;padding:.3rem .6rem;border-radius:4px;font-size:.62rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">✓ Valider</button>';
+          html += '</div>';
+          html += '<div id="fbs_' + tn + '_' + si2 + '" style="font-size:.6rem;margin-top:.2rem;min-height:.8rem"></div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div style="color:var(--error);font-size:.75rem">Erreur: ' + e.message + '</div>';
+  }
+}
+
+async function sendStepFeedback(projectId, teamNum, stepIdx) {
+  var ta = document.getElementById('fb_' + teamNum + '_' + stepIdx);
+  var fb = document.getElementById('fbs_' + teamNum + '_' + stepIdx);
+  if (!ta || !ta.value.trim()) return;
+  
+  var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+  var AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+  
+  try {
+    // Save feedback as a comment in cq_comments
+    await fetch(SB + '/cq_comments', {
+      method: 'POST',
+      headers: { 'apikey': AK, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id: student.id,
+        module_id: 'project-' + projectId + '-team' + teamNum + '-step' + stepIdx,
+        comment: '[FEEDBACK PROF] ' + ta.value,
+        unit_id: 4
+      })
+    });
+    fb.innerHTML = '<span style="color:var(--lo1)">💬 Commentaire envoyé !</span>';
+    ta.value = '';
+    setTimeout(function() { fb.innerHTML = ''; }, 3000);
+  } catch(e) {
+    fb.innerHTML = '<span style="color:var(--error)">Erreur</span>';
+  }
+}
+
+async function validateStep(projectId, teamNum, stepIdx) {
+  var fb = document.getElementById('fbs_' + teamNum + '_' + stepIdx);
+  var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
+  var AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
+  
+  try {
+    await fetch(SB + '/cq_team_step_progress?project_id=eq.' + projectId + '&team_number=eq.' + teamNum + '&step_index=eq.' + stepIdx + '&unit_id=eq.4', {
+      method: 'PATCH',
+      headers: { 'apikey': AK, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ score: 100 })
+    });
+    fb.innerHTML = '<span style="color:var(--lo1)">✅ Validé à 100% !</span>';
+    setTimeout(function() { loadProjectReview(); }, 1500);
+  } catch(e) {
+    fb.innerHTML = '<span style="color:var(--error)">Erreur</span>';
+  }
 }
 </script>
 <script src="presence-tracker.js?v=1774960217"></script>
