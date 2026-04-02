@@ -90,7 +90,7 @@
   var links = [
     { label: 'Dashboard', href: prefix + 'teacher.html', emoji: '' },
     { label: 'Acc\u00e8s', href: prefix + 'teacher.html?tab=access', emoji: '\uD83D\uDD12 ' },
-    { label: 'Projets', href: prefix + 'teacher.html?tab=projets', emoji: '\uD83D\uDCCB ' },
+    { label: 'Projets', href: prefix + 'teacher-projets.html', emoji: '\uD83D\uDCCB ' },
     { label: 'Mes Cours', href: indexPrefix + 'index.html', emoji: '' },
     { label: 'Mes Documents', href: prefix + 'teacher.html?tab=docs', emoji: '' },
     { label: 'Fichiers', href: 'https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads', emoji: '\uD83D\uDCE5 ', target: '_blank' }
