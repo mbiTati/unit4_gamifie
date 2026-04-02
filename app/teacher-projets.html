@@ -199,12 +199,19 @@ async function loadTeams() {
           mhtml += '<span style="background:rgba(255,255,255,.04);border:1px solid var(--border);padding:.1rem .3rem;border-radius:3px;display:inline-flex;align-items:center;gap:.2rem">';
           if (isLeader) mhtml += '<span style="color:var(--gold)">\uD83D\uDC51</span>';
           mhtml += t.members[mi];
-          mhtml += '<span onclick="removeFromTeam(\'' + t.memberIds[mi] + '\')" style="color:var(--error);cursor:pointer;font-size:.7rem;font-weight:900;margin-left:.1rem" title="Retirer">\u00d7</span>';
+          mhtml += ' <span class="dq-remove-member" data-sid="' + t.memberIds[mi] + '" style="color:var(--error);cursor:pointer;font-size:.8rem;font-weight:900;line-height:1" title="Retirer de l\'\u00e9quipe">\u00d7</span>';
           mhtml += '</span>';
         }
         mhtml += '</div>';
       }
       msg.innerHTML = mhtml;
+      // Attach remove listeners
+      var removeBtns = msg.querySelectorAll('.dq-remove-member');
+      for (var ri = 0; ri < removeBtns.length; ri++) {
+        removeBtns[ri].addEventListener('click', function() {
+          removeFromTeam(this.getAttribute('data-sid'));
+        });
+      }
     } else {
       msg.innerHTML = '<span style="color:var(--muted)">Aucune \u00e9quipe.</span>';
     }
