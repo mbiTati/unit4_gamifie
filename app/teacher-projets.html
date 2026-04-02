@@ -46,7 +46,10 @@ if (!student || student.role !== 'teacher') {
 
 <div class="main">
   <h1 style="font-size:1.2rem;font-weight:900;margin-bottom:.2rem;background:linear-gradient(135deg,var(--lo1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">📋 Gestion des Projets</h1>
-  <p style="font-size:.72rem;color:var(--muted);margin-bottom:1rem">Créez les équipes, suivez l'avancement, commentez et validez chaque étape.</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <p style="font-size:.72rem;color:var(--muted)">Cr&eacute;ez les &eacute;quipes, suivez l'avancement, validez chaque &eacute;tape.</p>
+    <a href="projet-veloshop.html" style="color:var(--lo2);text-decoration:none;font-size:.7rem;font-weight:700;border:1px solid rgba(59,130,246,.3);padding:.3rem .6rem;border-radius:5px">Voir c&ocirc;t&eacute; &eacute;l&egrave;ve &rarr;</a>
+  </div>
 
   <!-- Project selector -->
   <div class="project-tabs" id="projectTabs"></div>
@@ -144,10 +147,15 @@ async function loadTeams() {
     var teamMembers = await tmRes.json();
     if (!Array.isArray(teamMembers)) teamMembers = [];
     
-    // Load step progress
+    // Load step progress (new table)
     var spRes = await fetch(SB_URL + '/cq_team_step_progress?project_id=eq.' + currentProjectId + '&unit_id=eq.4&order=team_number.asc,step_index.asc', { headers: { 'apikey': SB_KEY } });
     var stepProgress = await spRes.json();
     if (!Array.isArray(stepProgress)) stepProgress = [];
+    
+    // Also load old step_data from cq_team_projects as fallback
+    var projRes = await fetch(SB_URL + '/cq_team_projects?project_id=eq.' + currentProjectId + '&unit_id=eq.4&select=step_data', { headers: { 'apikey': SB_KEY } });
+    var projData = await projRes.json();
+    var oldStepData = (Array.isArray(projData) && projData[0] && projData[0].step_data) ? projData[0].step_data : {};
     
     // Group by team
     var teams = {};
@@ -159,12 +167,30 @@ async function loadTeams() {
       if (!teams[tm.team_number].leader) teams[tm.team_number].leader = name;
     }
     
-    // Group steps
+    // Group steps from new table
     var stepsByTeam = {};
     for (var si = 0; si < stepProgress.length; si++) {
       var sp = stepProgress[si];
       if (!stepsByTeam[sp.team_number]) stepsByTeam[sp.team_number] = {};
       stepsByTeam[sp.team_number][sp.step_index] = sp;
+    }
+    
+    // Merge old step_data as fallback (assign to all teams that have no new data)
+    if (Object.keys(oldStepData).length > 0) {
+      for (var tn in teams) {
+        if (!stepsByTeam[tn]) stepsByTeam[tn] = {};
+        for (var sk in oldStepData) {
+          var idx = parseInt(sk.replace('step_', ''));
+          if (!isNaN(idx) && !stepsByTeam[tn][idx] && oldStepData[sk].done) {
+            stepsByTeam[tn][idx] = { 
+              done: true, 
+              score: oldStepData[sk].score || 0, 
+              work: oldStepData[sk].work || '',
+              submitted_at: null
+            };
+          }
+        }
+      }
     }
     
     // Show teams in manage section
