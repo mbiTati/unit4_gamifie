@@ -46,7 +46,7 @@
   right += lnk(indexHref, 'Cours', page === 'index.html');
   right += lnk(appPrefix + 'profile.html', 'Mon Profil', page === 'profile.html');
   right += lnk(appPrefix + 'scores.html', 'Classement', page === 'scores.html');
-  right += '<button onclick="localStorage.removeItem(\'cq_student\');localStorage.removeItem(\'cq_token\');localStorage.removeItem(\'cq_refresh\');localStorage.removeItem(\'cq_user\');window.location.href=\'' + appPrefix + 'login.html\'" style="color:#94a3b8;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:Outfit,system-ui,sans-serif">D\u00e9connexion</button>';
+  right += '<button onclick="try{if(window.supabase)supabase.signOut();}catch(e){}localStorage.clear();window.location.href=\'' + appPrefix + 'login.html\'" style="color:#94a3b8;font-size:.7rem;font-weight:600;border:1px solid #1e3a5f;padding:.25rem .5rem;border-radius:4px;background:none;cursor:pointer;font-family:Outfit,system-ui,sans-serif">D\u00e9connexion</button>';
   right += '</div>';
 
   nav.innerHTML = left + right;

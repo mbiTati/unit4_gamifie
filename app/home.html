@@ -54,12 +54,6 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 .stats-row{display:flex;justify-content:center;gap:1.5rem;padding:.8rem;font-size:.72rem;color:var(--muted)}
 .stats-row .val{font-weight:900;font-family:'JetBrains Mono',monospace;margin-right:.2rem}
 
-/* FAKE LOCK */
-.fake-lock{position:absolute;inset:0;background:rgba(10,15,26,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;z-index:2}
-.fake-lock .lock-icon{font-size:1.5rem;margin-bottom:.3rem}
-.fake-lock .lock-text{font-size:.6rem;color:var(--gold);font-weight:700;text-align:center;padding:0 .5rem}
-.fake-lock .lock-bar{width:60%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:.3rem;overflow:hidden}
-.fake-lock .lock-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--accent2));border-radius:2px}
 </style>
 </head>
 <body>
@@ -194,6 +188,7 @@ fetch(SB + '/cq_game_scores?student_id=eq.' + student.id + '&select=game_id,scor
   })
   .catch(function() {});
 </script>
+<script src="nav-bar.js?v=1775260800"></script>
 <script src="prof-bar.js?v=1775260800"></script>
 <script src="presence-tracker.js?v=1774980000"></script>
 </body>
