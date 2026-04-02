@@ -89,10 +89,11 @@
 
   var links = [
     { label: 'Dashboard', href: prefix + 'teacher.html', emoji: '' },
-    { label: 'Accès', href: prefix + 'teacher.html?tab=access', emoji: '🔒 ' },
+    { label: 'Acc\u00e8s', href: prefix + 'teacher.html?tab=access', emoji: '\uD83D\uDD12 ' },
+    { label: 'Projets', href: prefix + 'teacher.html?tab=projets', emoji: '\uD83D\uDCCB ' },
     { label: 'Mes Cours', href: indexPrefix + 'index.html', emoji: '' },
     { label: 'Mes Documents', href: prefix + 'teacher.html?tab=docs', emoji: '' },
-    { label: 'Fichiers', href: 'https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads', emoji: '📥 ', target: '_blank' }
+    { label: 'Fichiers', href: 'https://supabase.com/dashboard/project/jslbfkaujahihvjdxcjg/storage/buckets/team-uploads', emoji: '\uD83D\uDCE5 ', target: '_blank' }
   ];
 
   var html = '<span style="color:#F59E0B;font-weight:800;margin-right:.3rem">👑 PROF</span>';
