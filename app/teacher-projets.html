@@ -67,6 +67,16 @@ if (!student || student.role !== 'teacher') {
       </span>
     </div>
     <div id="manageMsg" style="font-size:.7rem;min-height:1.2rem;margin-top:.3rem"></div>
+    
+    <!-- Manual student assignment -->
+    <div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+      <span style="font-size:.68rem;font-weight:700;color:var(--lo2)">Ajouter un élève :</span>
+      <select id="addStudentSelect" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-size:.68rem;font-family:inherit;min-width:150px"></select>
+      <span style="font-size:.68rem;color:var(--muted)">→ Équipe</span>
+      <select id="addTeamSelect" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-size:.68rem;font-family:inherit;width:60px"></select>
+      <button class="btn btn-blue" onclick="addStudentToTeam()" style="font-size:.65rem">+ Ajouter</button>
+      <span id="addStudentMsg" style="font-size:.6rem;min-width:100px"></span>
+    </div>
   </div>
 
   <!-- Teams & submissions -->
@@ -211,70 +221,95 @@ async function loadTeams() {
         var isValidated = isDone && step.score >= 100;
         var isPending = isDone && step.score < 100;
         
-        var rowClass = isValidated ? 'done' : isPending ? ' style="border-color:var(--gold);background:rgba(245,158,11,.03)"' : '';
-        html += '<div class="step-row' + (isValidated ? ' done' : '') + '"' + (isPending ? ' style="border-color:var(--gold);background:rgba(245,158,11,.03)"' : '') + '>';
-        html += '<div class="step-header">';
-        
-        if (isValidated) {
-          var date = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
-          html += '<span class="step-name" style="color:var(--lo1)">\u2705 ' + stepName + '</span>';
-          html += '<span class="step-meta">Valid\u00e9 \u00b7 ' + date + '</span>';
-          html += '</div>';
-          // Show file if present
-          if (step.work) {
-            var vFileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
-            if (vFileMatch) {
-              var vUrl = vFileMatch[1];
-              var vName = vUrl.split('/').pop();
-              html += '<div style="margin:.2rem 0;display:flex;align-items:center;gap:.3rem">';
-              html += '<a href="' + vUrl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.65rem;font-weight:600">\uD83D\uDCCE ' + decodeURIComponent(vName) + '</a>';
-              html += '</div>';
-            }
-          }
-        } else if (isPending) {
-          var date2 = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
-          html += '<span class="step-name" style="color:var(--gold)">\u23f3 ' + stepName + '</span>';
-          html += '<span style="font-size:.6rem;color:var(--gold);font-weight:700">Soumis ' + date2 + '</span>';
-        } else {
-          html += '<span class="step-name">' + (si2+1) + '. ' + stepName + '</span>';
-          html += '<span style="font-size:.6rem;color:var(--muted)">\u2014</span>';
-        }
-        html += '</div>';
-        
         if (isPending) {
-          // Show submitted work + file link + big OK button
+          // === SOUMISSION EN ATTENTE → OK button ===
+          var date2 = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') + ' ' + new Date(step.submitted_at).toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'}) : '';
+          html += '<div class="step-row" style="border-color:var(--gold);background:rgba(245,158,11,.04)">';
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">';
+          html += '<div>';
+          html += '<span style="font-size:.75rem;font-weight:800;color:var(--gold)">\u23f3 ' + stepName + '</span>';
+          html += '<span style="font-size:.6rem;color:var(--muted);margin-left:.4rem">soumis ' + date2 + '</span>';
+          html += '</div>';
+          html += '<button onclick="validateStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.8rem;border-radius:6px;font-size:.85rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(16,185,129,.3)">OK \u2713</button>';
+          html += '</div>';
+          
+          // Show work preview
           if (step.work) {
-            var workText = step.work.substring(0, 3000).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            // Extract file URL if present
             var fileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
             if (fileMatch) {
               var fUrl = fileMatch[1];
               var fName = fUrl.split('/').pop();
-              html += '<div style="margin:.3rem 0;padding:.3rem .5rem;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:5px;display:flex;align-items:center;gap:.4rem">';
-              html += '<span style="font-size:.7rem">\uD83D\uDCCE</span>';
-              html += '<a href="' + fUrl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.7rem;font-weight:700">' + decodeURIComponent(fName) + '</a>';
-              html += '<a href="' + fUrl + '" target="_blank" download style="background:var(--lo2);color:#fff;padding:.2rem .5rem;border-radius:4px;font-size:.6rem;font-weight:700;text-decoration:none;margin-left:auto">\u2B07 T\u00e9l\u00e9charger</a>';
+              html += '<div style="margin:.3rem 0;display:flex;align-items:center;gap:.3rem">';
+              html += '<a href="' + fUrl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.7rem;font-weight:700">\uD83D\uDCCE ' + decodeURIComponent(fName) + '</a>';
+              html += '<a href="' + fUrl + '" target="_blank" download class="btn btn-blue" style="font-size:.58rem;padding:.2rem .4rem">\u2B07</a>';
               html += '</div>';
-              // Show text without the file URL line
-              workText = workText.replace(/\uD83D\uDCCE Fichier:.*$/gm, '').trim();
             }
-            if (workText) {
-              html += '<div class="step-work">' + workText + '</div>';
+            var cleanWork = step.work.replace(/\uD83D\uDCCE Fichier:.*$/gm, '').trim();
+            if (cleanWork) {
+              html += '<details style="margin-top:.2rem"><summary style="font-size:.6rem;color:var(--muted);cursor:pointer">Voir le texte</summary>';
+              html += '<div class="step-work">' + cleanWork.substring(0, 2000).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+              html += '</details>';
             }
           }
-          html += '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.4rem">';
-          html += '<button onclick="validateStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.5rem;border-radius:6px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit">OK \u2713</button>';
-          html += '<button onclick="rejectStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:transparent;color:var(--error);border:1px solid var(--error);padding:.4rem .8rem;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;font-family:inherit">\u2717 Refuser</button>';
-          html += '<input id="fb_' + tn2 + '_' + si2 + '" placeholder="Commentaire (optionnel)" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.35rem .5rem;font-size:.65rem;font-family:inherit">';
-          html += '<button class="btn btn-blue" onclick="sendFeedback(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="font-size:.6rem;padding:.35rem .5rem">\u2709</button>';
+          
+          html += '<div style="margin-top:.3rem;display:flex;gap:.3rem;align-items:center">';
+          html += '<input id="fb_' + tn2 + '_' + si2 + '" placeholder="Commentaire (optionnel)" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.25rem .4rem;font-size:.62rem;font-family:inherit">';
+          html += '<button class="btn btn-blue" onclick="sendFeedback(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="font-size:.58rem;padding:.25rem .4rem">\u2709</button>';
+          html += '<button onclick="rejectStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:transparent;color:var(--error);border:1px solid rgba(239,68,68,.3);padding:.25rem .5rem;border-radius:4px;font-size:.58rem;font-weight:700;cursor:pointer;font-family:inherit">\u2717</button>';
           html += '</div>';
-          html += '<div id="fbs_' + tn2 + '_' + si2 + '" style="font-size:.6rem;margin-top:.2rem;min-height:.7rem"></div>';
+          html += '<div id="fbs_' + tn2 + '_' + si2 + '" style="font-size:.58rem;margin-top:.15rem;min-height:.6rem"></div>';
+          html += '</div>';
+          
+        } else if (isValidated) {
+          // === VALIDÉ → compact green line ===
+          var dateV = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
+          html += '<div class="step-row done" style="padding:.3rem .6rem">';
+          html += '<div style="display:flex;align-items:center;justify-content:space-between">';
+          html += '<span style="font-size:.68rem;color:var(--lo1);font-weight:700">\u2705 ' + stepName + '</span>';
+          html += '<span style="font-size:.58rem;color:var(--muted)">' + dateV + '</span>';
+          html += '</div>';
+          if (step.work) {
+            var vFileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
+            if (vFileMatch) {
+              html += '<a href="' + vFileMatch[1] + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.6rem">\uD83D\uDCCE ' + decodeURIComponent(vFileMatch[1].split('/').pop()) + '</a>';
+            }
+          }
+          html += '</div>';
+          
+        } else {
+          // === PAS ENCORE SOUMIS → quiet gray line ===
+          html += '<div class="step-row" style="padding:.25rem .6rem;opacity:.5">';
+          html += '<span style="font-size:.65rem;color:var(--muted)">' + (si2+1) + '. ' + stepName + '</span>';
+          html += '</div>';
         }
-        html += '</div>';
       }
       html += '</div>';
     }
     container.innerHTML = html;
+    // Populate add-student selects
+    var addSel = document.getElementById('addStudentSelect');
+    var addTeamSel = document.getElementById('addTeamSelect');
+    if (addSel) {
+      // Find students NOT in any team for this project
+      var assignedIds = {};
+      for (var ai = 0; ai < teamMembers.length; ai++) assignedIds[teamMembers[ai].student_id] = true;
+      
+      addSel.innerHTML = '<option value="">-- Élève --</option>';
+      for (var sid in allStudentsMap) {
+        if (!assignedIds[sid]) {
+          addSel.innerHTML += '<option value="' + sid + '">' + allStudentsMap[sid] + '</option>';
+        }
+      }
+    }
+    if (addTeamSel) {
+      addTeamSel.innerHTML = '';
+      var maxTeam = 0;
+      for (var tn3 in teams) { if (parseInt(tn3) > maxTeam) maxTeam = parseInt(tn3); }
+      for (var tn4 = 1; tn4 <= maxTeam; tn4++) {
+        addTeamSel.innerHTML += '<option value="' + tn4 + '">' + tn4 + '</option>';
+      }
+      addTeamSel.innerHTML += '<option value="' + (maxTeam + 1) + '">' + (maxTeam + 1) + ' (nouvelle)</option>';
+    }
     
   } catch(e) {
     container.innerHTML = '<div class="empty" style="color:var(--error)">Erreur : ' + e.message + '</div>';
@@ -434,10 +469,34 @@ async function rejectStep(projectId, teamNum, stepIdx) {
       headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({ done: false, score: 0 })
     });
-    fb.innerHTML = '<span style="color:var(--error)">✗ Renvoyé à l\'équipe — doit resoumettre.</span>';
+    fb.innerHTML = '<span style="color:var(--error)">\u2717 Renvoy\u00e9</span>';
     setTimeout(function() { loadTeams(); }, 1500);
   } catch(e) {
     fb.innerHTML = '<span style="color:var(--error)">Erreur</span>';
+  }
+}
+
+async function addStudentToTeam() {
+  if (!currentProjectId) return;
+  var studentId = document.getElementById('addStudentSelect').value;
+  var teamNum = document.getElementById('addTeamSelect').value;
+  var msg = document.getElementById('addStudentMsg');
+  
+  if (!studentId || !teamNum) {
+    msg.innerHTML = '<span style="color:var(--error)">S\u00e9lectionnez un \u00e9l\u00e8ve et une \u00e9quipe</span>';
+    return;
+  }
+  
+  try {
+    await fetch(SB_URL + '/cq_team_members', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project_id: currentProjectId, team_number: parseInt(teamNum), student_id: studentId, unit_id: 4 })
+    });
+    msg.innerHTML = '<span style="color:var(--lo1)">\u2705 Ajout\u00e9 !</span>';
+    setTimeout(function() { msg.innerHTML = ''; loadTeams(); }, 1000);
+  } catch(e) {
+    msg.innerHTML = '<span style="color:var(--error)">Erreur</span>';
   }
 }
 
