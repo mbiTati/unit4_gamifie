@@ -1,18 +1,18 @@
 // profile-tabs.js — Shared sub-navigation for profile pages
-// Include on: profile.html, cards.html, scores.html, docs.html, settings.html
 (function() {
   var path = window.location.pathname || '';
   var page = path.split('/').pop();
 
   var tabs = [
-    { label: '👤 Profil', href: 'profile.html', id: 'profile.html' },
-    { label: '🃏 Cartes', href: 'cards.html', id: 'cards.html' },
-    { label: '🏆 Classement', href: 'scores.html', id: 'scores.html' },
-    { label: '📄 Documents', href: 'docs.html', id: 'docs.html' },
-    { label: '⚙️ Paramètres', href: 'settings.html', id: 'settings.html' }
+    { label: '\uD83D\uDC64 Profil', href: 'profile.html', id: 'profile.html' },
+    { label: '\uD83C\uDCCF Cartes', href: 'cards.html', id: 'cards.html' },
+    { label: '\uD83C\uDFC6 Classement', href: 'scores.html', id: 'scores.html' },
+    { label: '\uD83D\uDCC4 Documents', href: 'docs.html', id: 'docs.html' },
+    { label: '\u2699\uFE0F Param\u00e8tres', href: 'settings.html', id: 'settings.html' }
   ];
 
   var nav = document.createElement('div');
+  nav.id = 'dqProfileTabs';
   nav.style.cssText = 'background:#111827;border-bottom:1px solid #1e3a5f;padding:.3rem .8rem;display:flex;gap:.2rem;flex-wrap:wrap;justify-content:center;font-family:Outfit,system-ui,sans-serif';
 
   for (var i = 0; i < tabs.length; i++) {
@@ -25,18 +25,15 @@
     nav.appendChild(a);
   }
 
-  // Insert after the first topbar-like element
-  var topbar = document.querySelector('.topbar') || document.querySelector('[style*="border-bottom"]');
-  if (topbar && topbar.nextSibling) {
-    topbar.parentNode.insertBefore(nav, topbar.nextSibling);
+  // Insert after prof-bar or nav-bar (whichever is last at the top)
+  var anchor = document.getElementById('dqProfBar') || document.getElementById('dqNavBar');
+  if (anchor && anchor.nextSibling) {
+    anchor.parentNode.insertBefore(nav, anchor.nextSibling);
+  } else if (anchor) {
+    anchor.parentNode.appendChild(nav);
   } else {
-    // Fallback: insert after first child of body
-    var kids = document.body.children;
-    for (var j = 0; j < kids.length; j++) {
-      if (kids[j].tagName !== 'SCRIPT') {
-        kids[j].parentNode.insertBefore(nav, kids[j].nextSibling);
-        break;
-      }
+    if (document.body.firstChild) {
+      document.body.insertBefore(nav, document.body.firstChild);
     }
   }
 })();
