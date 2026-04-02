@@ -259,6 +259,18 @@ function showTab(tab, btn) {
     const el = document.getElementById('tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
+  // Hide KPIs, alerts, filters on standalone tabs
+  var standaloneTab = (tab === 'projets' || tab === 'access');
+  var kpis = document.querySelector('.kpis');
+  var alerts = document.getElementById('alerts');
+  var filters = document.querySelector('.filters');
+  if (kpis) kpis.style.display = standaloneTab ? 'none' : '';
+  if (alerts) alerts.style.display = standaloneTab ? 'none' : '';
+  if (filters) filters.style.display = standaloneTab ? 'none' : '';
+  // Auto-load project review
+  if (tab === 'projets' && document.getElementById('projReviewSelect').value) {
+    loadProjectReview();
+  }
 }
 
 function logout() {
