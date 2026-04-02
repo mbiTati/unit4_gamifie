@@ -202,11 +202,12 @@ async function loadScores() {
   renderBoard('Score', byScore2, 'totalGameScore', 'Score', 'exercisesDone', 'Exercices');
   renderBoard('Duels', byDuels, 'duelScore', 'Pts duel', 'duelCount', 'Duels');
   
-  // Teacher badge
-  if (isTeacher) {
+  // Teacher badge (only once)
+  if (isTeacher && !document.getElementById('dqObsBadge')) {
     var obs = document.createElement('div');
+    obs.id = 'dqObsBadge';
     obs.style.cssText = 'max-width:800px;margin:.5rem auto;padding:.5rem 1rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;font-family:Outfit,sans-serif;font-size:.75rem;color:#F59E0B;text-align:center;font-weight:700';
-    obs.textContent = '👁️ Mode Observateur — Vous voyez le classement de vos élèves';
+    obs.textContent = '\uD83D\uDC41\uFE0F Mode Observateur \u2014 Vous voyez le classement de vos \u00e9l\u00e8ves';
     var mainEl = document.querySelector('.main');
     if (mainEl) mainEl.insertBefore(obs, mainEl.firstChild);
   }

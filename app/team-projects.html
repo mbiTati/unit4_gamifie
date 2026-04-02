@@ -441,10 +441,32 @@ function submitStep(idx) {
   setTimeout(function() { openProject(currentProject.id); }, 2500);
 }
 
-// Save step data to Supabase
+// Save step data to Supabase — PER TEAM
 async function saveStepToSupabase(projectId, stepIdx, work, score) {
   try {
     var state = projectStates[projectId] || {};
+    var myTeam = state.myTeam;
+    
+    // Save to team-level progress table
+    if (myTeam) {
+      var body = { project_id: projectId, team_number: myTeam, step_index: stepIdx, work: (work || '').substring(0, 5000), score: score, done: true, submitted_by: student.id, submitted_at: new Date().toISOString(), unit_id: 4 };
+      // Upsert
+      var res = await fetch(SB_URL + '/cq_team_step_progress?project_id=eq.' + projectId + '&team_number=eq.' + myTeam + '&step_index=eq.' + stepIdx + '&unit_id=eq.4', {
+        method: 'PATCH',
+        headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify(body)
+      });
+      var data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        await fetch(SB_URL + '/cq_team_step_progress', {
+          method: 'POST',
+          headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      }
+    }
+    
+    // Also save globally to project (backward compat)
     var stepData = {};
     for (var i = 0; i < 6; i++) {
       if (state['step_' + i + '_done']) {
@@ -463,31 +485,43 @@ async function saveStepToSupabase(projectId, stepIdx, work, score) {
   } catch(e) { console.log('Step save error:', e); }
 }
 
-// Celebration animation
+// ==================== PUZZLE CELEBRATION ====================
 function showStepCelebration(stepNum, completed, total, score, found, totalKw) {
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;animation:fadeIn .3s ease';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;animation:fadeIn .3s ease';
   
   var isAllDone = completed >= total;
-  var emoji = isAllDone ? '🏆' : score >= 80 ? '🎉' : score >= 50 ? '👏' : '✅';
-  var msg = isAllDone ? 'PROJET TERMINÉ !' : 'Étape ' + stepNum + ' validée !';
   var color = isAllDone ? '#F59E0B' : '#10b981';
+  var msg = isAllDone ? 'PROJET TERMIN\u00c9 !' : '\u00c9tape ' + stepNum + ' valid\u00e9e !';
   
-  overlay.innerHTML = '<div style="text-align:center;animation:popIn .5s ease">' +
-    '<div style="font-size:4rem;margin-bottom:.5rem">' + emoji + '</div>' +
+  // Puzzle pieces SVG
+  var puzzleHtml = '<div style="display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(2,50px);gap:3px;margin-bottom:1rem">';
+  for (var pi = 0; pi < total; pi++) {
+    var done = pi < completed;
+    var isNew = pi === completed - 1;
+    var pColor = done ? (isNew ? color : '#32E0C4') : '#334155';
+    var pBorder = done ? (isNew ? 'rgba(255,255,255,.5)' : 'rgba(50,224,196,.3)') : '#1e3a5f';
+    var anim = isNew ? ';animation:puzzlePop .6s ease' : '';
+    puzzleHtml += '<div style="width:50px;height:50px;background:' + pColor + ';border:2px solid ' + pBorder + ';border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;font-family:Outfit,sans-serif;transition:all .3s' + anim + '">' + (done ? '\u2713' : (pi + 1)) + '</div>';
+  }
+  puzzleHtml += '</div>';
+  
+  overlay.innerHTML = '<style>@keyframes puzzlePop{0%{transform:scale(0) rotate(-180deg);opacity:0}60%{transform:scale(1.3) rotate(10deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}</style>' +
+    '<div style="text-align:center">' +
+    puzzleHtml +
     '<div style="font-size:1.5rem;font-weight:900;color:' + color + ';margin-bottom:.3rem;font-family:Outfit,sans-serif">' + msg + '</div>' +
-    '<div style="font-size:.9rem;color:#e2e8f0;margin-bottom:.8rem;font-family:Outfit,sans-serif">' + found + '/' + totalKw + ' éléments détectés (' + score + '%)</div>' +
-    '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1rem">' +
+    '<div style="font-size:.85rem;color:#e2e8f0;margin-bottom:.5rem;font-family:Outfit,sans-serif">' + found + '/' + totalKw + ' \u00e9l\u00e9ments d\u00e9tect\u00e9s (' + score + '%)</div>' +
+    '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.8rem">' +
       '<div style="width:200px;height:12px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden">' +
-        '<div style="width:' + Math.round(completed/total*100) + '%;height:100%;background:linear-gradient(90deg,' + color + ',#32E0C4);border-radius:6px;transition:width 1s ease"></div>' +
+        '<div style="width:' + Math.round(completed/total*100) + '%;height:100%;background:linear-gradient(90deg,' + color + ',#32E0C4);border-radius:6px"></div>' +
       '</div>' +
       '<span style="font-family:JetBrains Mono,monospace;font-size:1.2rem;font-weight:900;color:' + color + '">' + completed + '/' + total + '</span>' +
     '</div>' +
-    (completed < total ? '<div style="font-size:.75rem;color:#94a3b8;font-family:Outfit,sans-serif">Étape suivante débloquée !</div>' : '<div style="font-size:.85rem;color:#F59E0B;font-family:Outfit,sans-serif;font-weight:700">Bravo ! Toutes les étapes sont terminées !</div>') +
+    (isAllDone ? '<div style="font-size:1rem;color:#F59E0B;font-family:Outfit,sans-serif;font-weight:800">\uD83C\uDFC6 Carte d\'\u00e9quipe d\u00e9bloqu\u00e9e !</div>' : '<div style="font-size:.75rem;color:#94a3b8;font-family:Outfit,sans-serif">\u00c9tape suivante d\u00e9bloqu\u00e9e pour toute l\'\u00e9quipe !</div>') +
   '</div>';
   
-  // Confetti particles
-  for (var ci = 0; ci < 30; ci++) {
+  // Confetti
+  for (var ci = 0; ci < 25; ci++) {
     var conf = document.createElement('div');
     var colors = ['#F59E0B','#10b981','#3b82f6','#8b5cf6','#ef4444','#32E0C4'];
     conf.style.cssText = 'position:fixed;width:8px;height:8px;background:' + colors[ci % colors.length] + ';border-radius:' + (ci % 2 === 0 ? '50%' : '1px') + ';top:-10px;left:' + (Math.random()*100) + '%;z-index:10001;pointer-events:none;animation:confettiFall ' + (1.5 + Math.random()*2) + 's ease forwards;animation-delay:' + (Math.random()*0.5) + 's';
@@ -496,29 +530,29 @@ function showStepCelebration(stepNum, completed, total, score, found, totalKw) {
   
   document.body.appendChild(overlay);
   
-  // Play celebration sound
+  // Puzzle piece sound (5 notes ascending = piece locking in)
   try {
     var ctx = new (window.AudioContext || window.webkitAudioContext)();
-    var notes = isAllDone ? [523,659,784,1047,1319,1568] : [523,659,784,1047];
+    var notes = isAllDone ? [392,494,587,659,784,988,1175] : [440,523,587,659,784];
     var t = ctx.currentTime;
     for (var ni = 0; ni < notes.length; ni++) {
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'triangle';
+      osc.type = isAllDone ? 'triangle' : 'sine';
       osc.frequency.value = notes[ni];
-      gain.gain.setValueAtTime(0.12, t);
-      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
-      osc.start(t); osc.stop(t + 0.2);
-      t += 0.12;
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + (isAllDone ? 0.25 : 0.18));
+      osc.start(t); osc.stop(t + (isAllDone ? 0.25 : 0.18));
+      t += (isAllDone ? 0.15 : 0.1);
     }
   } catch(e) {}
   
-  // Auto-close after 2.2s
+  // Auto-close after ~4s
   setTimeout(function() {
     overlay.style.animation = 'fadeOut .3s ease forwards';
     setTimeout(function() { overlay.remove(); }, 300);
-  }, 2200);
+  }, 4000);
 }
 
 function showProjects() {
@@ -642,14 +676,6 @@ async function loadProjectStates() {
         if (!projectStates[p.project_id]) projectStates[p.project_id] = {};
         projectStates[p.project_id].unlocked = p.status === 'unlocked';
         if (p.team_data) projectStates[p.project_id].teamData = p.team_data;
-        if (p.step_data) {
-          for (var sk in p.step_data) {
-            var sd = p.step_data[sk];
-            projectStates[p.project_id][sk + '_done'] = sd.done;
-            projectStates[p.project_id][sk + '_score'] = sd.score;
-            if (sd.work) projectStates[p.project_id][sk + '_work'] = sd.work;
-          }
-        }
       }
     }
     
@@ -663,17 +689,56 @@ async function loadProjectStates() {
           projectStates[m.project_id].myTeam = m.team_number;
         }
       }
+      
+      // Load team-level step progress for my teams
+      for (var pid in projectStates) {
+        var myTeamNum = projectStates[pid].myTeam;
+        if (myTeamNum) {
+          try {
+            var steps = await supabase.query('cq_team_step_progress', { 
+              select: '*', 
+              filter: { 'project_id': 'eq.' + pid, 'team_number': 'eq.' + myTeamNum, 'unit_id': 'eq.4' } 
+            });
+            if (Array.isArray(steps)) {
+              for (var si = 0; si < steps.length; si++) {
+                var sp = steps[si];
+                projectStates[pid]['step_' + sp.step_index + '_done'] = sp.done;
+                projectStates[pid]['step_' + sp.step_index + '_score'] = sp.score;
+                if (sp.work) projectStates[pid]['step_' + sp.step_index + '_work'] = sp.work;
+              }
+            }
+          } catch(e) {}
+        }
+      }
+    } else {
+      // Teacher: load global step_data as fallback
+      if (Array.isArray(projects)) {
+        for (var ti = 0; ti < projects.length; ti++) {
+          var tp = projects[ti];
+          if (tp.step_data) {
+            for (var sk in tp.step_data) {
+              var sd = tp.step_data[sk];
+              if (!projectStates[tp.project_id]) projectStates[tp.project_id] = {};
+              projectStates[tp.project_id][sk + '_done'] = sd.done;
+              projectStates[tp.project_id][sk + '_score'] = sd.score;
+            }
+          }
+        }
+      }
     }
   } catch(e) {
-    console.log('Team projects: tables might not exist yet');
+    console.log('Team projects load error:', e);
   }
   
-  // Merge with localStorage (saved work)
+  // Merge with localStorage (saved work drafts)
   var local = JSON.parse(localStorage.getItem('dq_team_projects') || '{}');
   for (var k in local) {
     if (!projectStates[k]) projectStates[k] = {};
     for (var key in local[k]) {
-      if (key.indexOf('step_') === 0) projectStates[k][key] = local[k][key];
+      // Only merge work drafts, not done status (Supabase is source of truth)
+      if (key.indexOf('_work') > -1 && !projectStates[k][key]) {
+        projectStates[k][key] = local[k][key];
+      }
     }
   }
   
