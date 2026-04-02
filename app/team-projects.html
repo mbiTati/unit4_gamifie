@@ -386,6 +386,10 @@ function openProject(id) {
       } else {
         stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="\u00c9crivez votre r\u00e9ponse ici...">' + savedWork + '</textarea>';
       }
+      stepsHtml += '<div style="margin:.4rem 0;padding:.4rem;background:rgba(59,130,246,.04);border:1px dashed rgba(59,130,246,.2);border-radius:6px;display:flex;align-items:center;gap:.5rem">';
+      stepsHtml += '<span style="font-size:.65rem;color:var(--lo2);font-weight:700">\uD83D\uDCCE Joindre un fichier :</span>';
+      stepsHtml += '<input type="file" id="file_' + i + '" accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.sql,.txt,.zip" style="font-size:.6rem;color:var(--muted);font-family:inherit">';
+      stepsHtml += '</div>';
       stepsHtml += '<div class="step-submit">';
       stepsHtml += '<button class="btn btn-primary btn-sm" onclick="saveStep(' + i + ')">Sauvegarder</button>';
       stepsHtml += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">Soumettre \u2713</button>';
@@ -421,45 +425,72 @@ function saveStep(idx) {
 
 function submitStep(idx) {
   var work = document.getElementById('work_' + idx);
-  if (!work || !work.value.trim()) {
-    document.getElementById('fb_' + idx).innerHTML = '<span style="color:var(--error)">Écrivez quelque chose avant de soumettre.</span>';
+  var fileInput = document.getElementById('file_' + idx);
+  var fb = document.getElementById('fb_' + idx);
+  
+  if ((!work || !work.value.trim()) && (!fileInput || !fileInput.files.length)) {
+    fb.innerHTML = '<span style="color:var(--error)">\u00c9crivez quelque chose ou joignez un fichier.</span>';
     return;
   }
   
-  var step = currentProject.steps[idx];
-  var input = work.value.toUpperCase();
-  var found = 0;
-  for (var k = 0; k < step.keywords.length; k++) {
-    if (input.indexOf(step.keywords[k].toUpperCase()) > -1) found++;
+  fb.innerHTML = '<span style="color:var(--muted)">Envoi en cours...</span>';
+  
+  // Upload file if present
+  var fileUrl = '';
+  var uploadPromise = Promise.resolve();
+  
+  if (fileInput && fileInput.files.length > 0) {
+    var file = fileInput.files[0];
+    var state2 = projectStates[currentProject.id] || {};
+    var myTeam = state2.myTeam || 0;
+    var filePath = currentProject.id + '/team' + myTeam + '/step' + idx + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    
+    uploadPromise = fetch('https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/team-uploads/' + filePath, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'x-upsert': 'true'
+      },
+      body: file
+    }).then(function(r) {
+      if (r.ok) {
+        fileUrl = 'https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + filePath;
+      }
+    }).catch(function() {});
   }
-  var pct = Math.round(found / step.keywords.length * 100);
   
-  if (!projectStates[currentProject.id]) projectStates[currentProject.id] = {};
-  projectStates[currentProject.id]['step_' + idx + '_work'] = work.value;
-  projectStates[currentProject.id]['step_' + idx + '_done'] = true;
-  projectStates[currentProject.id]['step_' + idx + '_score'] = pct;
-  localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
-  
-  // Save to Supabase
-  saveStepToSupabase(currentProject.id, idx, work.value, pct);
-  
-  // Save score
-  if (typeof saveGameScore === 'function') {
-    saveGameScore('team-' + currentProject.id, pct, 0);
-  }
-  
-  // Count completed steps
-  var completed = 0;
-  for (var s = 0; s < currentProject.steps.length; s++) {
-    if (projectStates[currentProject.id]['step_' + s + '_done']) completed++;
-  }
-  var total = currentProject.steps.length;
-  
-  // Show celebration animation
-  showStepCelebration(idx + 1, completed, total, pct, found, step.keywords.length);
-  
-  // Refresh after animation
-  setTimeout(function() { openProject(currentProject.id); }, 2500);
+  uploadPromise.then(function() {
+    var step = currentProject.steps[idx];
+    var workText = (work ? work.value : '') + (fileUrl ? '\n\n\uD83D\uDCCE Fichier: ' + fileUrl : '');
+    var input = workText.toUpperCase();
+    var found = 0;
+    for (var k = 0; k < step.keywords.length; k++) {
+      if (input.indexOf(step.keywords[k].toUpperCase()) > -1) found++;
+    }
+    var pct = Math.round(found / step.keywords.length * 100);
+    
+    if (!projectStates[currentProject.id]) projectStates[currentProject.id] = {};
+    projectStates[currentProject.id]['step_' + idx + '_work'] = workText;
+    projectStates[currentProject.id]['step_' + idx + '_done'] = true;
+    projectStates[currentProject.id]['step_' + idx + '_score'] = pct;
+    localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
+    
+    saveStepToSupabase(currentProject.id, idx, workText, pct);
+    
+    if (typeof saveGameScore === 'function') {
+      saveGameScore('team-' + currentProject.id, pct, 0);
+    }
+    
+    var completed = 0;
+    for (var s = 0; s < currentProject.steps.length; s++) {
+      if (projectStates[currentProject.id]['step_' + s + '_done']) completed++;
+    }
+    var total = currentProject.steps.length;
+    
+    showStepCelebration(idx + 1, completed, total, pct, found, step.keywords.length);
+    setTimeout(function() { openProject(currentProject.id); }, 4500);
+  });
 }
 
 // Save step data to Supabase — PER TEAM

@@ -219,6 +219,18 @@ async function loadTeams() {
           var date = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
           html += '<span class="step-name" style="color:var(--lo1)">\u2705 ' + stepName + '</span>';
           html += '<span class="step-meta">Valid\u00e9 \u00b7 ' + date + '</span>';
+          html += '</div>';
+          // Show file if present
+          if (step.work) {
+            var vFileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
+            if (vFileMatch) {
+              var vUrl = vFileMatch[1];
+              var vName = vUrl.split('/').pop();
+              html += '<div style="margin:.2rem 0;display:flex;align-items:center;gap:.3rem">';
+              html += '<a href="' + vUrl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.65rem;font-weight:600">\uD83D\uDCCE ' + decodeURIComponent(vName) + '</a>';
+              html += '</div>';
+            }
+          }
         } else if (isPending) {
           var date2 = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
           html += '<span class="step-name" style="color:var(--gold)">\u23f3 ' + stepName + '</span>';
@@ -230,9 +242,25 @@ async function loadTeams() {
         html += '</div>';
         
         if (isPending) {
-          // Show submitted work + big OK button
+          // Show submitted work + file link + big OK button
           if (step.work) {
-            html += '<div class="step-work">' + step.work.substring(0, 3000).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+            var workText = step.work.substring(0, 3000).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            // Extract file URL if present
+            var fileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
+            if (fileMatch) {
+              var fUrl = fileMatch[1];
+              var fName = fUrl.split('/').pop();
+              html += '<div style="margin:.3rem 0;padding:.3rem .5rem;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:5px;display:flex;align-items:center;gap:.4rem">';
+              html += '<span style="font-size:.7rem">\uD83D\uDCCE</span>';
+              html += '<a href="' + fUrl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.7rem;font-weight:700">' + decodeURIComponent(fName) + '</a>';
+              html += '<a href="' + fUrl + '" target="_blank" download style="background:var(--lo2);color:#fff;padding:.2rem .5rem;border-radius:4px;font-size:.6rem;font-weight:700;text-decoration:none;margin-left:auto">\u2B07 T\u00e9l\u00e9charger</a>';
+              html += '</div>';
+              // Show text without the file URL line
+              workText = workText.replace(/\uD83D\uDCCE Fichier:.*$/gm, '').trim();
+            }
+            if (workText) {
+              html += '<div class="step-work">' + workText + '</div>';
+            }
           }
           html += '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.4rem">';
           html += '<button onclick="validateStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.5rem;border-radius:6px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit">OK \u2713</button>';
