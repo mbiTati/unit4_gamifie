@@ -44,16 +44,18 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 .steps{margin-top:1rem}
 .step{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.5rem}
 .step.done{border-color:var(--lo1);background:rgba(16,185,129,.02)}
+.step.pending{border-color:var(--gold);background:rgba(245,158,11,.02)}
 .step.current{border-color:var(--gold);background:rgba(245,158,11,.02)}
 .step.locked{opacity:.35}
 .step-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;cursor:pointer}
 .step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;border:2px solid var(--border);color:var(--muted);flex-shrink:0}
 .step.done .step-num{background:var(--lo1);border-color:var(--lo1);color:#fff}
+.step.pending .step-num{background:var(--gold);border-color:var(--gold);color:#000}
 .step.current .step-num{background:var(--gold);border-color:var(--gold);color:#fff}
 .step-title{font-size:.8rem;font-weight:700;flex:1}
 .step-badge{font-size:.5rem;font-weight:700;padding:.1rem .3rem;border-radius:3px}
 .step-body{display:none;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
-.step.current .step-body,.step.done .step-body{display:block}
+.step.current .step-body,.step.done .step-body,.step.pending .step-body{display:block}
 .step-instructions{font-size:.72rem;color:var(--muted);line-height:1.6;margin-bottom:.5rem}
 .step-instructions strong{color:var(--text)}
 .step-deliverable{font-size:.68rem;color:var(--gold);font-weight:600;margin-bottom:.5rem}
@@ -282,10 +284,12 @@ function renderProjects() {
     var state = projectStates[p.id] || {};
     var isUnlocked = state.unlocked || isTeacher;
     var completedSteps = 0;
+    var validatedSteps = 0;
     for (var s = 0; s < p.steps.length; s++) {
       if (state['step_' + s + '_done']) completedSteps++;
+      if (state['step_' + s + '_done'] && state['step_' + s + '_score'] >= 100) validatedSteps++;
     }
-    var pct = Math.round(completedSteps / p.steps.length * 100);
+    var pct = Math.round(validatedSteps / p.steps.length * 100);
     var teamMembers = state.team || [];
     
     html += '<div class="project-card ' + (!isUnlocked ? 'locked' : completedSteps > 0 ? 'active' : '') + '" data-id="' + p.id + '">';
@@ -348,30 +352,47 @@ function openProject(id) {
   for (var i = 0; i < currentProject.steps.length; i++) {
     var step = currentProject.steps[i];
     var isDone = state['step_' + i + '_done'];
-    var isCurrent = !isDone && (i === 0 || state['step_' + (i-1) + '_done']);
+    var isValidated = isDone && state['step_' + i + '_score'] >= 100;
+    var isPending = isDone && !isValidated;
+    // Next step unlocks only if previous step is VALIDATED (score=100) by prof
+    var prevValidated = (i === 0) || (state['step_' + (i-1) + '_done'] && state['step_' + (i-1) + '_score'] >= 100);
+    var isCurrent = !isDone && prevValidated;
     var isLocked = !isDone && !isCurrent;
     
-    stepsHtml += '<div class="step ' + (isDone ? 'done' : isCurrent ? 'current' : 'locked') + '" data-step="' + i + '">';
+    var stepClass = isValidated ? 'done' : isPending ? 'pending' : isCurrent ? 'current' : 'locked';
+    var badgeStyle = isValidated ? 'rgba(16,185,129,.1);color:var(--lo1)' : isPending ? 'rgba(245,158,11,.1);color:var(--gold)' : isCurrent ? 'rgba(59,130,246,.1);color:var(--lo2)' : 'var(--surface);color:var(--muted)';
+    var badgeText = isValidated ? 'Valid\u00e9 \u2713' : isPending ? 'Soumis \u23f3' : isCurrent ? 'En cours' : 'Verrouill\u00e9';
+    var numText = isValidated ? '\u2713' : isPending ? '\u23f3' : (i + 1);
+    
+    stepsHtml += '<div class="step ' + stepClass + '" data-step="' + i + '">';
     stepsHtml += '<div class="step-header" onclick="toggleStep(' + i + ')">';
-    stepsHtml += '<div class="step-num">' + (isDone ? '✓' : (i + 1)) + '</div>';
+    stepsHtml += '<div class="step-num">' + numText + '</div>';
     stepsHtml += '<div class="step-title">' + step.name + '</div>';
-    stepsHtml += '<span class="step-badge" style="background:' + (isDone ? 'rgba(16,185,129,.1);color:var(--lo1)' : isCurrent ? 'rgba(245,158,11,.1);color:var(--gold)' : 'var(--surface);color:var(--muted)') + '">' + (isDone ? 'Terminé' : isCurrent ? 'En cours' : 'Verrouillé') + '</span>';
+    stepsHtml += '<span class="step-badge" style="background:' + badgeStyle + '">' + badgeText + '</span>';
     stepsHtml += '</div>';
     stepsHtml += '<div class="step-body">';
     stepsHtml += '<div class="step-instructions">' + step.instructions + '</div>';
     stepsHtml += '<div class="step-deliverable">Livrable : ' + step.deliverable + '</div>';
     
-    var savedWork = state['step_' + i + '_work'] || '';
-    if (step.type === 'code') {
-      stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="Écrivez votre code SQL ici..." style="min-height:150px">' + savedWork + '</textarea>';
-    } else {
-      stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="Écrivez votre réponse ici...">' + savedWork + '</textarea>';
+    if (isPending) {
+      stepsHtml += '<div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:6px;padding:.5rem;margin:.4rem 0;font-size:.7rem;color:var(--gold);font-weight:700">\u23f3 Soumis ! En attente de validation par votre enseignant(e).</div>';
+      stepsHtml += '<div style="font-size:.65rem;color:var(--muted);padding:.3rem;background:rgba(255,255,255,.02);border-radius:4px;max-height:100px;overflow-y:auto;white-space:pre-wrap">' + (state['step_' + i + '_work'] || '').substring(0, 500).replace(/</g, '&lt;') + '</div>';
+    } else if (isValidated) {
+      stepsHtml += '<div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:6px;padding:.5rem;margin:.4rem 0;font-size:.7rem;color:var(--lo1);font-weight:700">\u2705 Valid\u00e9 par votre enseignant(e) !</div>';
+    } else if (isCurrent) {
+      var savedWork = state['step_' + i + '_work'] || '';
+      if (step.type === 'code') {
+        stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="\u00c9crivez votre code SQL ici..." style="min-height:150px">' + savedWork + '</textarea>';
+      } else {
+        stepsHtml += '<textarea class="step-input" id="work_' + i + '" placeholder="\u00c9crivez votre r\u00e9ponse ici...">' + savedWork + '</textarea>';
+      }
+      stepsHtml += '<div class="step-submit">';
+      stepsHtml += '<button class="btn btn-primary btn-sm" onclick="saveStep(' + i + ')">Sauvegarder</button>';
+      stepsHtml += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">Soumettre \u2713</button>';
+      stepsHtml += '</div>';
+      stepsHtml += '<div class="step-feedback" id="fb_' + i + '"></div>';
     }
-    stepsHtml += '<div class="step-submit">';
-    stepsHtml += '<button class="btn btn-primary btn-sm" onclick="saveStep(' + i + ')">Sauvegarder</button>';
-    stepsHtml += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">Soumettre ✓</button>';
-    stepsHtml += '</div>';
-    stepsHtml += '<div class="step-feedback" id="fb_' + i + '"></div>';
+    
     stepsHtml += '</div>';
     stepsHtml += '</div>';
   }
