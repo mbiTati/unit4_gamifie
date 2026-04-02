@@ -37,3 +37,6 @@ GRANT ALL ON cq_team_members TO anon, authenticated;
 GRANT USAGE ON SEQUENCE cq_team_members_id_seq TO anon, authenticated;
 
 SELECT 'Team projects tables created' as status;
+
+-- Add step_data column for persisting step submissions
+ALTER TABLE cq_team_projects ADD COLUMN IF NOT EXISTS step_data JSONB DEFAULT '{}';

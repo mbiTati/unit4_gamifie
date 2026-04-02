@@ -34,6 +34,12 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--
 .pc-progress{margin-top:.5rem;height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
 .pc-progress-fill{height:100%;border-radius:3px;transition:width .5s}
 
+/* CELEBRATION ANIMATIONS */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes popIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
 /* STEPS */
 .steps{margin-top:1rem}
 .step{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.5rem}
@@ -413,16 +419,106 @@ function submitStep(idx) {
   projectStates[currentProject.id]['step_' + idx + '_score'] = pct;
   localStorage.setItem('dq_team_projects', JSON.stringify(projectStates));
   
-  var fb = document.getElementById('fb_' + idx);
-  fb.innerHTML = '<span style="color:var(--lo1)">✅ Étape soumise ! (' + found + '/' + step.keywords.length + ' éléments détectés)</span>';
+  // Save to Supabase
+  saveStepToSupabase(currentProject.id, idx, work.value, pct);
   
   // Save score
   if (typeof saveGameScore === 'function') {
     saveGameScore('team-' + currentProject.id, pct, 0);
   }
   
-  // Refresh
-  setTimeout(function() { openProject(currentProject.id); }, 1000);
+  // Count completed steps
+  var completed = 0;
+  for (var s = 0; s < currentProject.steps.length; s++) {
+    if (projectStates[currentProject.id]['step_' + s + '_done']) completed++;
+  }
+  var total = currentProject.steps.length;
+  
+  // Show celebration animation
+  showStepCelebration(idx + 1, completed, total, pct, found, step.keywords.length);
+  
+  // Refresh after animation
+  setTimeout(function() { openProject(currentProject.id); }, 2500);
+}
+
+// Save step data to Supabase
+async function saveStepToSupabase(projectId, stepIdx, work, score) {
+  try {
+    var state = projectStates[projectId] || {};
+    var stepData = {};
+    for (var i = 0; i < 6; i++) {
+      if (state['step_' + i + '_done']) {
+        stepData['step_' + i] = {
+          done: true,
+          score: state['step_' + i + '_score'] || 0,
+          work: (state['step_' + i + '_work'] || '').substring(0, 5000)
+        };
+      }
+    }
+    await fetch(SB_URL + '/cq_team_projects?project_id=eq.' + projectId + '&unit_id=eq.4', {
+      method: 'PATCH',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ step_data: stepData, updated_at: new Date().toISOString() })
+    });
+  } catch(e) { console.log('Step save error:', e); }
+}
+
+// Celebration animation
+function showStepCelebration(stepNum, completed, total, score, found, totalKw) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;animation:fadeIn .3s ease';
+  
+  var isAllDone = completed >= total;
+  var emoji = isAllDone ? '🏆' : score >= 80 ? '🎉' : score >= 50 ? '👏' : '✅';
+  var msg = isAllDone ? 'PROJET TERMINÉ !' : 'Étape ' + stepNum + ' validée !';
+  var color = isAllDone ? '#F59E0B' : '#10b981';
+  
+  overlay.innerHTML = '<div style="text-align:center;animation:popIn .5s ease">' +
+    '<div style="font-size:4rem;margin-bottom:.5rem">' + emoji + '</div>' +
+    '<div style="font-size:1.5rem;font-weight:900;color:' + color + ';margin-bottom:.3rem;font-family:Outfit,sans-serif">' + msg + '</div>' +
+    '<div style="font-size:.9rem;color:#e2e8f0;margin-bottom:.8rem;font-family:Outfit,sans-serif">' + found + '/' + totalKw + ' éléments détectés (' + score + '%)</div>' +
+    '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1rem">' +
+      '<div style="width:200px;height:12px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden">' +
+        '<div style="width:' + Math.round(completed/total*100) + '%;height:100%;background:linear-gradient(90deg,' + color + ',#32E0C4);border-radius:6px;transition:width 1s ease"></div>' +
+      '</div>' +
+      '<span style="font-family:JetBrains Mono,monospace;font-size:1.2rem;font-weight:900;color:' + color + '">' + completed + '/' + total + '</span>' +
+    '</div>' +
+    (completed < total ? '<div style="font-size:.75rem;color:#94a3b8;font-family:Outfit,sans-serif">Étape suivante débloquée !</div>' : '<div style="font-size:.85rem;color:#F59E0B;font-family:Outfit,sans-serif;font-weight:700">Bravo ! Toutes les étapes sont terminées !</div>') +
+  '</div>';
+  
+  // Confetti particles
+  for (var ci = 0; ci < 30; ci++) {
+    var conf = document.createElement('div');
+    var colors = ['#F59E0B','#10b981','#3b82f6','#8b5cf6','#ef4444','#32E0C4'];
+    conf.style.cssText = 'position:fixed;width:8px;height:8px;background:' + colors[ci % colors.length] + ';border-radius:' + (ci % 2 === 0 ? '50%' : '1px') + ';top:-10px;left:' + (Math.random()*100) + '%;z-index:10001;pointer-events:none;animation:confettiFall ' + (1.5 + Math.random()*2) + 's ease forwards;animation-delay:' + (Math.random()*0.5) + 's';
+    overlay.appendChild(conf);
+  }
+  
+  document.body.appendChild(overlay);
+  
+  // Play celebration sound
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var notes = isAllDone ? [523,659,784,1047,1319,1568] : [523,659,784,1047];
+    var t = ctx.currentTime;
+    for (var ni = 0; ni < notes.length; ni++) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.value = notes[ni];
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+      osc.start(t); osc.stop(t + 0.2);
+      t += 0.12;
+    }
+  } catch(e) {}
+  
+  // Auto-close after 2.2s
+  setTimeout(function() {
+    overlay.style.animation = 'fadeOut .3s ease forwards';
+    setTimeout(function() { overlay.remove(); }, 300);
+  }, 2200);
 }
 
 function showProjects() {
@@ -546,6 +642,14 @@ async function loadProjectStates() {
         if (!projectStates[p.project_id]) projectStates[p.project_id] = {};
         projectStates[p.project_id].unlocked = p.status === 'unlocked';
         if (p.team_data) projectStates[p.project_id].teamData = p.team_data;
+        if (p.step_data) {
+          for (var sk in p.step_data) {
+            var sd = p.step_data[sk];
+            projectStates[p.project_id][sk + '_done'] = sd.done;
+            projectStates[p.project_id][sk + '_score'] = sd.score;
+            if (sd.work) projectStates[p.project_id][sk + '_work'] = sd.work;
+          }
+        }
       }
     }
     
