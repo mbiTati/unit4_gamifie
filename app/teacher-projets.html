@@ -185,8 +185,13 @@ async function loadTeams() {
       var team = teams[tn2];
       var tSteps = stepsByTeam[tn2] || {};
       var completed = 0;
-      for (var cs = 0; cs < 6; cs++) { if (tSteps[cs] && tSteps[cs].done) completed++; }
-      var pctColor = completed >= 6 ? 'var(--lo1)' : completed >= 3 ? 'var(--gold)' : 'var(--muted)';
+      var validated = 0;
+      for (var cs = 0; cs < 6; cs++) { 
+        if (tSteps[cs] && tSteps[cs].done) completed++; 
+        if (tSteps[cs] && tSteps[cs].done && tSteps[cs].score >= 100) validated++;
+      }
+      var pctColor = validated >= 6 ? 'var(--lo1)' : validated >= 3 ? 'var(--gold)' : 'var(--muted)';
+      var progressText = validated + '/6 valid\u00e9es' + (completed > validated ? ' (' + (completed - validated) + ' en attente)' : '');
       
       html += '<div class="team-card">';
       html += '<div class="team-header">';
@@ -196,32 +201,44 @@ async function loadTeams() {
       if (team.members.length > 1) html += ' · ' + team.members.slice(1).join(' · ');
       html += '</span>';
       html += '</div>';
-      html += '<span class="team-progress" style="color:' + pctColor + '">' + completed + '/6 étapes</span>';
+      html += '<span class="team-progress" style="color:' + pctColor + '">' + progressText + '</span>';
       html += '</div>';
       
       for (var si2 = 0; si2 < 6; si2++) {
         var step = tSteps[si2];
         var stepName = STEPS[si2];
         var isDone = step && step.done;
+        var isValidated = isDone && step.score >= 100;
+        var isPending = isDone && step.score < 100;
         
-        html += '<div class="step-row' + (isDone ? ' done' : '') + '">';
+        var rowClass = isValidated ? 'done' : isPending ? ' style="border-color:var(--gold);background:rgba(245,158,11,.03)"' : '';
+        html += '<div class="step-row' + (isValidated ? ' done' : '') + '"' + (isPending ? ' style="border-color:var(--gold);background:rgba(245,158,11,.03)"' : '') + '>';
         html += '<div class="step-header">';
-        html += '<span class="step-name">' + (isDone ? '✓ ' : (si2+1) + '. ') + stepName + '</span>';
-        if (isDone) {
+        
+        if (isValidated) {
           var date = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
-          html += '<span class="step-meta">' + (step.score || 0) + '% · ' + date + '</span>';
+          html += '<span class="step-name" style="color:var(--lo1)">\u2705 ' + stepName + '</span>';
+          html += '<span class="step-meta">Valid\u00e9 \u00b7 ' + date + '</span>';
+        } else if (isPending) {
+          var date2 = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
+          html += '<span class="step-name" style="color:var(--gold)">\u23f3 ' + stepName + '</span>';
+          html += '<span style="font-size:.6rem;color:var(--gold);font-weight:700">Soumis ' + date2 + '</span>';
         } else {
-          html += '<span style="font-size:.6rem;color:var(--muted)">En attente</span>';
+          html += '<span class="step-name">' + (si2+1) + '. ' + stepName + '</span>';
+          html += '<span style="font-size:.6rem;color:var(--muted)">\u2014</span>';
         }
         html += '</div>';
         
-        if (isDone && step.work) {
-          html += '<div class="step-work">' + step.work.substring(0, 3000).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
-          html += '<div class="step-actions">';
-          html += '<textarea id="fb_' + tn2 + '_' + si2 + '" placeholder="Votre commentaire ou conseil..."></textarea>';
-          html += '<button class="btn btn-blue" onclick="sendFeedback(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')">💬 Commenter</button>';
-          html += '<button class="btn btn-green" onclick="validateStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')">✓ Valider</button>';
-          html += '<button class="btn btn-red" onclick="rejectStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')">✗ Refuser</button>';
+        if (isPending) {
+          // Show submitted work + big OK button
+          if (step.work) {
+            html += '<div class="step-work">' + step.work.substring(0, 3000).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+          }
+          html += '<div style="display:flex;gap:.4rem;align-items:center;margin-top:.4rem">';
+          html += '<button onclick="validateStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.5rem;border-radius:6px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit">OK \u2713</button>';
+          html += '<button onclick="rejectStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:transparent;color:var(--error);border:1px solid var(--error);padding:.4rem .8rem;border-radius:6px;font-size:.65rem;font-weight:700;cursor:pointer;font-family:inherit">\u2717 Refuser</button>';
+          html += '<input id="fb_' + tn2 + '_' + si2 + '" placeholder="Commentaire (optionnel)" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.35rem .5rem;font-size:.65rem;font-family:inherit">';
+          html += '<button class="btn btn-blue" onclick="sendFeedback(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="font-size:.6rem;padding:.35rem .5rem">\u2709</button>';
           html += '</div>';
           html += '<div id="fbs_' + tn2 + '_' + si2 + '" style="font-size:.6rem;margin-top:.2rem;min-height:.7rem"></div>';
         }
@@ -345,7 +362,7 @@ async function lockProject() {
 async function sendFeedback(projectId, teamNum, stepIdx) {
   var ta = document.getElementById('fb_' + teamNum + '_' + stepIdx);
   var fb = document.getElementById('fbs_' + teamNum + '_' + stepIdx);
-  if (!ta || !ta.value.trim()) return;
+  if (!ta || !ta.value.trim()) { if(fb) fb.innerHTML='<span style="color:var(--muted)">Tapez un commentaire d\'abord</span>'; return; }
   
   try {
     await fetch(SB_URL + '/cq_comments', {
