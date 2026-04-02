@@ -99,7 +99,15 @@ var PROJECTS = {
   'hotelview': 'HotelView',
   'saasboard': 'SaaSBoard'
 };
-var STEPS = ['Recueil des besoins', 'Dictionnaire des données', 'MCD', 'MLD + SQL', 'Requêtes', 'Tests + Documentation'];
+
+var PROJECT_STEPS = {
+  'veloshop': ['Dictionnaire des donn\u00e9es','MCD \u2014 Mod\u00e8le Conceptuel','MLD \u2014 Mod\u00e8le Logique','CREATE TABLE (SQL)','INSERT + Requ\u00eates SELECT','Tests + Documentation'],
+  'techrepair': ['Recueil des besoins','MCD','MLD','MPD + Code SQL','Peuplement + Requ\u00eates','Tests + Documentation'],
+  'swissevent': ['Recueil des besoins','MCD','MLD','MPD + Code SQL','Peuplement + Requ\u00eates','Tests + Documentation'],
+  'meethub': ['Recueil des besoins','MCD','MLD','MPD + Code SQL','Peuplement + Requ\u00eates','Tests + Documentation'],
+  'hotelview': ['Recueil des besoins','MCD','MLD','MPD + Code SQL','Peuplement + Requ\u00eates','Tests + Documentation'],
+  'saasboard': ['Recueil des besoins','MCD','MLD','MPD + Code SQL','Peuplement + Requ\u00eates','Tests + Documentation']
+};
 
 var currentProjectId = null;
 var allStudentsMap = {};
@@ -138,6 +146,7 @@ async function loadTeams() {
   if (!currentProjectId) return;
   var container = document.getElementById('teamsContent');
   container.innerHTML = '<div class="empty">Chargement...</div>';
+  var STEPS = PROJECT_STEPS[currentProjectId] || ['1','2','3','4','5','6'];
   
   await loadStudentsMap();
   
@@ -147,15 +156,10 @@ async function loadTeams() {
     var teamMembers = await tmRes.json();
     if (!Array.isArray(teamMembers)) teamMembers = [];
     
-    // Load step progress (new table)
-    var spRes = await fetch(SB_URL + '/cq_team_step_progress?project_id=eq.' + currentProjectId + '&unit_id=eq.4&order=team_number.asc,step_index.asc', { headers: { 'apikey': SB_KEY } });
-    var stepProgress = await spRes.json();
-    if (!Array.isArray(stepProgress)) stepProgress = [];
-    
-    // Also load old step_data from cq_team_projects as fallback
-    var projRes = await fetch(SB_URL + '/cq_team_projects?project_id=eq.' + currentProjectId + '&unit_id=eq.4&select=step_data', { headers: { 'apikey': SB_KEY } });
-    var projData = await projRes.json();
-    var oldStepData = (Array.isArray(projData) && projData[0] && projData[0].step_data) ? projData[0].step_data : {};
+    // Load submissions from cq_team_submissions
+    var subRes = await fetch(SB_URL + '/cq_team_submissions?project_id=eq.' + currentProjectId + '&unit_id=eq.4&order=team_number.asc,step_number.asc,created_at.desc', { headers: { 'apikey': SB_KEY } });
+    var submissions = await subRes.json();
+    if (!Array.isArray(submissions)) submissions = [];
     
     // Group by team
     var teams = {};
@@ -167,31 +171,131 @@ async function loadTeams() {
       if (!teams[tm.team_number].leader) teams[tm.team_number].leader = name;
     }
     
-    // Group steps from new table
-    var stepsByTeam = {};
-    for (var si = 0; si < stepProgress.length; si++) {
-      var sp = stepProgress[si];
-      if (!stepsByTeam[sp.team_number]) stepsByTeam[sp.team_number] = {};
-      stepsByTeam[sp.team_number][sp.step_index] = sp;
+    // Latest submission per team per step (most recent)
+    var subsByTeam = {};
+    for (var si = 0; si < submissions.length; si++) {
+      var sub = submissions[si];
+      var key = sub.team_number + '_' + sub.step_number;
+      if (!subsByTeam[key]) subsByTeam[key] = sub; // first = most recent (ordered desc by created_at)
     }
     
-    // Merge old step_data as fallback (assign to all teams that have no new data)
-    if (Object.keys(oldStepData).length > 0) {
+    // Show teams in manage section
+    var msg = document.getElementById('manageMsg');
+    if (Object.keys(teams).length > 0) {
+      var mhtml = '<div style="font-size:.72rem;color:var(--lo1);font-weight:700;margin-bottom:.3rem">' + Object.keys(teams).length + ' \u00e9quipes cr\u00e9\u00e9es :</div>';
       for (var tn in teams) {
-        if (!stepsByTeam[tn]) stepsByTeam[tn] = {};
-        for (var sk in oldStepData) {
-          var idx = parseInt(sk.replace('step_', ''));
-          if (!isNaN(idx) && !stepsByTeam[tn][idx] && oldStepData[sk].done) {
-            stepsByTeam[tn][idx] = { 
-              done: true, 
-              score: oldStepData[sk].score || 0, 
-              work: oldStepData[sk].work || '',
-              submitted_at: null
-            };
+        var t = teams[tn];
+        mhtml += '<div style="font-size:.68rem;margin-bottom:.15rem">';
+        mhtml += '<span style="color:var(--accent2);font-weight:700">\u00c9quipe ' + tn + '</span> : ';
+        mhtml += '<span style="color:var(--gold)">\uD83D\uDC51</span> ' + t.leader;
+        if (t.members.length > 1) mhtml += ', ' + t.members.slice(1).join(', ');
+        mhtml += '</div>';
+      }
+      msg.innerHTML = mhtml;
+    } else {
+      msg.innerHTML = '<span style="color:var(--muted)">Aucune \u00e9quipe.</span>';
+    }
+    
+    if (Object.keys(teams).length === 0) {
+      container.innerHTML = '<div class="empty">Aucune \u00e9quipe pour ' + PROJECTS[currentProjectId] + '.</div>';
+      return;
+    }
+    
+    // Render teams
+    var html = '';
+    var pendingCount = 0;
+    
+    for (var tn2 in teams) {
+      var team = teams[tn2];
+      var validated = 0;
+      var submitted = 0;
+      
+      for (var cs = 0; cs < 6; cs++) {
+        var sub2 = subsByTeam[tn2 + '_' + cs];
+        if (sub2 && sub2.validated) validated++;
+        else if (sub2) submitted++;
+      }
+      
+      var pctColor = validated >= 6 ? 'var(--lo1)' : submitted > 0 ? 'var(--gold)' : 'var(--muted)';
+      var progressText = validated + '/6';
+      if (submitted > 0) progressText += ' <span style="color:var(--gold)">(' + submitted + ' \u00e0 valider)</span>';
+      
+      html += '<div class="team-card">';
+      html += '<div class="team-header">';
+      html += '<div>';
+      html += '<span class="team-name">\u00c9quipe ' + tn2 + '</span>';
+      html += ' <span class="team-members">\uD83D\uDC51 ' + team.leader;
+      if (team.members.length > 1) html += ' \u00b7 ' + team.members.slice(1).join(' \u00b7 ');
+      html += '</span>';
+      html += '</div>';
+      html += '<span class="team-progress" style="color:' + pctColor + '">' + progressText + '</span>';
+      html += '</div>';
+      
+      for (var si2 = 0; si2 < 6; si2++) {
+        var sub3 = subsByTeam[tn2 + '_' + si2];
+        var stepName = STEPS[si2] || ('\u00c9tape ' + (si2+1));
+        var isSubmitted = sub3 && !sub3.validated;
+        var isValidated = sub3 && sub3.validated;
+        
+        if (isSubmitted) {
+          // === SOUMISSION EN ATTENTE → gros OK ===
+          pendingCount++;
+          var date = sub3.created_at ? new Date(sub3.created_at).toLocaleDateString('fr-CH') + ' ' + new Date(sub3.created_at).toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'}) : '';
+          var submitter = allStudentsMap[sub3.submitted_by] || '';
+          
+          html += '<div class="step-row" style="border-color:var(--gold);background:rgba(245,158,11,.04)">';
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">';
+          html += '<div>';
+          html += '<span style="font-size:.75rem;font-weight:800;color:var(--gold)">\u23f3 ' + stepName + '</span>';
+          html += '<span style="font-size:.58rem;color:var(--muted);margin-left:.4rem">' + submitter + ' \u00b7 ' + date + '</span>';
+          html += '</div>';
+          html += '<button onclick="validateSubmission(\'' + sub3.id + '\')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.8rem;border-radius:6px;font-size:.85rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(16,185,129,.3)">OK \u2713</button>';
+          html += '</div>';
+          
+          // Files
+          if (sub3.content && sub3.content.indexOf('.') > -1) {
+            var files = sub3.content.split(', ');
+            html += '<div style="margin:.3rem 0;display:flex;flex-wrap:wrap;gap:.2rem">';
+            for (var fi = 0; fi < files.length; fi++) {
+              var fpath = currentProjectId + '/equipe' + tn2 + '/etape' + (si2 + 1) + '/' + files[fi];
+              var furl = 'https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + fpath;
+              html += '<a href="' + furl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.65rem;font-weight:700;border:1px solid rgba(59,130,246,.2);padding:.15rem .4rem;border-radius:4px">\uD83D\uDCCE ' + files[fi] + ' \u2B07</a>';
+            }
+            html += '</div>';
           }
+          
+          // SQL code
+          if (sub3.sql_code) {
+            html += '<details style="margin-top:.2rem"><summary style="font-size:.6rem;color:var(--accent2);cursor:pointer">Voir le SQL</summary>';
+            html += '<pre style="font-size:.58rem;color:var(--text);background:var(--bg);padding:.3rem;border-radius:4px;max-height:150px;overflow:auto;margin-top:.2rem">' + sub3.sql_code.replace(/</g,'&lt;') + '</pre>';
+            html += '</details>';
+          }
+          
+          html += '<div id="fbs_' + sub3.id + '" style="font-size:.58rem;margin-top:.15rem"></div>';
+          html += '</div>';
+          
+        } else if (isValidated) {
+          // === VALIDÉ → compact green ===
+          html += '<div class="step-row done" style="padding:.3rem .6rem">';
+          html += '<span style="font-size:.68rem;color:var(--lo1);font-weight:700">\u2705 ' + stepName + '</span>';
+          html += '</div>';
+          
+        } else {
+          // === PAS ENCORE SOUMIS ===
+          html += '<div class="step-row" style="padding:.25rem .6rem;opacity:.4">';
+          html += '<span style="font-size:.65rem;color:var(--muted)">' + (si2+1) + '. ' + stepName + '</span>';
+          html += '</div>';
         }
       }
+      html += '</div>';
     }
+    
+    // Show pending notification at top
+    if (pendingCount > 0) {
+      html = '<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.5rem 1rem;margin-bottom:.8rem;font-size:.78rem;font-weight:700;color:var(--gold)">\uD83D\uDD14 ' + pendingCount + ' soumission' + (pendingCount > 1 ? 's' : '') + ' en attente de validation</div>' + html;
+    }
+    
+    container.innerHTML = html;
     
     // Show teams in manage section
     var msg = document.getElementById('manageMsg');
@@ -448,57 +552,18 @@ async function lockProject() {
 }
 
 // ===== FEEDBACK & VALIDATION =====
-async function sendFeedback(projectId, teamNum, stepIdx) {
-  var ta = document.getElementById('fb_' + teamNum + '_' + stepIdx);
-  var fb = document.getElementById('fbs_' + teamNum + '_' + stepIdx);
-  if (!ta || !ta.value.trim()) { if(fb) fb.innerHTML='<span style="color:var(--muted)">Tapez un commentaire d\'abord</span>'; return; }
-  
+async function validateSubmission(submissionId) {
   try {
-    await fetch(SB_URL + '/cq_comments', {
-      method: 'POST',
-      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        student_id: student.id,
-        module_id: 'project-' + projectId + '-team' + teamNum + '-step' + stepIdx,
-        comment: '[FEEDBACK PROF] ' + ta.value,
-        unit_id: 4
-      })
-    });
-    fb.innerHTML = '<span style="color:var(--lo1)">💬 Commentaire envoyé !</span>';
-    ta.value = '';
-    setTimeout(function() { fb.innerHTML = ''; }, 3000);
-  } catch(e) {
-    fb.innerHTML = '<span style="color:var(--error)">Erreur</span>';
-  }
-}
-
-async function validateStep(projectId, teamNum, stepIdx) {
-  var fb = document.getElementById('fbs_' + teamNum + '_' + stepIdx);
-  try {
-    await fetch(SB_URL + '/cq_team_step_progress?project_id=eq.' + projectId + '&team_number=eq.' + teamNum + '&step_index=eq.' + stepIdx + '&unit_id=eq.4', {
+    await fetch(SB_URL + '/cq_team_submissions?id=eq.' + submissionId, {
       method: 'PATCH',
       headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score: 100 })
+      body: JSON.stringify({ validated: true })
     });
-    fb.innerHTML = '<span style="color:var(--lo1)">✅ Validé à 100% !</span>';
-    setTimeout(function() { loadTeams(); }, 1500);
+    var fb = document.getElementById('fbs_' + submissionId);
+    if (fb) fb.innerHTML = '<span style="color:var(--lo1)">\u2705</span>';
+    setTimeout(function() { loadTeams(); }, 800);
   } catch(e) {
-    fb.innerHTML = '<span style="color:var(--error)">Erreur</span>';
-  }
-}
-
-async function rejectStep(projectId, teamNum, stepIdx) {
-  var fb = document.getElementById('fbs_' + teamNum + '_' + stepIdx);
-  try {
-    await fetch(SB_URL + '/cq_team_step_progress?project_id=eq.' + projectId + '&team_number=eq.' + teamNum + '&step_index=eq.' + stepIdx + '&unit_id=eq.4', {
-      method: 'PATCH',
-      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ done: false, score: 0 })
-    });
-    fb.innerHTML = '<span style="color:var(--error)">\u2717 Renvoy\u00e9</span>';
-    setTimeout(function() { loadTeams(); }, 1500);
-  } catch(e) {
-    fb.innerHTML = '<span style="color:var(--error)">Erreur</span>';
+    alert('Erreur: ' + e.message);
   }
 }
 
