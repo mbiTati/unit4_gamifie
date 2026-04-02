@@ -233,8 +233,8 @@ function revealAnswer(idx) {
 
 function showFinal() {
   saveGameScore("quiz-live", score, 0);
-  const maxScore = questions.length * 25;
-  const pct = Math.round(score / maxScore * 100);
+  const maxScore = questions.length * 200;
+  const pct = Math.min(100, Math.round(score / maxScore * 100));
   
   document.getElementById('mainArea').innerHTML = `
     <div class="final-score">
