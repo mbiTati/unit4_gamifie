@@ -357,70 +357,54 @@ async function loadTeams() {
       html += '</div>';
       
       for (var si2 = 0; si2 < 6; si2++) {
-        var step = tSteps[si2];
-        var stepName = STEPS[si2];
-        var isDone = step && step.done;
-        var isValidated = isDone && step.score >= 100;
-        var isPending = isDone && step.score < 100;
+        var sub3 = subsByTeam[tn2 + '_' + si2];
+        var stepName = STEPS[si2] || ('\u00c9tape ' + (si2+1));
+        var isSubmitted = sub3 && !sub3.validated;
+        var isValidated = sub3 && sub3.validated;
         
-        if (isPending) {
-          // === SOUMISSION EN ATTENTE → OK button ===
-          var date2 = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') + ' ' + new Date(step.submitted_at).toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'}) : '';
+        if (isSubmitted) {
+          pendingCount++;
+          var date2 = sub3.created_at ? new Date(sub3.created_at).toLocaleDateString('fr-CH') + ' ' + new Date(sub3.created_at).toLocaleTimeString('fr-CH',{hour:'2-digit',minute:'2-digit'}) : '';
+          var submitter = allStudentsMap[sub3.submitted_by] || '';
+          
           html += '<div class="step-row" style="border-color:var(--gold);background:rgba(245,158,11,.04)">';
           html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">';
           html += '<div>';
           html += '<span style="font-size:.75rem;font-weight:800;color:var(--gold)">\u23f3 ' + stepName + '</span>';
-          html += '<span style="font-size:.6rem;color:var(--muted);margin-left:.4rem">soumis ' + date2 + '</span>';
+          html += '<span style="font-size:.58rem;color:var(--muted);margin-left:.4rem">' + submitter + ' \u00b7 ' + date2 + '</span>';
           html += '</div>';
-          html += '<button onclick="validateStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.8rem;border-radius:6px;font-size:.85rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(16,185,129,.3)">OK \u2713</button>';
+          html += '<button onclick="validateSubmission(\'' + sub3.id + '\')" style="background:var(--lo1);color:#fff;border:none;padding:.5rem 1.8rem;border-radius:6px;font-size:.85rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(16,185,129,.3)">OK \u2713</button>';
           html += '</div>';
           
-          // Show work preview
-          if (step.work) {
-            var fileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
-            if (fileMatch) {
-              var fUrl = fileMatch[1];
-              var fName = fUrl.split('/').pop();
-              html += '<div style="margin:.3rem 0;display:flex;align-items:center;gap:.3rem">';
-              html += '<a href="' + fUrl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.7rem;font-weight:700">\uD83D\uDCCE ' + decodeURIComponent(fName) + '</a>';
-              html += '<a href="' + fUrl + '" target="_blank" download class="btn btn-blue" style="font-size:.58rem;padding:.2rem .4rem">\u2B07</a>';
-              html += '</div>';
+          if (sub3.content && sub3.content.indexOf('.') > -1) {
+            var files = sub3.content.split(', ');
+            html += '<div style="margin:.3rem 0;display:flex;flex-wrap:wrap;gap:.2rem">';
+            for (var fi = 0; fi < files.length; fi++) {
+              var fpath = currentProjectId + '/equipe' + tn2 + '/etape' + (si2 + 1) + '/' + files[fi];
+              var furl = 'https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + fpath;
+              html += '<a href="' + furl + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.65rem;font-weight:700;border:1px solid rgba(59,130,246,.2);padding:.15rem .4rem;border-radius:4px">\uD83D\uDCCE ' + files[fi] + '</a>';
             }
-            var cleanWork = step.work.replace(/\uD83D\uDCCE Fichier:.*$/gm, '').trim();
-            if (cleanWork) {
-              html += '<details style="margin-top:.2rem"><summary style="font-size:.6rem;color:var(--muted);cursor:pointer">Voir le texte</summary>';
-              html += '<div class="step-work">' + cleanWork.substring(0, 2000).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
-              html += '</details>';
-            }
+            html += '</div>';
           }
-          
-          html += '<div style="margin-top:.3rem;display:flex;gap:.3rem;align-items:center">';
-          html += '<input id="fb_' + tn2 + '_' + si2 + '" placeholder="Commentaire (optionnel)" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.25rem .4rem;font-size:.62rem;font-family:inherit">';
-          html += '<button class="btn btn-blue" onclick="sendFeedback(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="font-size:.58rem;padding:.25rem .4rem">\u2709</button>';
-          html += '<button onclick="rejectStep(\'' + currentProjectId + '\',' + tn2 + ',' + si2 + ')" style="background:transparent;color:var(--error);border:1px solid rgba(239,68,68,.3);padding:.25rem .5rem;border-radius:4px;font-size:.58rem;font-weight:700;cursor:pointer;font-family:inherit">\u2717</button>';
-          html += '</div>';
-          html += '<div id="fbs_' + tn2 + '_' + si2 + '" style="font-size:.58rem;margin-top:.15rem;min-height:.6rem"></div>';
+          if (sub3.sql_code) {
+            html += '<details><summary style="font-size:.6rem;color:var(--accent2);cursor:pointer">SQL</summary>';
+            html += '<pre style="font-size:.58rem;color:var(--text);background:var(--bg);padding:.3rem;border-radius:4px;max-height:120px;overflow:auto">' + sub3.sql_code.replace(/</g,'&lt;') + '</pre></details>';
+          }
+          html += '<div id="fbs_' + sub3.id + '" style="font-size:.58rem;margin-top:.1rem"></div>';
           html += '</div>';
           
         } else if (isValidated) {
-          // === VALIDÉ → compact green line ===
-          var dateV = step.submitted_at ? new Date(step.submitted_at).toLocaleDateString('fr-CH') : '';
           html += '<div class="step-row done" style="padding:.3rem .6rem">';
-          html += '<div style="display:flex;align-items:center;justify-content:space-between">';
           html += '<span style="font-size:.68rem;color:var(--lo1);font-weight:700">\u2705 ' + stepName + '</span>';
-          html += '<span style="font-size:.58rem;color:var(--muted)">' + dateV + '</span>';
-          html += '</div>';
-          if (step.work) {
-            var vFileMatch = step.work.match(/\uD83D\uDCCE Fichier: (https:\/\/[^\s]+)/);
-            if (vFileMatch) {
-              html += '<a href="' + vFileMatch[1] + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.6rem">\uD83D\uDCCE ' + decodeURIComponent(vFileMatch[1].split('/').pop()) + '</a>';
-            }
+          if (sub3.content && sub3.content.indexOf('.') > -1) {
+            var vfiles = sub3.content.split(', ');
+            var vfpath = currentProjectId + '/equipe' + tn2 + '/etape' + (si2+1) + '/' + vfiles[0];
+            html += ' <a href="https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + vfpath + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.58rem">\uD83D\uDCCE</a>';
           }
           html += '</div>';
           
         } else {
-          // === PAS ENCORE SOUMIS → quiet gray line ===
-          html += '<div class="step-row" style="padding:.25rem .6rem;opacity:.5">';
+          html += '<div class="step-row" style="padding:.25rem .6rem;opacity:.4">';
           html += '<span style="font-size:.65rem;color:var(--muted)">' + (si2+1) + '. ' + stepName + '</span>';
           html += '</div>';
         }
