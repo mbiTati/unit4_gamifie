@@ -73,12 +73,15 @@ if (!student || student.role !== 'teacher') {
     
     <!-- Manual student assignment -->
     <div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
-      <span style="font-size:.68rem;font-weight:700;color:var(--lo2)">Ajouter un élève :</span>
+      <span style="font-size:.68rem;font-weight:700;color:var(--lo2)">Ajouter :</span>
+      <select id="addClassFilter" onchange="filterAddStudents()" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .3rem;font-size:.65rem;font-family:inherit">
+        <option value="all">Toutes classes</option>
+      </select>
       <select id="addStudentSelect" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-size:.68rem;font-family:inherit;min-width:150px"></select>
-      <span style="font-size:.68rem;color:var(--muted)">→ Équipe</span>
+      <span style="font-size:.65rem;color:var(--muted)">&rarr;</span>
       <select id="addTeamSelect" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:.2rem .4rem;font-size:.68rem;font-family:inherit;width:60px"></select>
       <button class="btn btn-blue" onclick="addStudentToTeam()" style="font-size:.65rem">+ Ajouter</button>
-      <span id="addStudentMsg" style="font-size:.6rem;min-width:100px"></span>
+      <span id="addStudentMsg" style="font-size:.6rem;min-width:80px"></span>
     </div>
   </div>
 
@@ -129,12 +132,15 @@ function selectProject(pid) {
   loadTeams();
 }
 
+var allStudentsList = [];
+
 async function loadStudentsMap() {
-  if (Object.keys(allStudentsMap).length > 0) return;
+  if (allStudentsList.length > 0) return;
   try {
-    var res = await fetch(SB_URL + '/cq_students?select=id,first_name,last_name&role=eq.student', { headers: { 'apikey': SB_KEY } });
+    var res = await fetch(SB_URL + '/cq_students?select=id,first_name,last_name,class_name&role=eq.student&order=last_name.asc', { headers: { 'apikey': SB_KEY } });
     var list = await res.json();
     if (Array.isArray(list)) {
+      allStudentsList = list;
       for (var i = 0; i < list.length; i++) {
         allStudentsMap[list[i].id] = list[i].first_name + ' ' + list[i].last_name;
       }
@@ -412,21 +418,26 @@ async function loadTeams() {
       html += '</div>';
     }
     container.innerHTML = html;
-    // Populate add-student selects
-    var addSel = document.getElementById('addStudentSelect');
-    var addTeamSel = document.getElementById('addTeamSelect');
-    if (addSel) {
-      // Find students NOT in any team for this project
-      var assignedIds = {};
-      for (var ai = 0; ai < teamMembers.length; ai++) assignedIds[teamMembers[ai].student_id] = true;
-      
-      addSel.innerHTML = '<option value="">-- Élève --</option>';
-      for (var sid in allStudentsMap) {
-        if (!assignedIds[sid]) {
-          addSel.innerHTML += '<option value="' + sid + '">' + allStudentsMap[sid] + '</option>';
-        }
+    
+    // Populate class filter + student selects
+    window._assignedIds = {};
+    for (var ai = 0; ai < teamMembers.length; ai++) window._assignedIds[teamMembers[ai].student_id] = true;
+    
+    var classFilter = document.getElementById('addClassFilter');
+    if (classFilter) {
+      var classes = {};
+      for (var ci = 0; ci < allStudentsList.length; ci++) {
+        var cl = allStudentsList[ci].class_name || 'Sans classe';
+        classes[cl] = true;
+      }
+      classFilter.innerHTML = '<option value="all">Toutes classes</option>';
+      for (var cn in classes) {
+        classFilter.innerHTML += '<option value="' + cn + '">' + cn + '</option>';
       }
     }
+    filterAddStudents();
+    
+    var addTeamSel = document.getElementById('addTeamSelect');
     if (addTeamSel) {
       addTeamSel.innerHTML = '';
       var maxTeam = 0;
@@ -441,6 +452,56 @@ async function loadTeams() {
     container.innerHTML = '<div class="empty" style="color:var(--error)">Erreur : ' + e.message + '</div>';
   }
 }
+
+// Filter students dropdown by class
+function filterAddStudents() {
+  var classVal = document.getElementById('addClassFilter').value;
+  var sel = document.getElementById('addStudentSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- \u00c9l\u00e8ve --</option>';
+  for (var i = 0; i < allStudentsList.length; i++) {
+    var s = allStudentsList[i];
+    if (window._assignedIds && window._assignedIds[s.id]) continue;
+    if (classVal !== 'all' && s.class_name !== classVal) continue;
+    sel.innerHTML += '<option value="' + s.id + '">' + s.first_name + ' ' + s.last_name + '</option>';
+  }
+}
+
+// Check for new submissions (notification)
+var _lastSubCount = -1;
+async function checkNewSubmissions() {
+  if (!currentProjectId) return;
+  try {
+    var res = await fetch(SB_URL + '/cq_team_submissions?project_id=eq.' + currentProjectId + '&validated=eq.false&unit_id=eq.4&select=id', { headers: { 'apikey': SB_KEY } });
+    var data = await res.json();
+    var count = Array.isArray(data) ? data.length : 0;
+    if (_lastSubCount >= 0 && count > _lastSubCount) {
+      // New submission detected
+      var notif = document.createElement('div');
+      notif.style.cssText = 'position:fixed;top:80px;right:20px;background:var(--gold);color:#000;padding:.6rem 1rem;border-radius:8px;font-size:.78rem;font-weight:800;font-family:Outfit,sans-serif;z-index:10000;box-shadow:0 4px 15px rgba(245,158,11,.4);animation:fadeIn .3s ease';
+      notif.innerHTML = '\uD83D\uDD14 Nouvelle soumission re\u00e7ue !';
+      document.body.appendChild(notif);
+      setTimeout(function() { notif.remove(); }, 4000);
+      // Play notification sound
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var notes = [659, 784, 988];
+        var t = ctx.currentTime;
+        for (var ni = 0; ni < notes.length; ni++) {
+          var osc = ctx.createOscillator(); var gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine'; osc.frequency.value = notes[ni];
+          gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+          osc.start(t); osc.stop(t + 0.15); t += 0.12;
+        }
+      } catch(e) {}
+      loadTeams();
+    }
+    _lastSubCount = count;
+  } catch(e) {}
+}
+// Poll every 15 seconds
+setInterval(checkNewSubmissions, 15000);
 
 // ===== TEAM MANAGEMENT =====
 async function autoTeams() {
