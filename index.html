@@ -354,69 +354,7 @@ function s(id){document.getElementById(id).scrollIntoView({behavior:'smooth',blo
 })();
 </script>
 
-<script>
-// Faux blocage hub — l'élève inactif voit des cadenas
-(function() {
-  var stu = JSON.parse(localStorage.getItem('cq_student') || 'null');
-  if (!stu || stu.role === 'teacher') return;
-  
-  var SB = 'https://jslbfkaujahihvjdxcjg.supabase.co/rest/v1';
-  var AK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzbGJma2F1amFoaWh2amR4Y2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODA3MzksImV4cCI6MjA4ODE1NjczOX0.h1lCm-DOG8wgUpMc0Ob1fUDSGpSu_Ix6PpboggdAVAc';
-  
-  fetch(SB + '/cq_game_scores?student_id=eq.' + stu.id + '&select=id,game_id,score', { headers: { 'apikey': AK } })
-    .then(function(r) { return r.json(); })
-    .then(function(scores) {
-      if (!Array.isArray(scores)) scores = [];
-      
-      var gamesPlayed = 0;
-      var seen = {};
-      for (var i = 0; i < scores.length; i++) {
-        if (!seen[scores[i].game_id]) { gamesPlayed++; seen[scores[i].game_id] = true; }
-      }
-      
-      var xp = 0;
-      var best = {};
-      for (var j = 0; j < scores.length; j++) {
-        var gid = scores[j].game_id;
-        var sc = scores[j].score || 0;
-        if (!best[gid] || sc > best[gid]) best[gid] = sc;
-      }
-      for (var k in best) xp += Math.min(20, Math.floor(best[k] / 5));
-      
-      // Define fake locks for hub activités
-      var fakeLocks = [
-        { href: 'app/duel-sql.html', need: 1, type: 'games', current: gamesPlayed },
-        { href: 'app/pipeline-bdd.html', need: 30, type: 'xp', current: xp },
-        { href: 'app/team-projects.html', need: 50, type: 'xp', current: xp },
-        { href: 'app/quiz-live.html', need: 2, type: 'games', current: gamesPlayed },
-      ];
-      
-      for (var f = 0; f < fakeLocks.length; f++) {
-        var fl = fakeLocks[f];
-        if (fl.current >= fl.need) continue;
-        
-        var links = document.querySelectorAll('a[href="' + fl.href + '"]');
-        for (var li = 0; li < links.length; li++) {
-          var el = links[li];
-          el.style.position = 'relative';
-          el.style.pointerEvents = 'none';
-          
-          var pct = Math.min(100, Math.round(fl.current / fl.need * 100));
-          var label = fl.type === 'xp' ? (fl.current + '/' + fl.need + ' XP') : (fl.current + '/' + fl.need + ' jeux joués');
-          
-          var ov = document.createElement('div');
-          ov.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,15,26,.82);z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:inherit';
-          ov.innerHTML = '<div style="font-size:1.2rem">🔒</div>' +
-            '<div style="font-size:.6rem;color:#F59E0B;font-weight:700;margin-top:.2rem">' + label + '</div>' +
-            '<div style="width:60%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:.3rem;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#F59E0B,#32E0C4);border-radius:2px"></div></div>';
-          
-          el.appendChild(ov);
-        }
-      }
-    })
-    .catch(function() {});
-})();
-</script>
+<script src="app/nav-bar.js?v=1775260800"></script>
 <script src="app/prof-bar.js?v=1775260800"></script>
 </body>
 </html>
