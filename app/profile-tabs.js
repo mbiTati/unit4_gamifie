@@ -25,15 +25,23 @@
     nav.appendChild(a);
   }
 
-  // Insert after prof-bar or nav-bar (whichever is last at the top)
-  var anchor = document.getElementById('dqProfBar') || document.getElementById('dqNavBar');
-  if (anchor && anchor.nextSibling) {
-    anchor.parentNode.insertBefore(nav, anchor.nextSibling);
-  } else if (anchor) {
-    anchor.parentNode.appendChild(nav);
-  } else {
-    if (document.body.firstChild) {
-      document.body.insertBefore(nav, document.body.firstChild);
+  // Insert right after dqNavBar (injected by nav-bar.js) or dqProfBar
+  function insertAfterNav() {
+    var profBar = document.getElementById('dqProfBar');
+    var navBar = document.getElementById('dqNavBar');
+    var anchor = profBar || navBar;
+    if (anchor && anchor.nextSibling) {
+      anchor.parentNode.insertBefore(nav, anchor.nextSibling);
+    } else if (anchor) {
+      anchor.parentNode.appendChild(nav);
+    } else {
+      // Fallback: insert at top of body
+      if (document.body.firstChild) {
+        document.body.insertBefore(nav, document.body.firstChild);
+      }
     }
   }
+
+  // Wait a tick for nav-bar.js and prof-bar.js to run first
+  setTimeout(insertAfterNav, 0);
 })();
