@@ -161,14 +161,15 @@ async function loadTeams() {
     var submissions = await subRes.json();
     if (!Array.isArray(submissions)) submissions = [];
     
-    // Group by team
+    // Group by team — store IDs too
     var teams = {};
     for (var ti = 0; ti < teamMembers.length; ti++) {
       var tm = teamMembers[ti];
-      if (!teams[tm.team_number]) teams[tm.team_number] = { members: [], leader: null };
+      if (!teams[tm.team_number]) teams[tm.team_number] = { members: [], memberIds: [], leader: null, leaderId: null };
       var name = allStudentsMap[tm.student_id] || tm.student_id;
       teams[tm.team_number].members.push(name);
-      if (!teams[tm.team_number].leader) teams[tm.team_number].leader = name;
+      teams[tm.team_number].memberIds.push(tm.student_id);
+      if (!teams[tm.team_number].leader) { teams[tm.team_number].leader = name; teams[tm.team_number].leaderId = tm.student_id; }
     }
     
     // Latest submission per team per step (most recent)
@@ -176,19 +177,25 @@ async function loadTeams() {
     for (var si = 0; si < submissions.length; si++) {
       var sub = submissions[si];
       var key = sub.team_number + '_' + sub.step_number;
-      if (!subsByTeam[key]) subsByTeam[key] = sub; // first = most recent (ordered desc by created_at)
+      if (!subsByTeam[key]) subsByTeam[key] = sub;
     }
     
-    // Show teams in manage section
+    // Show teams in manage section with remove buttons
     var msg = document.getElementById('manageMsg');
     if (Object.keys(teams).length > 0) {
-      var mhtml = '<div style="font-size:.72rem;color:var(--lo1);font-weight:700;margin-bottom:.3rem">' + Object.keys(teams).length + ' \u00e9quipes cr\u00e9\u00e9es :</div>';
+      var mhtml = '<div style="font-size:.72rem;color:var(--lo1);font-weight:700;margin-bottom:.3rem">' + Object.keys(teams).length + ' \u00e9quipes :</div>';
       for (var tn in teams) {
         var t = teams[tn];
-        mhtml += '<div style="font-size:.68rem;margin-bottom:.15rem">';
-        mhtml += '<span style="color:var(--accent2);font-weight:700">\u00c9quipe ' + tn + '</span> : ';
-        mhtml += '<span style="color:var(--gold)">\uD83D\uDC51</span> ' + t.leader;
-        if (t.members.length > 1) mhtml += ', ' + t.members.slice(1).join(', ');
+        mhtml += '<div style="font-size:.68rem;margin-bottom:.2rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">';
+        mhtml += '<span style="color:var(--accent2);font-weight:700">\u00c9q.' + tn + '</span>';
+        for (var mi = 0; mi < t.members.length; mi++) {
+          var isLeader = mi === 0;
+          mhtml += '<span style="background:rgba(255,255,255,.04);border:1px solid var(--border);padding:.1rem .3rem;border-radius:3px;display:inline-flex;align-items:center;gap:.2rem">';
+          if (isLeader) mhtml += '<span style="color:var(--gold)">\uD83D\uDC51</span>';
+          mhtml += t.members[mi];
+          mhtml += '<span onclick="removeFromTeam(\'' + t.memberIds[mi] + '\')" style="color:var(--error);cursor:pointer;font-size:.7rem;font-weight:900;margin-left:.1rem" title="Retirer">\u00d7</span>';
+          mhtml += '</span>';
+        }
         mhtml += '</div>';
       }
       msg.innerHTML = mhtml;
@@ -321,17 +328,22 @@ async function loadTeams() {
     
     // Render teams with steps
     var html = '';
+    var pendingCount = 0;
+    
     for (var tn2 in teams) {
       var team = teams[tn2];
-      var tSteps = stepsByTeam[tn2] || {};
-      var completed = 0;
       var validated = 0;
-      for (var cs = 0; cs < 6; cs++) { 
-        if (tSteps[cs] && tSteps[cs].done) completed++; 
-        if (tSteps[cs] && tSteps[cs].done && tSteps[cs].score >= 100) validated++;
+      var submitted = 0;
+      
+      for (var cs = 0; cs < 6; cs++) {
+        var csub = subsByTeam[tn2 + '_' + cs];
+        if (csub && csub.validated) validated++;
+        else if (csub) submitted++;
       }
-      var pctColor = validated >= 6 ? 'var(--lo1)' : validated >= 3 ? 'var(--gold)' : 'var(--muted)';
-      var progressText = validated + '/6 valid\u00e9es' + (completed > validated ? ' (' + (completed - validated) + ' en attente)' : '');
+      
+      var pctColor = validated >= 6 ? 'var(--lo1)' : submitted > 0 ? 'var(--gold)' : 'var(--muted)';
+      var progressText = validated + '/6';
+      if (submitted > 0) progressText += ' <span style="color:var(--gold)">(' + submitted + ' \u00e0 valider)</span>';
       
       html += '<div class="team-card">';
       html += '<div class="team-header">';
@@ -585,9 +597,23 @@ async function addStudentToTeam() {
       body: JSON.stringify({ project_id: currentProjectId, team_number: parseInt(teamNum), student_id: studentId, unit_id: 4 })
     });
     msg.innerHTML = '<span style="color:var(--lo1)">\u2705 Ajout\u00e9 !</span>';
-    setTimeout(function() { msg.innerHTML = ''; loadTeams(); }, 1000);
+    setTimeout(function() { msg.innerHTML = ''; loadTeams(); }, 800);
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--error)">Erreur</span>';
+  }
+}
+
+async function removeFromTeam(studentId) {
+  if (!currentProjectId) return;
+  if (!confirm('Retirer cet \u00e9l\u00e8ve de l\'\u00e9quipe ?')) return;
+  try {
+    await fetch(SB_URL + '/cq_team_members?project_id=eq.' + currentProjectId + '&student_id=eq.' + studentId + '&unit_id=eq.4', {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY }
+    });
+    loadTeams();
+  } catch(e) {
+    alert('Erreur: ' + e.message);
   }
 }
 
