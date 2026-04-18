@@ -417,14 +417,23 @@ async function loadTeams() {
           html += '</div>';
           
         } else {
-          html += '<div class="step-row" style="padding:.25rem .6rem;opacity:.4">';
+          html += '<div class="step-row" style="padding:.25rem .6rem;display:flex;align-items:center;justify-content:space-between">';
           html += '<span style="font-size:.65rem;color:var(--muted)">' + (si2+1) + '. ' + stepName + '</span>';
+          html += '<button class="dq-mark-done" data-team="' + tn2 + '" data-step="' + si2 + '" style="font-size:.58rem;color:var(--muted);background:transparent;border:1px solid var(--border);padding:.15rem .4rem;border-radius:4px;cursor:pointer;font-family:inherit;opacity:.6">Marquer fait \u2713</button>';
           html += '</div>';
         }
       }
       html += '</div>';
     }
     container.innerHTML = html;
+    
+    // Attach "Marquer fait" listeners
+    var markBtns = container.querySelectorAll('.dq-mark-done');
+    for (var mbi = 0; mbi < markBtns.length; mbi++) {
+      markBtns[mbi].addEventListener('click', function() {
+        markStepDone(parseInt(this.getAttribute('data-team')), parseInt(this.getAttribute('data-step')));
+      });
+    }
     
     // Populate class filter + student selects
     window._assignedIds = {};
@@ -626,6 +635,28 @@ async function validateSubmission(submissionId) {
     var fb = document.getElementById('fbs_' + submissionId);
     if (fb) fb.innerHTML = '<span style="color:var(--lo1)">\u2705</span>';
     setTimeout(function() { loadTeams(); }, 800);
+  } catch(e) {
+    alert('Erreur: ' + e.message);
+  }
+}
+
+async function markStepDone(teamNum, stepIdx) {
+  if (!currentProjectId) return;
+  try {
+    await fetch(SB_URL + '/cq_team_submissions', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        project_id: currentProjectId,
+        team_number: teamNum,
+        step_number: stepIdx,
+        submitted_by: student.id,
+        content: '[Valid\u00e9 par le prof]',
+        validated: true,
+        unit_id: 4
+      })
+    });
+    loadTeams();
   } catch(e) {
     alert('Erreur: ' + e.message);
   }

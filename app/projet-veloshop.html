@@ -371,20 +371,34 @@ function renderSteps() {
   for (var i = 0; i < STEPS.length; i++) {
     var step = STEPS[i];
     var state = stepStates[i] || {};
-    var isDone = state.submitted;
-    var isCurrent = !isDone && (i === 0 || stepStates[i-1] && stepStates[i-1].submitted);
-    var isLocked = !isDone && !isCurrent;
+    var isSubmitted = state.submitted;
+    var isValidated = state.validated;
+    var isPending = isSubmitted && !isValidated;
+    // Next step unlocks only when previous is VALIDATED by prof
+    var prevValidated = (i === 0) || (stepStates[i-1] && stepStates[i-1].validated);
+    var isCurrent = !isSubmitted && prevValidated;
+    var isLocked = !isSubmitted && !isCurrent;
 
-    html += '<div class="step-card ' + (isDone ? 'done' : isCurrent ? 'current' : 'locked') + '" data-step="' + i + '">';
+    var stepClass = isValidated ? 'done' : isPending ? 'done' : isCurrent ? 'current' : 'locked';
+    var badgeText = isValidated ? '\u2705 Valid\u00e9' : isPending ? '\u23f3 Soumis' : isCurrent ? 'En cours' : '\uD83D\uDD12';
+    var badgeStyle = isValidated ? 'rgba(16,185,129,.1);color:var(--lo1)' : isPending ? 'rgba(245,158,11,.1);color:var(--gold)' : isCurrent ? 'rgba(245,158,11,.1);color:var(--gold)' : 'var(--surface);color:var(--muted)';
+
+    html += '<div class="step-card ' + stepClass + '" data-step="' + i + '">';
     html += '<div class="step-header" onclick="toggleStep(' + i + ')">';
-    html += '<div class="step-num">' + (isDone ? '✓' : step.icon) + '</div>';
-    html += '<div class="step-title">Étape ' + (i+1) + ' : ' + step.name + '</div>';
-    html += '<span class="step-badge" style="background:' + (isDone ? 'rgba(16,185,129,.1);color:var(--lo1)' : isCurrent ? 'rgba(245,158,11,.1);color:var(--gold)' : 'var(--surface);color:var(--muted)') + '">' + (isDone ? '✅ Soumis' : isCurrent ? 'En cours' : '🔒') + '</span>';
+    html += '<div class="step-num">' + (isValidated ? '\u2713' : isPending ? '\u23f3' : step.icon) + '</div>';
+    html += '<div class="step-title">\u00c9tape ' + (i+1) + ' : ' + step.name + '</div>';
+    html += '<span class="step-badge" style="background:' + badgeStyle + '">' + badgeText + '</span>';
     html += '</div>';
     html += '<div class="step-body" id="stepBody_' + i + '">';
-    html += '<div class="step-instructions">' + step.instructions + '</div>';
+    
+    if (isPending) {
+      html += '<div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:6px;padding:.6rem;margin:.3rem 0;text-align:center"><span style="font-size:.8rem;font-weight:700;color:var(--gold)">\u23f3 En attente de validation par votre enseignant(e)</span></div>';
+    } else if (isValidated) {
+      html += '<div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:6px;padding:.5rem;margin:.3rem 0;text-align:center"><span style="font-size:.8rem;font-weight:700;color:var(--lo1)">\u2705 Valid\u00e9 !</span></div>';
+    } else if (isCurrent) {
+      html += '<div class="step-instructions">' + step.instructions + '</div>';
 
-    if (step.type === 'sql') {
+    if (isCurrent && step.type === 'sql') {
       html += '<div class="sql-editor">';
       html += '<textarea class="sql-textarea" id="sqlCode_' + i + '" placeholder="-- Écrivez votre SQL ici\nCREATE TABLE categorie (\n  id_categorie INT AUTO_INCREMENT PRIMARY KEY,\n  ...\n);" rows="12">' + (state.sqlCode || '') + '</textarea>';
       html += '<div style="display:flex;gap:.3rem;margin-top:.3rem">';
@@ -395,7 +409,7 @@ function renderSteps() {
       html += '</div>';
     }
 
-    if (step.type === 'upload') {
+    if (isCurrent && step.type === 'upload') {
       html += '<div class="upload-zone" id="uploadZone_' + i + '" onclick="document.getElementById(\'fileInput_' + i + '\').click()">';
       html += '<div style="font-size:1.5rem;margin-bottom:.3rem">📎</div>';
       html += '<div style="font-size:.78rem;color:var(--muted)">Cliquez pour choisir un fichier (' + step.accept + ')</div>';
@@ -404,14 +418,15 @@ function renderSteps() {
       html += '<div id="uploadedFiles_' + i + '"></div>';
     }
 
-    if (amLeader || isTeacher) {
+    if (isCurrent && (amLeader || isTeacher)) {
       html += '<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;gap:.3rem;align-items:center">';
       html += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">👑 Soumettre cette étape</button>';
       html += '<span style="font-size:.6rem;color:var(--muted)">Seul le chef d\'équipe peut soumettre</span>';
       html += '</div>';
-    } else {
+    } else if (isCurrent) {
       html += '<div style="margin-top:.5rem;font-size:.68rem;color:var(--muted);font-style:italic">Le chef d\'équipe 👑 soumettra cette étape pour votre groupe.</div>';
     }
+    } // close isCurrent/isPending/isValidated
 
     html += '<div id="stepFeedback_' + i + '" style="font-size:.72rem;margin-top:.3rem;min-height:1rem"></div>';
     html += '</div></div>';
@@ -772,17 +787,17 @@ async function loadSubmissions() {
   // Load saved step states
   stepStates = JSON.parse(localStorage.getItem('dq_veloshop_steps') || '{}');
 
-  // Load existing submissions from Supabase to mark steps as done
+  // Load existing submissions from Supabase
   supabase.query('cq_team_submissions', {
-    select: 'step_number,team_number',
+    select: 'step_number,team_number,validated',
     filter: { 'project_id': 'eq.' + PROJECT_ID }
   }).then(function(subs) {
     if (Array.isArray(subs)) {
       for (var i = 0; i < subs.length; i++) {
-        // Check if this is my team's submission
         if (myTeam && subs[i].team_number === myTeam.number) {
           stepStates[subs[i].step_number] = stepStates[subs[i].step_number] || {};
           stepStates[subs[i].step_number].submitted = true;
+          if (subs[i].validated) stepStates[subs[i].step_number].validated = true;
         }
       }
     }
