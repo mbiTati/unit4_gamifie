@@ -422,32 +422,35 @@ function renderSteps() {
     } else if (isCurrent) {
       html += '<div class="step-instructions">' + step.instructions + '</div>';
 
-    if (isCurrent && step.type === 'sql') {
-      html += '<div class="sql-editor">';
-      html += '<textarea class="sql-textarea" id="sqlCode_' + i + '" placeholder="-- Écrivez votre SQL ici\nCREATE TABLE categorie (\n  id_categorie INT AUTO_INCREMENT PRIMARY KEY,\n  ...\n);" rows="12">' + (state.sqlCode || '') + '</textarea>';
-      html += '<div style="display:flex;gap:.3rem;margin-top:.3rem">';
-      html += '<button class="btn btn-primary btn-sm" onclick="runSQL(' + i + ')">▶ Exécuter</button>';
-      html += '<button class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="clearSQL(' + i + ')">Effacer résultats</button>';
-      html += '</div>';
-      html += '<div id="sqlResult_' + i + '" class="sql-result" style="display:none"></div>';
-      html += '</div>';
-    }
+      if (step.type === 'sql') {
+        html += '<div class="sql-editor">';
+        html += '<textarea class="sql-textarea" id="sqlCode_' + i + '" placeholder="-- \u00c9crivez votre SQL ici" rows="12">' + (state.sqlCode || '') + '</textarea>';
+        html += '<div style="display:flex;gap:.3rem;margin-top:.3rem">';
+        html += '<button class="btn btn-primary btn-sm" onclick="runSQL(' + i + ')">\u25b6 Ex\u00e9cuter</button>';
+        html += '<button class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="clearSQL(' + i + ')">Effacer r\u00e9sultats</button>';
+        html += '</div>';
+        html += '<div id="sqlResult_' + i + '" class="sql-result" style="display:none"></div>';
+        html += '</div>';
+      }
 
-    if (isCurrent && step.type === 'upload') {
-      html += '<div class="upload-zone" id="uploadZone_' + i + '" onclick="document.getElementById(\'fileInput_' + i + '\').click()">';
-      html += '<div style="font-size:1.5rem;margin-bottom:.3rem">📎</div>';
-      html += '<div style="font-size:.78rem;color:var(--muted)">Cliquez pour choisir un fichier (' + step.accept + ')</div>';
-      html += '<input type="file" id="fileInput_' + i + '" accept="' + step.accept + '" onchange="handleFileUpload(' + i + ', this)">';
-      html += '</div>';
-      html += '<div id="uploadedFiles_' + i + '"></div>';
-    }
+      if (step.type === 'upload') {
+        html += '<div class="upload-zone" id="uploadZone_' + i + '" onclick="document.getElementById(\'fileInput_' + i + '\').click()">';
+        html += '<div style="font-size:1.5rem;margin-bottom:.3rem">\uD83D\uDCCE</div>';
+        html += '<div style="font-size:.78rem;color:var(--muted)">Cliquez pour choisir un fichier (' + step.accept + ')</div>';
+        html += '<input type="file" id="fileInput_' + i + '" accept="' + step.accept + '" onchange="handleFileUpload(' + i + ', this)">';
+        html += '</div>';
+        html += '<div id="uploadedFiles_' + i + '"></div>';
+      }
 
-    if (isCurrent) {
-      html += '<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;gap:.3rem;align-items:center">';
-      html += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">\u2713 Soumettre cette \u00e9tape</button>';
-      html += '</div>';
+      if (amLeader || isTeacher) {
+        html += '<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;gap:.3rem;align-items:center">';
+        html += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">\uD83D\uDC51 Soumettre cette \u00e9tape</button>';
+        html += '<span style="font-size:.6rem;color:var(--muted)">Seul le chef d\'\u00e9quipe peut soumettre</span>';
+        html += '</div>';
+      } else {
+        html += '<div style="margin-top:.5rem;font-size:.68rem;color:var(--muted);font-style:italic">Le chef d\'\u00e9quipe \uD83D\uDC51 soumettra cette \u00e9tape pour votre groupe.</div>';
+      }
     }
-    } // close isCurrent/isPending/isValidated
 
     html += '<div id="stepFeedback_' + i + '" style="font-size:.72rem;margin-top:.3rem;min-height:1rem"></div>';
     html += '</div></div>';
