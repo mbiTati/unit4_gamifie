@@ -442,13 +442,10 @@ function renderSteps() {
       html += '<div id="uploadedFiles_' + i + '"></div>';
     }
 
-    if (isCurrent && (amLeader || isTeacher)) {
+    if (isCurrent) {
       html += '<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;gap:.3rem;align-items:center">';
-      html += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">👑 Soumettre cette étape</button>';
-      html += '<span style="font-size:.6rem;color:var(--muted)">Seul le chef d\'équipe peut soumettre</span>';
+      html += '<button class="btn btn-gold btn-sm" onclick="submitStep(' + i + ')">\u2713 Soumettre cette \u00e9tape</button>';
       html += '</div>';
-    } else if (isCurrent) {
-      html += '<div style="margin-top:.5rem;font-size:.68rem;color:var(--muted);font-style:italic">Le chef d\'équipe 👑 soumettra cette étape pour votre groupe.</div>';
     }
     } // close isCurrent/isPending/isValidated
 
@@ -654,7 +651,7 @@ function handleFileUpload(stepIdx, input) {
 
 // ==================== SUBMIT ====================
 async function submitStep(stepIdx) {
-  if (!amLeader && !isTeacher) { alert('Seul le chef d\'équipe peut soumettre.'); return; }
+  if (!myTeam) { alert('Vous n\'\u00eates pas dans une \u00e9quipe.'); return; }
   if (!myTeam && !isTeacher) { alert('Vous n\'êtes dans aucune équipe.'); return; }
 
   var fb = document.getElementById('stepFeedback_' + stepIdx);
