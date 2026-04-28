@@ -794,10 +794,9 @@ async function loadSubmissions() {
 }
 
 // ==================== INIT ====================
-(function() {
+(async function() {
   if (isTeacher) {
     document.getElementById('profPanel').style.display = '';
-    // Show all prof buttons in topbar
     var profBtns = ['btnCorrige','btnApp','btnCards','btnStorage'];
     for (var pb = 0; pb < profBtns.length; pb++) {
       var btn = document.getElementById(profBtns[pb]);
@@ -805,27 +804,31 @@ async function loadSubmissions() {
     }
   }
 
-  // Load saved step states
+  // Load saved step states from localStorage
   stepStates = JSON.parse(localStorage.getItem('dq_veloshop_steps') || '{}');
 
-  // Load existing submissions from Supabase
-  supabase.query('cq_team_submissions', {
-    select: 'step_number,team_number,validated',
-    filter: { 'project_id': 'eq.' + PROJECT_ID }
-  }).then(function(subs) {
+  // Load my team FIRST
+  await loadMyTeam();
+
+  // Then load submissions and match to my team
+  try {
+    var subs = await supabase.query('cq_team_submissions', {
+      select: 'step_number,team_number,validated',
+      filter: { 'project_id': 'eq.' + PROJECT_ID }
+    });
     if (Array.isArray(subs)) {
+      var myTeamNum = myTeam ? myTeam.number : -1;
       for (var i = 0; i < subs.length; i++) {
-        if (myTeam && subs[i].team_number === myTeam.number) {
+        if (subs[i].team_number === myTeamNum || isTeacher) {
           stepStates[subs[i].step_number] = stepStates[subs[i].step_number] || {};
           stepStates[subs[i].step_number].submitted = true;
           if (subs[i].validated) stepStates[subs[i].step_number].validated = true;
         }
       }
     }
-    renderSteps();
-  }).catch(function() { renderSteps(); });
+  } catch(e) {}
 
-  loadMyTeam();
+  renderSteps();
   if (isTeacher) loadSubmissions();
 })();
 </script>
