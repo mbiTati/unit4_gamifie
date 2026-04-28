@@ -418,13 +418,16 @@ async function loadTeams() {
           html += '</div>';
           
         } else if (isValidated) {
-          html += '<div class="step-row done" style="padding:.3rem .6rem">';
+          html += '<div class="step-row done" style="padding:.3rem .6rem;display:flex;align-items:center;justify-content:space-between">';
+          html += '<div style="display:flex;align-items:center;gap:.3rem">';
           html += '<span style="font-size:.68rem;color:var(--lo1);font-weight:700">\u2705 ' + stepName + '</span>';
           if (sub3.content && sub3.content.indexOf('.') > -1) {
             var vfiles = sub3.content.split(', ');
             var vfpath = currentProjectId + '/equipe' + tn2 + '/etape' + (si2+1) + '/' + vfiles[0];
-            html += ' <a href="https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + vfpath + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.58rem">\uD83D\uDCCE</a>';
+            html += '<a href="https://jslbfkaujahihvjdxcjg.supabase.co/storage/v1/object/public/team-uploads/' + vfpath + '" target="_blank" download style="color:var(--lo2);text-decoration:none;font-size:.58rem">\uD83D\uDCCE</a>';
           }
+          html += '</div>';
+          html += '<button class="dq-unvalidate" data-subid="' + sub3.id + '" style="font-size:.55rem;color:var(--error);background:transparent;border:1px solid rgba(239,68,68,.2);padding:.1rem .3rem;border-radius:3px;cursor:pointer;font-family:inherit;opacity:.5" title="D\u00e9valider">\u21a9</button>';
           html += '</div>';
           
         } else {
@@ -446,6 +449,14 @@ async function loadTeams() {
     for (var mbi = 0; mbi < markBtns.length; mbi++) {
       markBtns[mbi].addEventListener('click', function() {
         markStepDone(parseInt(this.getAttribute('data-team')), parseInt(this.getAttribute('data-step')));
+      });
+    }
+    
+    // Attach "Dévalider" listeners
+    var unvalBtns = container.querySelectorAll('.dq-unvalidate');
+    for (var ubi = 0; ubi < unvalBtns.length; ubi++) {
+      unvalBtns[ubi].addEventListener('click', function() {
+        unvalidateSubmission(this.getAttribute('data-subid'));
       });
     }
     
@@ -649,6 +660,20 @@ async function validateSubmission(submissionId) {
     var fb = document.getElementById('fbs_' + submissionId);
     if (fb) fb.innerHTML = '<span style="color:var(--lo1)">\u2705</span>';
     setTimeout(function() { loadTeams(); }, 800);
+  } catch(e) {
+    alert('Erreur: ' + e.message);
+  }
+}
+
+async function unvalidateSubmission(submissionId) {
+  if (!confirm('D\u00e9valider cette \u00e9tape ? L\'\u00e9quipe devra resoumettre.')) return;
+  try {
+    await fetch(SB_URL + '/cq_team_submissions?id=eq.' + submissionId, {
+      method: 'PATCH',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ validated: false })
+    });
+    loadTeams();
   } catch(e) {
     alert('Erreur: ' + e.message);
   }
